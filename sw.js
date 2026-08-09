@@ -1,15 +1,28 @@
 /* Tanger Reiseplan — offline service worker */
-var CACHE = 'tanger-v4';
+var CACHE = 'tanger-v5';
+var TILES = 'tanger-maps-v1';   // Kartenkacheln, von der App gefuellt
+var DATA  = 'tanger-data-v1';   // Erinnerungsliste fuer periodicSync
+var KEEP  = [CACHE, TILES, DATA];
+
+var TILE_HOSTS = ['tile.openstreetmap.org', 'a.tile.openstreetmap.org',
+                  'b.tile.openstreetmap.org', 'c.tile.openstreetmap.org'];
+
 var ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './vendor/leaflet.js',
+  './vendor/leaflet.css',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-512-maskable.png',
   './icons/apple-touch-icon.png',
   './icons/favicon-32.png'
 ];
+
+// Graue Ersatzkachel, wenn offline und nicht im Cache
+var BLANK = '<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256">' +
+  '<rect width="256" height="256" fill="#E8E4DB"/></svg>';
 
 self.addEventListener('install', function (e) {
   e.waitUntil(
@@ -24,8 +37,9 @@ self.addEventListener('install', function (e) {
 self.addEventListener('activate', function (e) {
   e.waitUntil(
     caches.keys().then(function (keys) {
+      // Nur eigene alte Versionen loeschen — Kacheln und Daten bleiben liegen.
       return Promise.all(keys.map(function (k) {
-        return k === CACHE ? null : caches.delete(k);
+        return KEEP.indexOf(k) === -1 ? caches.delete(k) : null;
       }));
     }).then(function () {
       return self.clients.claim();
@@ -38,6 +52,25 @@ self.addEventListener('fetch', function (e) {
   if (req.method !== 'GET') return;
 
   var url = new URL(req.url);
+
+  // Kartenkacheln: erst Cache, dann Netz, sonst graue Platzhalterkachel.
+  if (TILE_HOSTS.indexOf(url.host) !== -1) {
+    e.respondWith(
+      caches.open(TILES).then(function (c) {
+        return c.match(req).then(function (hit) {
+          if (hit) return hit;
+          return fetch(req).then(function (res) {
+            if (res && res.ok) c.put(req, res.clone());
+            return res;
+          }).catch(function () {
+            return new Response(BLANK, {headers: {'Content-Type': 'image/svg+xml'}});
+          });
+        });
+      })
+    );
+    return;
+  }
+
   if (url.origin !== self.location.origin) return;
 
   // Seiten: erst Netz (damit Updates ankommen), sonst Cache — funktioniert offline in der Medina.
@@ -66,6 +99,44 @@ self.addEventListener('fetch', function (e) {
         }
         return res;
       });
+    })
+  );
+});
+
+/* ---------- Erinnerungen ---------- */
+// Die App legt die Liste unter DATA ab; hier wird sie ohne offene Seite gelesen.
+function dueReminders() {
+  return caches.open(DATA).then(function (c) {
+    return c.match('./reminders.json');
+  }).then(function (r) {
+    return r ? r.json() : [];
+  }).then(function (list) {
+    var now = Date.now();
+    return Promise.all((list || []).filter(function (x) {
+      return x.when <= now && now - x.when < 36 * 3600e3;
+    }).map(function (x) {
+      return self.registration.showNotification('Tanger · Tag ' + x.n, {
+        body: 'Morgen ' + x.t + ' Uhr · ' + x.h,
+        icon: 'icons/icon-192.png',
+        badge: 'icons/favicon-32.png',
+        tag: 'tng-' + x.id            // gleicher Tag = ersetzt statt stapelt
+      });
+    }));
+  }).catch(function () {});
+}
+
+self.addEventListener('periodicsync', function (e) {
+  if (e.tag === 'tanger-reminders') e.waitUntil(dueReminders());
+});
+
+self.addEventListener('notificationclick', function (e) {
+  e.notification.close();
+  e.waitUntil(
+    self.clients.matchAll({type: 'window', includeUncontrolled: true}).then(function (cs) {
+      for (var i = 0; i < cs.length; i++) {
+        if ('focus' in cs[i]) return cs[i].focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow('./');
     })
   );
 });

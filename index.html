@@ -14,6 +14,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
+<link rel="stylesheet" href="vendor/leaflet.css">
 <style>
 :root{
   --ink:#10222B; --ink-2:#1B3A47; --ink-3:#2C5566;
@@ -231,6 +232,95 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 .instl h4{color:#fff;font-size:15px;margin-bottom:6px}
 .instl p{margin:0;font-size:13px;color:#B7CBD4;line-height:1.55}
 .instl button{margin-top:11px;background:var(--saffron);color:#1A1200;font-weight:700;font-size:13.5px;padding:10px 16px;border-radius:8px;width:100%}
+/* ---------- Karte ---------- */
+.mapwrap{position:relative}
+#map{height:260px;background:#E8E4DB}
+#map .pin{background:none;border:0}
+#map .pin b{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;
+  background:var(--saffron);color:#1A1200;font-family:var(--m);font-size:11px;font-weight:700;
+  border:2px solid #fff;box-shadow:0 1px 4px rgba(16,34,43,.4)}
+#map .leaflet-container{font-family:var(--f)}
+#map .leaflet-popup-content{margin:9px 12px;font-size:13px;line-height:1.4}
+#map .leaflet-popup-content b{font-size:13.5px}
+.maptools{display:flex;align-items:center;gap:9px;padding:11px 13px;border-top:1px solid var(--line-2);background:var(--card)}
+.maptools p{margin:0;flex:1;font-size:11.5px;color:var(--muted);line-height:1.4}
+.dlbtn{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;
+  background:var(--ink);color:#fff;font-size:12.5px;font-weight:600;
+  transition:background .2s var(--ease),opacity .2s var(--ease)}
+.dlbtn:disabled{opacity:.55}
+.dlbtn.done{background:var(--sea)}
+.dlbtn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- Zug-Fahrplan ---------- */
+.rail{display:flex;align-items:center;gap:9px;margin-top:9px;padding:9px 11px;border-radius:var(--r-s);
+  background:var(--saffron-wash);border-left:3px solid var(--saffron);color:#6B4C00;text-decoration:none}
+.rail svg{flex:0 0 15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.rail span{flex:1;font-size:12.5px;line-height:1.35}
+.rail b{display:block;font-size:13px;color:var(--saffron-deep)}
+
+.note.small{margin-top:9px;padding:9px 11px;font-size:12.5px}
+.note.small i{font-style:normal;opacity:.75}
+
+/* ---------- Notiz & Bewertung ---------- */
+.acts{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:8px}
+.acts .mapl{margin-top:0}
+.notebtn{display:inline-flex;align-items:center;gap:5px;padding:4px 9px 4px 7px;border-radius:6px;
+  background:var(--line-2);color:var(--muted);font-size:12px;font-weight:600;
+  transition:background .18s var(--ease),color .18s var(--ease)}
+.notebtn.has{background:var(--saffron-wash);color:var(--saffron-deep)}
+.notebtn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.rnote{margin-top:9px;padding:11px;border-radius:var(--r-s);background:#F7F5F0;border:1px solid var(--line-2)}
+.rnote[hidden]{display:none}
+.stars{display:flex;gap:3px;margin-bottom:8px}
+.stars button{width:26px;height:26px;font-size:18px;line-height:1;color:var(--line);
+  transition:color .18s var(--ease),transform .14s var(--pop)}
+.stars button.on{color:var(--saffron)}
+.stars button:active{transform:scale(1.25)}
+.rnote textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:7px 9px;background:var(--card);
+  font-family:var(--f);font-size:13px;line-height:1.45;color:var(--text);resize:vertical;
+  -webkit-appearance:none;appearance:none;transition:border-color .18s var(--ease)}
+.rnote textarea:focus{outline:none;border-color:var(--saffron)}
+
+/* ---------- Bearbeitungsmodus ---------- */
+.editbar{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.editbar p{flex:1;margin:0;font-size:12px;color:var(--muted);line-height:1.4}
+.editbtn{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;
+  background:var(--card);border:1px solid var(--line);color:var(--ink-3);font-size:12.5px;font-weight:600;
+  box-shadow:var(--shadow);transition:background .2s var(--ease),color .2s var(--ease),border-color .2s var(--ease)}
+.editbtn.on{background:var(--saffron);border-color:var(--saffron-deep);color:#1A1200}
+.editbtn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tl li.editing{background:#FBF9F5;margin:0 -8px;padding:11px 8px;border-radius:8px}
+.ed-t,.ed-h,.ed-p{width:100%;border:1px solid var(--line);border-radius:6px;background:var(--card);
+  padding:6px 8px;color:var(--text);-webkit-appearance:none;appearance:none;
+  transition:border-color .18s var(--ease)}
+.ed-t{font-family:var(--m);font-size:12.5px;font-weight:600;text-align:center;padding:6px 2px}
+.ed-h{font-size:14.5px;font-weight:600;margin-bottom:5px}
+.ed-p{font-family:var(--f);font-size:13px;line-height:1.45;color:var(--muted);resize:vertical}
+.ed-t:focus,.ed-h:focus,.ed-p:focus{outline:none;border-color:var(--saffron)}
+.ed-reset{margin-top:7px;font-size:11.5px;font-weight:600;color:var(--alert);
+  padding:3px 8px;border-radius:5px;background:var(--alert-wash)}
+.chip.edit{background:var(--sea-wash);color:var(--sea)}
+
+/* ---------- Tatsaechliche Ausgaben ---------- */
+.spend{display:block;margin-top:5px}
+.spend input{width:76px;padding:4px 7px;border:1px solid var(--line);border-radius:6px;background:var(--paper);
+  font-family:var(--m);font-size:12px;font-weight:600;text-align:right;color:var(--ink);
+  -webkit-appearance:none;appearance:none;transition:border-color .18s var(--ease),background .18s var(--ease)}
+.spend input:focus{outline:none;border-color:var(--saffron);background:#fff}
+.spend input::-webkit-outer-spin-button,.spend input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.cmprow td{border-top:1px solid var(--line)!important;padding-top:10px!important;font-weight:700}
+.cmprow.under td:last-child{color:var(--sea)}
+.cmprow.over td:last-child{color:var(--alert)}
+.cmprow td small{font-weight:400}
+
+/* ---------- Erinnerungen ---------- */
+.notif{display:flex;align-items:center;gap:11px;margin-top:11px}
+.notif p{flex:1;margin:0;font-size:12.5px;color:var(--muted);line-height:1.45}
+.notifbtn{flex:0 0 auto;padding:9px 14px;border-radius:8px;background:var(--ink);color:#fff;
+  font-size:13px;font-weight:600;transition:background .2s var(--ease),opacity .2s var(--ease)}
+.notifbtn.on{background:var(--sea)}
+.notifbtn:disabled{opacity:.5}
+
 button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -365,6 +455,10 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
       </table>
       <div class="note warn"><b>Guides in der Medina:</b> Am Petit Socco wirst du angesprochen. Freundlich, aber klar ablehnen — „Non merci, ça va". Wenn du einen Guide willst, buch ihn über die Rezeption, ca. 300 MAD für einen halben Tag.</div></div></div>
 
+    <div class="card"><div class="card-h"><div class="meta">Erinnerungen</div><h3>Nichts Wichtiges verpassen</h3>
+      <p>Für die als <b>wichtig</b> markierten Punkte — Zugtickets, Check-in, Taxi bestellen.</p></div>
+      <div class="card-b"><div id="notifbox"></div></div></div>
+
     <div class="instl">
       <h4>Auf den Homescreen legen</h4>
       <p id="instlTxt">Dann startet der Plan wie eine App und funktioniert auch ohne Netz in der Medina.</p>
@@ -383,117 +477,118 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
   <i class="tabind" id="tabind"></i>
 </nav>
 
+<script src="vendor/leaflet.js"></script>
 <script>
 var TRIP=[
 {n:1,date:"2026-09-02",wd:"Mi",dd:"02",tag:"Ankunft",title:"Landung 14:10 & erste Runde",sub:"Locker gehalten — falls sich der Flug verspätet, schiebst du einfach alles nach hinten.",
 items:[
-{t:"14:10",h:"Landung in Tanger",p:"Pass und Gepäck: 30–45 Minuten einplanen. Uhr eine Stunde zurückstellen.",g:"Aéroport Tanger Ibn Battouta"},
+{t:"14:10",h:"Landung in Tanger",p:"Pass und Gepäck: 30–45 Minuten einplanen. Uhr eine Stunde zurückstellen.",loc:{q:"Aéroport Tanger Ibn Battouta",lat:35.72919,lng:-5.91297}},
 {t:"14:50",h:"Geld abheben",p:"Automat in der Ankunftshalle. Dirham bekommst du in Deutschland nicht.",c:"Gebühr ca. 30 MAD"},
 {t:"15:10",h:"Taxi in die Medina",p:"15 km, 25–35 Minuten. Festpreis vorher vereinbaren.",c:"150–200 MAD"},
-{t:"15:45",h:"Check-in Mamora Bay",p:"Direkt am Petit Socco, gegenüber dem Hafen.",g:"Hôtel Mamora, Tanger"},
-{t:"16:30",h:"Petit Socco",p:"Minztee im Café Tingis, Leute beobachten. Startet direkt vor der Haustür.",c:"20 MAD",g:"Petit Socco, Tanger"},
-{t:"17:15",h:"Grand Socco & Mendoubia-Garten",p:"Die Rue Siaghine hoch, quer durch die Medina.",f:1,g:"Grand Socco, Tanger"},
-{t:"18:15",h:"Terrasse des Paresseux",p:"Alte Kanonen, Blick über die Straße von Gibraltar. Bei klarer Sicht siehst du Spanien.",f:1,g:"Terrasse des Paresseux, Tanger"},
-{t:"19:00",h:"Am Hafen-Kiosk fragen",p:"Fährt der City-Tour-Bus? Fünf Minuten Umweg, entscheidet über Tag 3 und 4.",k:"wichtig",g:"Port de Tanger Ville"},
+{t:"15:45",h:"Check-in Mamora Bay",p:"Direkt am Petit Socco, gegenüber dem Hafen.",loc:{q:"Hôtel Mamora, Tanger",lat:35.78536,lng:-5.80971}},
+{t:"16:30",h:"Petit Socco",p:"Minztee im Café Tingis, Leute beobachten. Startet direkt vor der Haustür.",c:"20 MAD",loc:{q:"Petit Socco, Tanger",lat:35.78556,lng:-5.81037},eat:1},
+{t:"17:15",h:"Grand Socco & Mendoubia-Garten",p:"Die Rue Siaghine hoch, quer durch die Medina.",f:1,loc:{q:"Grand Socco, Tanger",lat:35.7843,lng:-5.81309}},
+{t:"18:15",h:"Terrasse des Paresseux",p:"Alte Kanonen, Blick über die Straße von Gibraltar. Bei klarer Sicht siehst du Spanien.",f:1,loc:{q:"Terrasse des Paresseux, Tanger",lat:35.78086,lng:-5.81179}},
+{t:"19:00",h:"Am Hafen-Kiosk fragen",p:"Fährt der City-Tour-Bus? Fünf Minuten Umweg, entscheidet über Tag 3 und 4.",k:"wichtig",loc:{q:"Port de Tanger Ville",lat:35.78912,lng:-5.80454}},
 {t:"19:45",h:"Sonnenuntergang",p:"Von der Hoteldachterrasse über dem Hafen."},
-{t:"20:30",h:"Abendessen im Hotel",p:"Tajine auf der Terrasse.",c:"ca. 130 MAD"}],
+{t:"20:30",h:"Abendessen im Hotel",p:"Tajine auf der Terrasse.",c:"ca. 130 MAD",eat:1}],
 notes:[{k:"tip",t:"<b>Heute noch erledigen:</b> Al-Boraq-Tickets für Montag auf oncf-voyages.ma buchen. Sitzplatzpflicht, beliebte Züge sind ausverkauft."}]},
 
 {n:2,date:"2026-09-03",wd:"Do",dd:"03",tag:"Tanger",title:"Medina & Kasbah",sub:"Alles zu Fuß. Kein Transportmittel nötig.",
 items:[
-{t:"10:00",h:"Frühstück am Petit Socco",p:"Msemen und Kaffee.",c:"40 MAD",g:"Petit Socco, Tanger"},
-{t:"10:30",h:"American Legation Museum",p:"Ältestes US-Auslandsgebäude der Welt, mitten in der Medina versteckt.",c:"50 MAD",g:"Tangier American Legation Museum"},
-{t:"12:00",h:"Durch die Medina zur Kasbah",p:"Einfach bergauf halten, die Gassen führen von selbst hin.",f:1,g:"Kasbah de Tanger"},
-{t:"12:30",h:"Kasbah-Museum · Dar el Makhzen",p:"Sultanspalast mit andalusischem Garten und Blick über die Bucht.",c:"30 MAD",g:"Musée de la Kasbah Dar el Makhzen, Tanger"},
-{t:"14:00",h:"Mittagessen in der Kasbah",p:"Le Salon Bleu, Dachterrasse über den Dächern.",c:"ca. 80 MAD",g:"Le Salon Bleu, Tanger"},
-{t:"15:30",h:"Rue Riad Sultan & Bab Bhar",p:"Der Klippenweg an der alten Stadtmauer entlang.",f:1,g:"Bab Bhar, Tanger"},
-{t:"16:30",h:"Café Hafa",p:"Seit 1921 auf Terrassen über dem Meer. Minztee, sonst nichts — genau das ist der Punkt.",c:"20 MAD",g:"Café Hafa, Tanger"},
-{t:"18:00",h:"Cinema Rif & Rue des Chrétiens",p:"Erste Souvenirs anschauen, noch nichts kaufen. Preise vergleichen lohnt.",f:1,g:"Cinéma Rif, Tanger"},
-{t:"20:00",h:"Abendessen Ville Nouvelle",p:"El Morocco Club oder Hamadi.",c:"ca. 150 MAD",g:"El Morocco Club, Tanger"}]},
+{t:"10:00",h:"Frühstück am Petit Socco",p:"Msemen und Kaffee.",c:"40 MAD",loc:{q:"Petit Socco, Tanger",lat:35.78556,lng:-5.81037},eat:1},
+{t:"10:30",h:"American Legation Museum",p:"Ältestes US-Auslandsgebäude der Welt, mitten in der Medina versteckt.",c:"50 MAD",loc:{q:"Tangier American Legation Museum",lat:35.78386,lng:-5.81088},hours:{days:[1,2,3,4,5,6],from:"10:00",to:"17:00"}},
+{t:"12:00",h:"Durch die Medina zur Kasbah",p:"Einfach bergauf halten, die Gassen führen von selbst hin.",f:1,loc:{q:"Kasbah de Tanger",lat:35.78875,lng:-5.81343}},
+{t:"12:30",h:"Kasbah-Museum · Dar el Makhzen",p:"Sultanspalast mit andalusischem Garten und Blick über die Bucht.",c:"30 MAD",loc:{q:"Musée de la Kasbah Dar el Makhzen, Tanger",lat:35.78848,lng:-5.81243},hours:{days:[0,1,3,4,5,6],from:"09:00",to:"16:00"}},
+{t:"14:00",h:"Mittagessen in der Kasbah",p:"Le Salon Bleu, Dachterrasse über den Dächern.",c:"ca. 80 MAD",loc:{q:"Le Salon Bleu, Tanger",lat:35.78862,lng:-5.81189},eat:1},
+{t:"15:30",h:"Rue Riad Sultan & Bab Bhar",p:"Der Klippenweg an der alten Stadtmauer entlang.",f:1,loc:{q:"Bab Bhar, Tanger",lat:35.78884,lng:-5.81031}},
+{t:"16:30",h:"Café Hafa",p:"Seit 1921 auf Terrassen über dem Meer. Minztee, sonst nichts — genau das ist der Punkt.",c:"20 MAD",loc:{q:"Café Hafa, Tanger",lat:35.7914,lng:-5.82198},eat:1},
+{t:"18:00",h:"Cinema Rif & Rue des Chrétiens",p:"Erste Souvenirs anschauen, noch nichts kaufen. Preise vergleichen lohnt.",f:1,loc:{q:"Cinéma Rif, Tanger",lat:35.78383,lng:-5.81307}},
+{t:"20:00",h:"Abendessen Ville Nouvelle",p:"El Morocco Club oder Hamadi.",c:"ca. 150 MAD",loc:{q:"El Morocco Club, Tanger",lat:35.78879,lng:-5.81449},eat:1}]},
 
 {n:3,date:"2026-09-04",wd:"Fr",dd:"04",tag:"Bus · Linie 1",title:"Cap Spartel & Herkuleshöhlen",sub:"Heute das 48-Stunden-Ticket kaufen — es gilt dann bis Sonntagmorgen.",
 items:[
-{t:"09:45",h:"Ticket am Hafen-Kiosk",p:"Fahrplanzettel für die Herkules-Linie unbedingt mitnehmen. Nur fünf Abfahrten am Tag.",c:"80 MAD",k:"wichtig",g:"Port de Tanger Ville"},
+{t:"09:45",h:"Ticket am Hafen-Kiosk",p:"Fahrplanzettel für die Herkules-Linie unbedingt mitnehmen. Nur fünf Abfahrten am Tag.",c:"80 MAD",k:"wichtig",loc:{q:"Port de Tanger Ville",lat:35.78912,lng:-5.80454}},
 {t:"10:00",h:"Abfahrt Linie Grottes d'Hercule",p:"Start am Hafen, Oberdeck offen."},
-{t:"10:45",h:"Parc Perdicaris · Rmilat",p:"Pinienwald über der Küste, kaum Menschen.",f:1,g:"Parc Perdicaris, Tanger"},
-{t:"12:15",h:"Cap Spartel",p:"Leuchtturm an der Ecke Afrikas — hier trifft der Atlantik aufs Mittelmeer.",c:"60 MAD",g:"Cap Spartel"},
-{t:"13:15",h:"Grottes d'Hercule",p:"Die berühmte Öffnung in Form Afrikas. Rechne mit 45 Minuten.",c:"80 MAD · nur bar",g:"Grottes d'Hercule, Tanger"},
-{t:"14:15",h:"Fisch am Strand",p:"Die Restaurants direkt neben den Höhlen sind besser als sie aussehen.",c:"ca. 80 MAD"},
-{t:"15:30",h:"Achakkar-Beach",p:"Weiter Atlantikstrand, langer Spaziergang. Kamelritt optional.",c:"Kamel 100 MAD",g:"Plage Achakkar, Tanger"},
+{t:"10:45",h:"Parc Perdicaris · Rmilat",p:"Pinienwald über der Küste, kaum Menschen.",f:1,loc:{q:"Parc Perdicaris, Tanger",lat:35.78558,lng:-5.89462}},
+{t:"12:15",h:"Cap Spartel",p:"Leuchtturm an der Ecke Afrikas — hier trifft der Atlantik aufs Mittelmeer.",c:"60 MAD",loc:{q:"Cap Spartel",lat:35.79153,lng:-5.92567},hours:{days:[0,1,2,3,4,5,6],from:"09:00",to:"18:00"}},
+{t:"13:15",h:"Grottes d'Hercule",p:"Die berühmte Öffnung in Form Afrikas. Rechne mit 45 Minuten.",c:"80 MAD · nur bar",loc:{q:"Grottes d'Hercule, Tanger",lat:35.7598,lng:-5.93915},hours:{days:[0,1,2,3,4,5,6],from:"09:00",to:"18:00"}},
+{t:"14:15",h:"Fisch am Strand",p:"Die Restaurants direkt neben den Höhlen sind besser als sie aussehen.",c:"ca. 80 MAD",eat:1},
+{t:"15:30",h:"Achakkar-Beach",p:"Weiter Atlantikstrand, langer Spaziergang. Kamelritt optional.",c:"Kamel 100 MAD",loc:{q:"Plage Achakkar, Tanger",lat:35.76802,lng:-5.93382}},
 {t:"17:30",h:"Rückfahrt mit dem Bus",p:"Nicht die letzte Abfahrt nehmen, sondern die vorletzte."},
-{t:"19:30",h:"Couscous-Abend",p:"Freitags gibt es in ganz Marokko Couscous. Unbedingt mitnehmen.",c:"ca. 100 MAD"}],
+{t:"19:30",h:"Couscous-Abend",p:"Freitags gibt es in ganz Marokko Couscous. Unbedingt mitnehmen.",c:"ca. 100 MAD",eat:1}],
 notes:[{k:"plan",t:"<b>Ohne Bus:</b> Grand Taxi privat am Grand Socco chartern, halber Tag mit Wartezeit für 300–400 MAD pro Wagen. Preis vorher festlegen und die Rückfahrt ausdrücklich einschließen."}]},
 
 {n:4,date:"2026-09-05",wd:"Sa",dd:"05",tag:"Bus · Linie 2",title:"Neustadt, Villa Harris & Malabata",sub:"Das Ticket von gestern gilt noch.",
 items:[
-{t:"10:00",h:"Linie Tanger Ville ab Hafen",p:"Ohne neue Kosten — die 48 Stunden laufen bis morgen früh.",f:1,g:"Port de Tanger Ville"},
-{t:"10:30",h:"Place Faro",p:"Kanonenterrasse mit dem besten Panorama über die Bucht.",f:1,g:"Place Faro, Tanger"},
-{t:"11:30",h:"Palais Moulay Hafid & Phönizische Gräber",p:"Felsgräber direkt über dem Meer, 2.500 Jahre alt.",f:1,g:"Palais Moulay Hafid, Tanger"},
-{t:"13:00",h:"Mittagessen an der Corniche",p:"",c:"ca. 80 MAD",g:"Corniche de Tanger"},
-{t:"14:30",h:"Villa Harris Museum",p:"Ehemalige Privatvilla in Malabata, heute Museum mit großem Park am Meer.",c:"30 MAD",g:"Villa Harris Museum, Tanger"},
-{t:"16:00",h:"Malabata-Strand",p:"Der beste Stadtstrand von Tanger, ruhiger als der Hauptstrand.",f:1,g:"Plage Malabata, Tanger"},
-{t:"17:30",h:"Tanja Marina Bay",p:"Yachthafen mit Cafés. Guter Ort für ein Eis vor der Rückfahrt.",g:"Tanja Marina Bay"},
-{t:"19:30",h:"Zurück in die Medina",p:"Abendessen in der Altstadt.",c:"ca. 120 MAD"}],
+{t:"10:00",h:"Linie Tanger Ville ab Hafen",p:"Ohne neue Kosten — die 48 Stunden laufen bis morgen früh.",f:1,loc:{q:"Port de Tanger Ville",lat:35.78912,lng:-5.80454}},
+{t:"10:30",h:"Place Faro",p:"Kanonenterrasse mit dem besten Panorama über die Bucht.",f:1,loc:{q:"Place Faro, Tanger",lat:35.78022,lng:-5.81019}},
+{t:"11:30",h:"Palais Moulay Hafid & Phönizische Gräber",p:"Felsgräber direkt über dem Meer, 2.500 Jahre alt.",f:1,loc:{q:"Palais Moulay Hafid, Tanger",lat:35.78616,lng:-5.82062}},
+{t:"13:00",h:"Mittagessen an der Corniche",p:"",c:"ca. 80 MAD",loc:{q:"Corniche de Tanger",lat:35.78904,lng:-5.83405},eat:1},
+{t:"14:30",h:"Villa Harris Museum",p:"Ehemalige Privatvilla in Malabata, heute Museum mit großem Park am Meer.",c:"30 MAD",loc:{q:"Villa Harris Museum, Tanger",lat:35.78274,lng:-5.76393},hours:{days:[0,2,3,4,5,6],from:"10:00",to:"18:00"}},
+{t:"16:00",h:"Malabata-Strand",p:"Der beste Stadtstrand von Tanger, ruhiger als der Hauptstrand.",f:1,loc:{q:"Plage Malabata, Tanger",lat:35.77854,lng:-5.77687}},
+{t:"17:30",h:"Tanja Marina Bay",p:"Yachthafen mit Cafés. Guter Ort für ein Eis vor der Rückfahrt.",loc:{q:"Tanja Marina Bay",lat:35.78397,lng:-5.79646}},
+{t:"19:30",h:"Zurück in die Medina",p:"Abendessen in der Altstadt.",c:"ca. 120 MAD",eat:1}],
 notes:[{k:"plan",t:"<b>Ohne Bus:</b> Alles per Petit Taxi, ca. 100–120 MAD für den ganzen Tag zu zweit."}]},
 
 {n:5,date:"2026-09-06",wd:"So",dd:"06",tag:"Asilah",title:"Weiße Stadt am Atlantik",sub:"45 Minuten mit dem Zug ab Tanger Ville.",
 items:[
-{t:"09:20",h:"Taxi zum Bahnhof Tanger Ville",p:"",c:"15 MAD",g:"Gare de Tanger Ville"},
-{t:"10:00",h:"Zug nach Asilah",p:"Regionalzug, ca. 40–45 Minuten. Zeiten am Vortag prüfen.",c:"25–35 MAD",g:"Gare d'Asilah"},
-{t:"11:00",h:"Medina von Asilah",p:"Weiß-blaue Gassen mit Wandmalereien, viel ruhiger als Tanger.",f:1,g:"Medina of Asilah"},
-{t:"12:30",h:"Portugiesische Stadtmauer",p:"Wehrgang und Bab Homar, direkt über dem Atlantik.",f:1,g:"Bab Homar, Asilah"},
-{t:"13:30",h:"Meeresfrüchte",p:"Casa Garcia oder Oceano Casa Pepe an der Mauer.",c:"ca. 100 MAD",g:"Casa Garcia, Asilah"},
-{t:"15:00",h:"Paradise Beach",p:"12 km südlich, Taxi hin und zurück. Breiter, leerer Sandstrand.",c:"ca. 150 MAD pro Wagen",g:"Paradise Beach, Asilah"},
-{t:"17:30",h:"Promenade & Galerien",p:"Asilah ist eine Künstlerstadt — die kleinen Galerien lohnen sich.",c:"30 MAD",g:"Corniche d'Asilah"},
-{t:"18:40",h:"Zug zurück",p:"",c:"25–35 MAD",g:"Gare d'Asilah"},
-{t:"20:00",h:"Abendessen in Tanger",p:"",c:"ca. 130 MAD"}],
+{t:"09:20",h:"Taxi zum Bahnhof Tanger Ville",p:"",c:"15 MAD",loc:{q:"Gare de Tanger Ville",lat:35.77153,lng:-5.78622}},
+{t:"10:00",h:"Zug nach Asilah",p:"Regionalzug, ca. 40–45 Minuten. Zeiten am Vortag prüfen.",c:"25–35 MAD",loc:{q:"Gare d'Asilah",lat:35.48238,lng:-6.02353},rail:{a:"Tanger Ville",b:"Asilah"}},
+{t:"11:00",h:"Medina von Asilah",p:"Weiß-blaue Gassen mit Wandmalereien, viel ruhiger als Tanger.",f:1,loc:{q:"Medina of Asilah",lat:35.46553,lng:-6.03817}},
+{t:"12:30",h:"Portugiesische Stadtmauer",p:"Wehrgang und Bab Homar, direkt über dem Atlantik.",f:1,loc:{q:"Bab Homar, Asilah",lat:35.46507,lng:-6.038}},
+{t:"13:30",h:"Meeresfrüchte",p:"Casa Garcia oder Oceano Casa Pepe an der Mauer.",c:"ca. 100 MAD",loc:{q:"Casa Garcia, Asilah",lat:35.46822,lng:-6.03307},eat:1},
+{t:"15:00",h:"Paradise Beach",p:"12 km südlich, Taxi hin und zurück. Breiter, leerer Sandstrand.",c:"ca. 150 MAD pro Wagen",loc:{q:"Paradise Beach, Asilah",lat:35.41553,lng:-6.06587}},
+{t:"17:30",h:"Promenade & Galerien",p:"Asilah ist eine Künstlerstadt — die kleinen Galerien lohnen sich.",c:"30 MAD",loc:{q:"Corniche d'Asilah",lat:35.45999,lng:-6.03663}},
+{t:"18:40",h:"Zug zurück",p:"",c:"25–35 MAD",loc:{q:"Gare d'Asilah",lat:35.48238,lng:-6.02353},rail:{a:"Asilah",b:"Tanger Ville"}},
+{t:"20:00",h:"Abendessen in Tanger",p:"",c:"ca. 130 MAD",eat:1}],
 notes:[{k:"tip",t:"Zugzeiten am Vortag am Bahnhof oder auf oncf-voyages.ma prüfen. Die Regionalzüge fahren etwa alle zwei Stunden."}]},
 
 {n:6,date:"2026-09-07",wd:"Mo",dd:"07",tag:"Rabat",title:"Die Hauptstadt mit dem Al Boraq",sub:"Der einzige Tag, der früh startet. Montag bewusst gewählt: dienstags sind Rabats Museen geschlossen.",
 items:[
-{t:"07:20",h:"Taxi zum Bahnhof",p:"",c:"15 MAD",g:"Gare de Tanger Ville"},
-{t:"08:00",h:"Al Boraq nach Rabat",p:"Afrikas einziger Hochgeschwindigkeitszug, 320 km/h, ca. 1 Std. 20.",c:"115–172 MAD"},
-{t:"09:30",h:"Ankunft Rabat Agdal",p:"Tram oder Taxi in die Altstadt.",c:"Tram 6 MAD",g:"Gare Rabat Agdal"},
-{t:"10:00",h:"Kasbah des Oudayas",p:"Blau-weiße Gassen, andalusischer Garten, Café Maure über dem Fluss.",f:1,g:"Kasbah des Oudayas, Rabat"},
-{t:"11:30",h:"Medina & Rue des Consuls",p:"Teppiche, Leder, Silber — deutlich entspannter als in Tanger.",f:1,g:"Rue des Consuls, Rabat"},
-{t:"13:00",h:"Mittagessen",p:"",c:"ca. 100 MAD"},
-{t:"14:15",h:"Hassan-Turm & Mausoleum",p:"Unvollendetes Minarett von 1195, daneben das Mausoleum Mohammed V. mit Wachen in Tracht.",f:1,g:"Tour Hassan, Rabat"},
-{t:"15:45",h:"Chellah",p:"Römische Ruinen und Nekropole, überwachsen und voller Storchennester. 2024 neu eröffnet.",c:"70 MAD",g:"Chellah, Rabat"},
-{t:"17:15",h:"Museum Mohammed VI",p:"Moderne Kunst. Alternative: Aussichtsdeck im neuen Mohammed-VI-Turm.",c:"40 MAD",g:"Musée Mohammed VI d'art moderne et contemporain, Rabat"},
-{t:"18:30",h:"Bouregreg-Promenade",p:"Sonnenuntergang am Fluss, mit Blick auf Salé.",f:1,g:"Marina Bouregreg, Rabat"},
-{t:"19:45",h:"Rückzug ab Rabat Agdal",p:"",c:"115–172 MAD",g:"Gare Rabat Agdal"},
+{t:"07:20",h:"Taxi zum Bahnhof",p:"",c:"15 MAD",loc:{q:"Gare de Tanger Ville",lat:35.77153,lng:-5.78622}},
+{t:"08:00",h:"Al Boraq nach Rabat",p:"Afrikas einziger Hochgeschwindigkeitszug, 320 km/h, ca. 1 Std. 20.",c:"115–172 MAD",rail:{a:"Tanger Ville",b:"Rabat Agdal"}},
+{t:"09:30",h:"Ankunft Rabat Agdal",p:"Tram oder Taxi in die Altstadt.",c:"Tram 6 MAD",loc:{q:"Gare Rabat Agdal",lat:34.0011,lng:-6.85744}},
+{t:"10:00",h:"Kasbah des Oudayas",p:"Blau-weiße Gassen, andalusischer Garten, Café Maure über dem Fluss.",f:1,loc:{q:"Kasbah des Oudayas, Rabat",lat:34.03166,lng:-6.83585}},
+{t:"11:30",h:"Medina & Rue des Consuls",p:"Teppiche, Leder, Silber — deutlich entspannter als in Tanger.",f:1,loc:{q:"Rue des Consuls, Rabat",lat:34.02797,lng:-6.83403}},
+{t:"13:00",h:"Mittagessen",p:"",c:"ca. 100 MAD",eat:1},
+{t:"14:15",h:"Hassan-Turm & Mausoleum",p:"Unvollendetes Minarett von 1195, daneben das Mausoleum Mohammed V. mit Wachen in Tracht.",f:1,loc:{q:"Tour Hassan, Rabat",lat:34.02415,lng:-6.8228}},
+{t:"15:45",h:"Chellah",p:"Römische Ruinen und Nekropole, überwachsen und voller Storchennester. 2024 neu eröffnet.",c:"70 MAD",loc:{q:"Chellah, Rabat",lat:34.00637,lng:-6.82078},hours:{days:[0,1,2,3,4,5,6],from:"09:00",to:"18:00"}},
+{t:"17:15",h:"Museum Mohammed VI",p:"Moderne Kunst. Alternative: Aussichtsdeck im neuen Mohammed-VI-Turm.",c:"40 MAD",loc:{q:"Musée Mohammed VI d'art moderne et contemporain, Rabat",lat:34.01523,lng:-6.83288},hours:{days:[0,1,3,4,5,6],from:"10:00",to:"18:00"}},
+{t:"18:30",h:"Bouregreg-Promenade",p:"Sonnenuntergang am Fluss, mit Blick auf Salé.",f:1,loc:{q:"Marina Bouregreg, Rabat",lat:34.02956,lng:-6.82198}},
+{t:"19:45",h:"Rückzug ab Rabat Agdal",p:"",c:"115–172 MAD",loc:{q:"Gare Rabat Agdal",lat:34.0011,lng:-6.85744},rail:{a:"Rabat Agdal",b:"Tanger Ville"}},
 {t:"21:15",h:"Ankunft Tanger",p:""}],
 notes:[{k:"warn",t:"<b>Tickets vorher online buchen</b> auf oncf-voyages.ma. Der Al Boraq hat feste Sitzplatzreservierung, beliebte Züge sind ausverkauft."}]},
 
 {n:7,date:"2026-09-08",wd:"Di",dd:"08",tag:"Ruhetag",title:"Strand & Hammam",sub:"Heute nichts, was Öffnungszeiten hat.",
 items:[
-{t:"10:30",h:"Taxi nach Achakkar",p:"Robinson Beach am Atlantik — Wellen, Weite, wenig Menschen.",c:"ca. 60 MAD",g:"Robinson Beach, Tanger"},
+{t:"10:30",h:"Taxi nach Achakkar",p:"Robinson Beach am Atlantik — Wellen, Weite, wenig Menschen.",c:"ca. 60 MAD",loc:{q:"Robinson Beach, Tanger",lat:35.76802,lng:-5.93382}},
 {t:"11:00",h:"Strand",p:"Schwimmen, Liege mieten. Der Atlantik hat rund 20 °C.",c:"Liege 50 MAD"},
-{t:"14:00",h:"Fisch direkt am Strand",p:"",c:"ca. 100 MAD"},
+{t:"14:00",h:"Fisch direkt am Strand",p:"",c:"ca. 100 MAD",eat:1},
 {t:"16:00",h:"Zurück in die Medina",p:"",c:"ca. 60 MAD"},
 {t:"17:00",h:"Hammam",p:"Dampfbad, Peeling mit dem Kessa-Handschuh, Seife aus schwarzer Olive. Einfaches Viertel-Hammam oder Riad mit Massage.",c:"50–300 MAD"},
-{t:"20:00",h:"Abendessen",p:"",c:"ca. 130 MAD"}],
+{t:"20:00",h:"Abendessen",p:"",c:"ca. 130 MAD",eat:1}],
 notes:[{k:"plan",t:"<b>Wenn dir ein Ausflug lieber ist:</b> Chefchaouen, die blaue Stadt, per CTM-Bus ab 08:00. Rund 2,5–3 Stunden pro Richtung, ca. 100 MAD. Als Tagestour lang, aber machbar."}]},
 
 {n:8,date:"2026-09-09",wd:"Mi",dd:"09",tag:"Letzter Tag",title:"Einkaufen & vorbereiten",sub:"Heute wird alles für morgen früh geregelt.",
 items:[
 {t:"10:00",h:"Ryanair-Check-in für morgen",p:"Öffnet heute. Ohne Online-Check-in kostet der Schalter 55 €. Bordkarte offline speichern.",k:"wichtig"},
-{t:"10:30",h:"Souvenirs in der Medina",p:"Gewürze, Argan-Öl, Leder, Teekannen, Babouches. Handeln gehört dazu — starte bei einem Drittel.",f:1,g:"Medina de Tanger"},
-{t:"13:00",h:"Letztes Mittagessen am Petit Socco",p:"",c:"ca. 80 MAD",g:"Petit Socco, Tanger"},
-{t:"15:00",h:"Abschiedsrunde",p:"Kasbah-Aussicht, Bab Bhar, noch einmal Café Hafa.",c:"20 MAD",g:"Café Hafa, Tanger"},
+{t:"10:30",h:"Souvenirs in der Medina",p:"Gewürze, Argan-Öl, Leder, Teekannen, Babouches. Handeln gehört dazu — starte bei einem Drittel.",f:1,loc:{q:"Medina de Tanger",lat:35.78556,lng:-5.81037}},
+{t:"13:00",h:"Letztes Mittagessen am Petit Socco",p:"",c:"ca. 80 MAD",loc:{q:"Petit Socco, Tanger",lat:35.78556,lng:-5.81037},eat:1},
+{t:"15:00",h:"Abschiedsrunde",p:"Kasbah-Aussicht, Bab Bhar, noch einmal Café Hafa.",c:"20 MAD",loc:{q:"Café Hafa, Tanger",lat:35.7914,lng:-5.82198}},
 {t:"17:30",h:"Restliche Dirham ausgeben",p:"Die Ausfuhr ist offiziell nicht erlaubt und am Flughafen tauschst du kaum zurück.",k:"wichtig"},
 {t:"18:00",h:"Taxi für 06:15 Uhr bestellen",p:"An der Rezeption. Morgens früh findest du in der Medina spontan keins.",k:"wichtig"},
-{t:"19:00",h:"Abschiedsessen",p:"Hoteldachterrasse mit Hafenblick.",c:"ca. 150 MAD"},
+{t:"19:00",h:"Abschiedsessen",p:"Hoteldachterrasse mit Hafenblick.",c:"ca. 150 MAD",eat:1},
 {t:"21:00",h:"Packen und früh schlafen",p:"Wecker 05:30."}]},
 
 {n:9,date:"2026-09-10",wd:"Do",dd:"10",tag:"Abreise",title:"Abflug 09:20",sub:"Früher Start — dafür bist du mittags zu Hause.",
 items:[
 {t:"05:30",h:"Aufstehen & Check-out",p:"Die Rezeption ist rund um die Uhr besetzt."},
-{t:"06:15",h:"Taxi zum Flughafen",p:"30 Minuten. Nachttarif plus 50 %.",c:"250–300 MAD",g:"Aéroport Tanger Ibn Battouta"},
+{t:"06:15",h:"Taxi zum Flughafen",p:"30 Minuten. Nachttarif plus 50 %.",c:"250–300 MAD",loc:{q:"Aéroport Tanger Ibn Battouta",lat:35.72919,lng:-5.91297}},
 {t:"06:50",h:"Ankunft TNG",p:"Ryanair schließt das Gate 30 Minuten vor Abflug."},
 {t:"07:20",h:"Gepäck, Ausreiseformular, Sicherheit",p:"Das Formular bekommst du am Schalter oder vor der Passkontrolle."},
 {t:"09:20",h:"Abflug nach Weeze",p:""},
-{t:"13:35",h:"Landung Weeze",p:"Deutsche Zeit.",g:"Flughafen Weeze"}],
+{t:"13:35",h:"Landung Weeze",p:"Deutsche Zeit.",loc:{q:"Flughafen Weeze"}}],
 notes:[{k:"warn",t:"Frühstück gibt es im Hotel um die Zeit nicht mehr. Nimm dir am Vorabend etwas mit oder iss am Flughafen."}]}
 ];
 
@@ -552,7 +647,47 @@ function today(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+
 var active=0,people=2,busFull=false,withFood=false;
 
 var MAPS='https://www.google.com/maps/search/?api=1&query=';
+var ONCF='https://www.oncf-voyages.ma/';
+var TILE_CACHE='tanger-maps-v1',DATA_CACHE='tanger-data-v1',TILE_MAX=160;
+var WD=['So','Mo','Di','Mi','Do','Fr','Sa'];
+
 var PIN='<svg viewBox="0 0 24 24"><path d="M12 21.5s6.8-6.4 6.8-11.2a6.8 6.8 0 1 0-13.6 0C5.2 15.1 12 21.5 12 21.5Z"/><circle cx="12" cy="10.1" r="2.5"/></svg>';
+var ICO_TRAIN='<svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="13" rx="3"/><path d="M5 10h14M8 20l-2 2M16 20l2 2M9 19h6"/><circle cx="8.6" cy="13" r=".6"/><circle cx="15.4" cy="13" r=".6"/></svg>';
+var ICO_DL='<svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>';
+var ICO_OK='<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></svg>';
+var ICO_NOTE='<svg viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9L14.5 20h-9A1.5 1.5 0 0 1 4 18.5Z"/><path d="M20 14.5h-5.5V20"/></svg>';
+var ICO_EDIT='<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.5 2.5 0 0 0-3.5-3.5L4.5 16.5Z"/><path d="M14.5 6.5 17.5 9.5"/></svg>';
+
+/* ---------- Overrides: Aenderungen liegen neben TRIP, nie darin ---------- */
+var OV={},RN={},SPENT={},NOTIF={},EDIT=false,mapObj=null;
+function ik(di,ii){return di+'_'+ii;}
+
+/* Zusammengefuehrtes Item: Original + gespeicherte Aenderung. */
+function item(di,ii){
+  var s=TRIP[di].items[ii],o=OV[ik(di,ii)]||{};
+  return {t:o.t!==undefined?o.t:s.t, h:o.h!==undefined?o.h:s.h, p:o.p!==undefined?o.p:(s.p||''),
+    c:s.c, f:s.f, k:s.k, loc:s.loc, hours:s.hours, rail:s.rail, eat:s.eat,
+    edited:o.t!==undefined||o.h!==undefined||o.p!==undefined};
+}
+function setOv(di,ii,field,val){
+  var k=ik(di,ii),orig=TRIP[di].items[ii][field]||'';
+  OV[k]=OV[k]||{};
+  if(val===orig){delete OV[k][field];}else{OV[k][field]=val;}
+  var n=0,x;for(x in OV[k])n++;
+  if(!n)delete OV[k];
+  Store.set('overrides',OV);
+}
+
+/* ---------- Oeffnungszeiten ---------- */
+function hoursMsg(d,it){
+  if(!it.hours)return '';
+  var dow=new Date(d.date+'T12:00:00').getDay();
+  if(it.hours.days.indexOf(dow)<0)
+    return 'Am '+WD[dow]+' geschlossen — geöffnet '+it.hours.days.map(function(x){return WD[x];}).join(', ')+'.';
+  if(it.t<it.hours.from)return 'Öffnet erst um '+it.hours.from+' Uhr, im Plan steht '+it.t+'.';
+  if(it.t>it.hours.to)return 'Schließt um '+it.hours.to+' Uhr, im Plan steht '+it.t+'.';
+  return '';
+}
 
 function renderNow(){
   var t=today(),idx=-1,i,doneDays;
@@ -591,32 +726,215 @@ function centerTile(){
   if(s.scrollTo){s.scrollTo({left:left,behavior:'smooth'});}else{s.scrollLeft=left;}
 }
 
+function hasNote(di,ii){var v=RN[ik(di,ii)];return !!(v&&(v.r||v.t));}
+
+function notePanel(di,ii){
+  var v=RN[ik(di,ii)]||{},s,stars='';
+  for(s=1;s<=5;s++)stars+='<button class="star'+(s<=(v.r||0)?' on':'')+'" data-s="'+s+'" aria-label="'+s+' Sterne">★</button>';
+  return '<div class="rnote" id="rn'+ii+'" hidden><div class="stars" data-i="'+ii+'">'+stars+'</div>'+
+    '<textarea data-i="'+ii+'" rows="2" placeholder="Wie war es? Was hast du gegessen?">'+esc(v.t||'')+'</textarea></div>';
+}
+
 function renderDay(){
+  if(mapObj){mapObj.remove();mapObj=null;}          // Container wird gleich ueberschrieben
   var d=TRIP[active],t=today(),nowIdx=-1;
+  var merged=d.items.map(function(_,i){return item(active,i);});
   if(d.date===t){var n=new Date(),cur=n.getHours()*60+n.getMinutes();
-    d.items.forEach(function(it,i){var pp=it.t.split(':');if(+pp[0]*60+ +pp[1]<=cur)nowIdx=i;});}
-  var items=d.items.map(function(it,i){
+    merged.forEach(function(it,i){var pp=it.t.split(':');if(+pp[0]*60+ +pp[1]<=cur)nowIdx=i;});}
+
+  var items=merged.map(function(it,i){
+    if(EDIT)return '<li class="editing"><div class="time"><input class="ed-t" data-i="'+i+'" value="'+esc(it.t)+
+      '" aria-label="Uhrzeit"></div><div class="body"><input class="ed-h" data-i="'+i+'" value="'+esc(it.h)+
+      '" aria-label="Titel"><textarea class="ed-p" data-i="'+i+'" rows="2" aria-label="Beschreibung">'+esc(it.p)+
+      '</textarea>'+(it.edited?'<button class="ed-reset" data-i="'+i+'">Auf Original zurücksetzen</button>':'')+'</div></li>';
+
     var ch='';
     if(it.c)ch+='<span class="chip pay">'+esc(it.c)+'</span>';
     if(it.f)ch+='<span class="chip free">kostenlos</span>';
     if(it.k)ch+='<span class="chip pay">'+esc(it.k)+'</span>';
-    var map=it.g?'<div><a class="mapl" href="'+MAPS+encodeURIComponent(it.g)+
-      '" target="_blank" rel="noopener">'+PIN+'Auf Karte öffnen</a></div>':'';
-    return '<li'+(i===nowIdx?' class="now-row"':'')+'><div class="time">'+it.t+'</div><div class="body"><strong>'+
-      esc(it.h)+'</strong>'+(it.p?'<p>'+esc(it.p)+'</p>':'')+ch+map+'</div></li>';}).join('');
+    if(it.edited)ch+='<span class="chip edit">geändert</span>';
+
+    var extra='',hw=hoursMsg(d,it);
+    if(hw)extra+='<div class="note warn small"><b>'+esc(hw)+'</b> <i>Öffnungszeiten sind Richtwerte — vor Ort prüfen.</i></div>';
+    if(it.rail)extra+='<a class="rail" href="'+ONCF+'" target="_blank" rel="noopener">'+ICO_TRAIN+
+      '<span><b>Aktuelle Zeiten prüfen</b>'+esc(it.rail.a)+' → '+esc(it.rail.b)+' · '+d.wd+' '+d.dd+'.09. · oncf-voyages.ma</span></a>';
+
+    var acts='';
+    if(it.loc)acts+='<a class="mapl" href="'+MAPS+encodeURIComponent(it.loc.q)+
+      '" target="_blank" rel="noopener">'+PIN+'Auf Karte öffnen</a>';
+    if(it.eat)acts+='<button class="notebtn'+(hasNote(active,i)?' has':'')+'" data-i="'+i+'">'+ICO_NOTE+
+      (hasNote(active,i)?'Notiz ansehen':'Notiz')+'</button>';
+    if(acts)acts='<div class="acts">'+acts+'</div>';
+
+    return '<li'+(i===nowIdx?' class="now-row"':'')+'><div class="time">'+esc(it.t)+'</div><div class="body"><strong>'+
+      esc(it.h)+'</strong>'+(it.p?'<p>'+esc(it.p)+'</p>':'')+ch+extra+acts+
+      (it.eat?notePanel(active,i):'')+'</div></li>';}).join('');
+
   var notes=(d.notes||[]).map(function(n){return '<div class="note '+n.k+'">'+n.t+'</div>';}).join('');
+  if(merged.some(function(it){return it.rail;}))
+    notes+='<div class="note plan">Die Zugzeiten im Plan sind Richtwerte. ONCF ändert den Fahrplan saisonal — prüf sie am Vortag über den Link am jeweiligen Punkt.</div>';
 
   var arrows='<div class="arrows">'+
     '<button id="dprev"'+(active>0?'':' disabled')+' aria-label="Vorheriger Tag"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>'+
     '<button id="dnext"'+(active<TRIP.length-1?'':' disabled')+' aria-label="Nächster Tag"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>';
 
-  $("#p-tage").innerHTML='<div class="card"><div class="card-h"><div class="meta">Tag '+d.n+' · '+d.wd+' '+d.dd+
+  var bar='<div class="editbar"><p>'+(EDIT?'Zeit, Titel und Text sind editierbar. Änderungen bleiben lokal gespeichert.'
+    :'Stimmt etwas nicht? Du kannst jeden Punkt anpassen.')+'</p><button class="editbtn'+(EDIT?' on':'')+
+    '" id="editbtn">'+ICO_EDIT+(EDIT?'Fertig':'Bearbeiten')+'</button></div>';
+
+  var pts=[];
+  merged.forEach(function(it,i){if(it.loc&&it.loc.lat)pts.push({it:it,i:i});});
+  var mapCard=pts.length?'<div class="card mapwrap"><div class="card-h"><div class="meta">Route · '+pts.length+
+    ' Orte</div><h3>Karte des Tages</h3></div><div id="map"></div><div class="maptools">'+
+    '<p id="maphint">Kartendaten © OpenStreetMap</p><button class="dlbtn" id="dltiles">'+ICO_DL+
+    'Offline speichern</button></div></div>':'';
+
+  $("#p-tage").innerHTML=bar+'<div class="card"><div class="card-h"><div class="meta">Tag '+d.n+' · '+d.wd+' '+d.dd+
     '.09. · '+esc(d.tag)+'</div><div class="dnav"><h3>'+esc(d.title)+'</h3>'+arrows+'</div><p>'+esc(d.sub)+
-    '</p></div><div class="card-b"><ul class="tl">'+items+'</ul>'+notes+'</div></div>';
+    '</p></div><div class="card-b"><ul class="tl">'+items+'</ul>'+notes+'</div></div>'+mapCard;
 
   var step=function(delta){return function(){active+=delta;renderStrip();renderDay();};};
   $("#dprev").onclick=step(-1);
   $("#dnext").onclick=step(1);
+  $("#editbtn").onclick=function(){EDIT=!EDIT;renderDay();};
+
+  wireEdit();
+  wireNotes();
+  if(pts.length)buildMap(d,pts);
+}
+
+/* Eingaben schreiben direkt in den Store — kein Re-Render, sonst springt der Fokus raus. */
+function wireEdit(){
+  if(!EDIT)return;
+  [['.ed-t','t'],['.ed-h','h'],['.ed-p','p']].forEach(function(pair){
+    $$("#p-tage "+pair[0]).forEach(function(el){
+      el.oninput=function(){setOv(active,+el.dataset.i,pair[1],el.value);};});
+  });
+  $$("#p-tage .ed-reset").forEach(function(b){b.onclick=function(){
+    delete OV[ik(active,+b.dataset.i)];Store.set('overrides',OV);renderDay();};});
+}
+
+function wireNotes(){
+  $$("#p-tage .notebtn").forEach(function(b){b.onclick=function(){
+    var p=$("#rn"+b.dataset.i);if(p)p.hidden=!p.hidden;};});
+
+  var save=function(di,ii,patch){
+    var k=ik(di,ii),v=RN[k]||{};
+    if(patch.r!==undefined)v.r=patch.r;
+    if(patch.t!==undefined)v.t=patch.t;
+    RN[k]=v;Store.set('rnotes',RN);
+  };
+  $$("#p-tage .stars").forEach(function(box){
+    var ii=+box.dataset.i;
+    $$("#rn"+ii+" .star").forEach(function(s){s.onclick=function(){
+      var val=+s.dataset.s,cur=(RN[ik(active,ii)]||{}).r||0;
+      if(val===cur)val=0;                                  // nochmal tippen = Bewertung loeschen
+      save(active,ii,{r:val});
+      $$("#rn"+ii+" .star").forEach(function(x){x.classList.toggle('on',+x.dataset.s<=val);});
+      var nb=$('#p-tage .notebtn[data-i="'+ii+'"]');if(nb)nb.classList.toggle('has',hasNote(active,ii));
+    };});
+  });
+  $$("#p-tage .rnote textarea").forEach(function(ta){
+    var tm=null;
+    ta.oninput=function(){
+      clearTimeout(tm);
+      tm=setTimeout(function(){
+        save(active,+ta.dataset.i,{t:ta.value});
+        var nb=$('#p-tage .notebtn[data-i="'+ta.dataset.i+'"]');
+        if(nb)nb.classList.toggle('has',hasNote(active,+ta.dataset.i));
+      },400);
+    };
+  });
+}
+
+/* ---------- Tatsaechlich bezahlt ---------- */
+var EST={t:{},e:{}};
+function spendInput(k){
+  var v=SPENT[k];
+  return '<span class="spend"><input type="number" inputmode="decimal" min="0" step="1" data-k="'+k+
+    '" value="'+(v===undefined?'':v)+'" placeholder="ist" aria-label="Tatsächlich bezahlt in MAD"></span>';
+}
+/* Nur ueber die Posten vergleichen, bei denen wirklich etwas eingetragen ist —
+   sonst waere die Differenz immer negativ und damit wertlos. */
+function cmpRow(est){
+  var e=0,a=0,n=0,k;
+  for(k in est){if(SPENT[k]!==undefined){e+=est[k];a+=SPENT[k];n++;}}
+  var total=0;for(k in est)total++;
+  if(!n)return {cls:'',html:'<td>Geschätzt vs. tatsächlich<small>Noch nichts erfasst — trag rechts ein, was du wirklich bezahlt hast</small></td><td>—</td>'};
+  var diff=Math.round(a-e);
+  return {cls:diff<=0?'under':'over',
+    html:'<td>Geschätzt vs. tatsächlich<small>'+n+' von '+total+' Posten erfasst · geschätzt '+Math.round(e)+
+      ', bezahlt '+Math.round(a)+' MAD</small></td><td>'+(diff<=0?'−':'+')+Math.abs(diff)+' MAD</td>'};
+}
+function updateCmp(){
+  [['#cmpT',EST.t],['#cmpE',EST.e]].forEach(function(p){
+    var row=$(p[0]);if(!row)return;
+    var r=cmpRow(p[1]);
+    row.className='cmprow'+(r.cls?' '+r.cls:'');
+    row.innerHTML=r.html;});
+}
+
+/* ---------- Karte ---------- */
+function buildMap(d,pts){
+  if(typeof L==='undefined'){$("#map").innerHTML='<p style="padding:14px;font-size:13px;color:#66757C">Karte nicht verfügbar.</p>';return;}
+  var latlngs=pts.map(function(p){return [p.it.loc.lat,p.it.loc.lng];});
+  mapObj=L.map($("#map"),{scrollWheelZoom:false,zoomControl:true});
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {maxZoom:18,attribution:'&copy; OpenStreetMap'}).addTo(mapObj);
+  L.polyline(latlngs,{color:'#10222B',weight:2,opacity:.45,dashArray:'5 6'}).addTo(mapObj);
+  pts.forEach(function(p,n){
+    L.marker(latlngs[n],{icon:L.divIcon({className:'pin',html:'<b>'+(n+1)+'</b>',
+      iconSize:[24,24],iconAnchor:[12,12],popupAnchor:[0,-12]})})
+     .addTo(mapObj).bindPopup('<b>'+esc(p.it.h)+'</b><br>'+esc(p.it.t)+' Uhr');
+  });
+  mapObj.fitBounds(L.latLngBounds(latlngs).pad(.18));
+
+  var btn=$("#dltiles");
+  Store.get('tiles').then(function(s){
+    if(s&&s[d.n]){btn.className='dlbtn done';btn.innerHTML=ICO_OK+s[d.n]+' Kacheln offline';}
+  }).catch(function(){});
+  btn.onclick=function(){saveTiles(btn,d.n);};
+}
+
+/* ---------- Offline-Kartenausschnitt ---------- */
+function lon2x(lon,z){return Math.floor((lon+180)/360*Math.pow(2,z));}
+function lat2y(lat,z){var r=lat*Math.PI/180;
+  return Math.floor((1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*Math.pow(2,z));}
+
+function tileUrls(){
+  var b=mapObj.getBounds(),z=mapObj.getZoom(),urls=[],zz,x,y;
+  for(zz=z;zz<=Math.min(z+1,17);zz++){
+    var x1=lon2x(b.getWest(),zz),x2=lon2x(b.getEast(),zz);
+    var y1=lat2y(b.getNorth(),zz),y2=lat2y(b.getSouth(),zz);
+    for(x=x1;x<=x2;x++)for(y=y1;y<=y2;y++)
+      urls.push('https://tile.openstreetmap.org/'+zz+'/'+x+'/'+y+'.png');
+  }
+  return urls.slice(0,TILE_MAX);   // Deckel: die OSM-Kachelserver sind gespendet
+}
+
+function saveTiles(btn,dayN){
+  if(!window.caches||!mapObj){btn.disabled=true;btn.textContent='Hier nicht möglich';return;}
+  var urls=tileUrls(),i=0,ok=0;
+  btn.disabled=true;
+  caches.open(TILE_CACHE).then(function(c){
+    var done=function(){
+      btn.disabled=false;btn.className='dlbtn done';btn.innerHTML=ICO_OK+ok+' Kacheln offline';
+      $("#maphint").textContent='Ausschnitt liegt im Cache — die Karte funktioniert hier auch ohne Netz.';
+      Store.get('tiles').then(function(s){s=s||{};s[dayN]=ok;Store.set('tiles',s);}).catch(function(){});
+    };
+    var next=function(){
+      if(i>=urls.length)return done();
+      var u=urls[i++];
+      btn.textContent='Lade '+i+' / '+urls.length+' …';
+      c.match(u).then(function(hit){
+        if(hit){ok++;return next();}
+        fetch(u,{mode:'cors'}).then(function(r){
+          if(r&&r.ok){ok++;return c.put(u,r.clone());}
+        }).catch(function(){}).then(function(){setTimeout(next,60);});
+      });
+    };
+    next();
+  }).catch(function(){btn.disabled=false;btn.textContent='Speichern fehlgeschlagen';});
 }
 
 function renderCosts(){
@@ -625,15 +943,25 @@ function renderCosts(){
   $$("#pplbtn button").forEach(function(b){b.onclick=function(){
     people=+b.dataset.n;Store.set('ppl',people);renderCosts();};});
 
-  var sumT=0,rowsT=COSTS_T.map(function(c){
-    var v=(c.id==='bus'&&busFull)?130:c.v, tot=(c.per==='p')?v*people:v; sumT+=tot;
+  var estT={},estE={};
+  var sumT=0,rowsT=COSTS_T.map(function(c,i){
+    var v=(c.id==='bus'&&busFull)?130:c.v, tot=(c.per==='p')?v*people:v; sumT+=tot; estT['t'+i]=tot;
     var sub=(c.d?esc(c.d):'')+(c.per==='p'?(c.d?' · ':'')+v+' pro Person':'');
-    return '<tr><td>'+esc(c.n)+(sub?'<small>'+sub+'</small>':'')+'</td><td>'+tot+'</td></tr>';}).join('');
-  $("#tblT").innerHTML=rowsT+'<tr class="sumrow"><td>Summe Transport</td><td>'+sumT+' MAD</td></tr>';
+    return '<tr><td>'+esc(c.n)+(sub?'<small>'+sub+'</small>':'')+'</td><td>'+tot+spendInput('t'+i)+'</td></tr>';}).join('');
+  $("#tblT").innerHTML=rowsT+'<tr class="sumrow"><td>Summe Transport</td><td>'+sumT+' MAD</td></tr>'+
+    '<tr class="cmprow" id="cmpT"></tr>';
 
-  var sumE=0,rowsE=COSTS_E.map(function(c){var tot=c.v*people;sumE+=tot;
-    return '<tr><td>'+esc(c.n)+'<small>'+(c.d?esc(c.d)+' · ':'')+c.v+' pro Person</small></td><td>'+tot+'</td></tr>';}).join('');
-  $("#tblE").innerHTML=rowsE+'<tr class="sumrow"><td>Summe Eintritte</td><td>'+sumE+' MAD</td></tr>';
+  var sumE=0,rowsE=COSTS_E.map(function(c,i){var tot=c.v*people;sumE+=tot; estE['e'+i]=tot;
+    return '<tr><td>'+esc(c.n)+'<small>'+(c.d?esc(c.d)+' · ':'')+c.v+' pro Person</small></td><td>'+tot+spendInput('e'+i)+'</td></tr>';}).join('');
+  $("#tblE").innerHTML=rowsE+'<tr class="sumrow"><td>Summe Eintritte</td><td>'+sumE+' MAD</td></tr>'+
+    '<tr class="cmprow" id="cmpE"></tr>';
+
+  EST={t:estT,e:estE};
+  updateCmp();
+  $$(".spend input").forEach(function(inp){inp.oninput=function(){
+    var v=parseFloat(inp.value);
+    if(inp.value===''||isNaN(v)){delete SPENT[inp.dataset.k];}else{SPENT[inp.dataset.k]=v;}
+    Store.set('spent',SPENT);updateCmp();};});
 
   var sum=sumT+sumE+(withFood?150*people*9:0);
   $("#tot").innerHTML=sum.toLocaleString('de-DE')+'<span>MAD</span>';
@@ -673,6 +1001,8 @@ $$("#tabs button").forEach(function(b){b.onclick=function(){
   $$("#tabs button").forEach(function(x){x.classList.toggle('on',x===b);});
   $$(".panel").forEach(function(p){p.classList.toggle('on',p.id==='p-'+b.dataset.p);});
   moveInd();
+  // Leaflet misst im display:none-Panel 0x0 — nach dem Einblenden neu vermessen.
+  if(b.dataset.p==='tage'&&mapObj)setTimeout(function(){mapObj.invalidateSize();},60);
   window.scrollTo({top:0,behavior:'smooth'});};});
 
 /* Erst positionieren, dann Transition scharfschalten — sonst gleitet der
@@ -701,10 +1031,88 @@ $("#tglFood").onclick=function(){withFood=!withFood;Store.set('food',withFood);r
       : 'Öffne das Browser-Menü und wähle <b>Zum Startbildschirm hinzufügen</b>. Danach startet der Plan wie eine App.';},900);
 })();
 
+/* ---------- Erinnerungen fuer die "wichtig"-Punkte ---------- */
+function reminders(){
+  var out=[];
+  TRIP.forEach(function(d,di){d.items.forEach(function(_,ii){
+    var m=item(di,ii);
+    if(m.k!=='wichtig')return;
+    var at=new Date(d.date+'T'+m.t+':00');
+    at.setDate(at.getDate()-1);at.setHours(20,0,0,0);   // Vorabend, 20 Uhr
+    out.push({id:ik(di,ii),when:at.getTime(),t:m.t,h:m.h,n:d.n});
+  });});
+  return out;
+}
+function showReminder(r){
+  var opt={body:'Morgen '+r.t+' Uhr · '+r.h,icon:'icons/icon-192.png',
+    badge:'icons/favicon-32.png',tag:'tng-'+r.id};
+  var title='Tanger · Tag '+r.n;
+  if(navigator.serviceWorker&&navigator.serviceWorker.ready){
+    navigator.serviceWorker.ready.then(function(reg){reg.showNotification(title,opt);})
+      .catch(function(){try{new Notification(title,opt);}catch(e){}});
+  }else{try{new Notification(title,opt);}catch(e){}}
+}
+/* Nachholen nur im 36-Stunden-Fenster — sonst feuert nach der Reise alles auf einmal. */
+function checkReminders(){
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  var now=Date.now();
+  reminders().forEach(function(r){
+    if(NOTIF[r.id])return;
+    var dt=r.when-now;
+    if(dt<=0&&-dt<36*3600e3){showReminder(r);NOTIF[r.id]=true;Store.set('notified',NOTIF);}
+    else if(dt>0&&dt<6*3600e3){                       // waehrend die App offen bleibt
+      setTimeout(function(){
+        if(NOTIF[r.id])return;
+        showReminder(r);NOTIF[r.id]=true;Store.set('notified',NOTIF);},dt);}
+  });
+}
+/* Liste in den Cache legen, damit der Service Worker sie bei periodicSync lesen kann. */
+function syncReminders(){
+  if(!window.caches)return;
+  var list=JSON.stringify(reminders());
+  caches.open(DATA_CACHE).then(function(c){
+    c.put('./reminders.json',new Response(list,{headers:{'Content-Type':'application/json'}}));
+  }).catch(function(){});
+}
+function renderNotif(){
+  var box=$("#notifbox");if(!box)return;
+  if(!('Notification' in window)){
+    box.innerHTML='<div class="notif"><p>Dieser Browser kann keine Erinnerungen anzeigen. Auf dem iPhone geht es nur, wenn der Plan auf dem Homescreen liegt.</p></div>';return;}
+  var p=Notification.permission,n=reminders().length;
+  var txt=p==='granted'?'Eingeschaltet für '+n+' Punkte. Die Erinnerung kommt am Vorabend um 20 Uhr.'
+    :p==='denied'?'Vom Browser blockiert. In den Website-Einstellungen wieder freigeben.'
+    :'Am Vorabend um 20 Uhr erinnert dich der Plan an die '+n+' wichtigen Punkte.';
+  box.innerHTML='<div class="notif"><p>'+txt+'</p><button class="notifbtn'+(p==='granted'?' on':'')+'" id="notifbtn"'+
+    (p!=='default'?' disabled':'')+'>'+(p==='granted'?'Aktiv':p==='denied'?'Blockiert':'Einschalten')+'</button></div>';
+  var b=$("#notifbtn");
+  if(b&&p==='default')b.onclick=function(){
+    Notification.requestPermission().then(function(){renderNotif();checkReminders();syncReminders();registerSync();});};
+}
+function registerSync(){
+  if(!navigator.serviceWorker)return;
+  navigator.serviceWorker.ready.then(function(reg){
+    if(reg.periodicSync&&reg.periodicSync.register)
+      reg.periodicSync.register('tanger-reminders',{minInterval:12*3600e3}).catch(function(){});
+  }).catch(function(){});
+}
+
+function boot(){
+  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();
+  checkReminders();syncReminders();registerSync();
+}
+
 Store.get('ppl').then(function(v){people=v||2;return Store.get('busFull');})
 .then(function(v){busFull=!!v;return Store.get('food');})
-.then(function(v){withFood=!!v;renderNow();renderStrip();renderDay();renderCosts();renderCheck();})
-.catch(function(){renderNow();renderStrip();renderDay();renderCosts();renderCheck();});
+.then(function(v){withFood=!!v;return Store.get('overrides');})
+.then(function(v){OV=v||{};return Store.get('rnotes');})
+.then(function(v){RN=v||{};return Store.get('spent');})
+.then(function(v){SPENT=v||{};return Store.get('notified');})
+.then(function(v){NOTIF=v||{};boot();})
+.catch(function(){boot();});
+
+/* Karte in einem versteckten Panel misst 0×0 — nach dem Tabwechsel neu vermessen. */
+document.addEventListener('visibilitychange',function(){
+  if(!document.hidden)checkReminders();});
 
 /* Tagesleiste: "stuck"-Zustand ueber einen Sentinel, damit die Hoehenaenderung
    der Leiste selbst kein Flackern am Umschaltpunkt ausloest. */
