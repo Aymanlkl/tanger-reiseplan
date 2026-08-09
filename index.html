@@ -48,6 +48,19 @@ h1,h2,h3,h4{margin:0;font-weight:700;letter-spacing:-.022em;line-height:1.15}
 .hd h1 em{font-style:normal;color:var(--saffron)}
 .hd .sub{color:#A9C0CB;font-size:13.5px;margin-bottom:16px;letter-spacing:-.005em}
 
+/* Glocke: .hd>* setzt position:relative — hier braucht es hoehere Spezifitaet */
+.hd .bell{position:absolute;top:calc(var(--st) + 15px);right:18px;z-index:3;
+  width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
+  background:rgba(255,255,255,.1);color:#A9C0CB;
+  transition:background .22s var(--ease),color .22s var(--ease),transform .14s var(--ease)}
+.hd .bell[hidden]{display:none}
+.hd .bell:active{transform:scale(.9)}
+.hd .bell svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.hd .bell.on{background:var(--saffron);color:#1A1200}
+.hd .bell.off{opacity:.45}
+.hd .bell .dot{position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;
+  background:var(--saffron);border:2px solid var(--ink)}
+
 .flt{display:flex;gap:1px;background:rgba(255,255,255,.13);border-radius:var(--r-s);overflow:hidden;margin-bottom:16px}
 .flt>div{flex:1 1 0;min-width:0;background:var(--ink-2);padding:9px;display:flex;flex-direction:column}
 .flt .k{font-family:var(--m);font-size:clamp(7px,2.1vw,9px);letter-spacing:.08em;color:#7E9AA6;text-transform:uppercase;
@@ -123,7 +136,8 @@ h1,h2,h3,h4{margin:0;font-weight:700;letter-spacing:-.022em;line-height:1.15}
 .tl .body{flex:1;min-width:0}
 .tl .body strong{display:block;font-weight:600;font-size:14.5px;line-height:1.35;letter-spacing:-.01em}
 .tl .body p{margin:3px 0 0;font-size:13px;color:var(--muted);line-height:1.45}
-.tl li.now-row{background:linear-gradient(90deg,var(--saffron-wash),transparent 75%);margin:0 -8px;padding:11px 8px;border-radius:8px}
+.tl li.now-row{background:linear-gradient(90deg,var(--saffron-wash),transparent 75%);margin:0 -8px;padding:11px 8px;border-radius:8px;
+  scroll-margin-top:calc(var(--st) + 96px)}   /* Hoehe der klebenden Tagesleiste */
 .tl li.now-row .time{color:var(--saffron-deep)}
 
 .chip{display:inline-block;font-family:var(--m);font-size:10px;font-weight:600;letter-spacing:.03em;
@@ -233,8 +247,7 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 .instl p{margin:0;font-size:13px;color:#B7CBD4;line-height:1.55}
 .instl button{margin-top:11px;background:var(--saffron);color:#1A1200;font-weight:700;font-size:13.5px;padding:10px 16px;border-radius:8px;width:100%}
 /* ---------- Karte ---------- */
-.mapwrap{position:relative}
-#map{height:260px;background:#E8E4DB}
+#map{height:230px;background:#E8E4DB;border-top:1px solid var(--line-2)}
 #map .pin{background:none;border:0}
 #map .pin b{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;
   background:var(--saffron);color:#1A1200;font-family:var(--m);font-size:11px;font-weight:700;
@@ -242,7 +255,8 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 #map .leaflet-container{font-family:var(--f)}
 #map .leaflet-popup-content{margin:9px 12px;font-size:13px;line-height:1.4}
 #map .leaflet-popup-content b{font-size:13.5px}
-.maptools{display:flex;align-items:center;gap:9px;padding:11px 13px;border-top:1px solid var(--line-2);background:var(--card)}
+.maptools{display:flex;align-items:center;gap:9px;padding:10px 13px;background:#F7F5F0;
+  border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2)}
 .maptools p{margin:0;flex:1;font-size:11.5px;color:var(--muted);line-height:1.4}
 .dlbtn{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;
   background:var(--ink);color:#fff;font-size:12.5px;font-weight:600;
@@ -328,6 +342,7 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
 <body>
 
 <header class="hd">
+  <button class="bell" id="bell" hidden></button>
   <div class="eyebrow">02.09 — 10.09 · 9 Tage</div>
   <h1>Tanger<em>.</em></h1>
   <div class="sub">Medina, Cap Spartel, Rabat und Asilah — ohne Auto.</div>
@@ -657,6 +672,8 @@ var ICO_DL='<svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.
 var ICO_OK='<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></svg>';
 var ICO_NOTE='<svg viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9L14.5 20h-9A1.5 1.5 0 0 1 4 18.5Z"/><path d="M20 14.5h-5.5V20"/></svg>';
 var ICO_EDIT='<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.5 2.5 0 0 0-3.5-3.5L4.5 16.5Z"/><path d="M14.5 6.5 17.5 9.5"/></svg>';
+var ICO_BELL='<svg viewBox="0 0 24 24"><path d="M18 8.5a6 6 0 1 0-12 0c0 5-2 6.5-2 6.5h16s-2-1.5-2-6.5Z"/><path d="M13.7 19a2 2 0 0 1-3.4 0"/></svg>';
+var ICO_BELL_OFF='<svg viewBox="0 0 24 24"><path d="M18 8.5a6 6 0 0 0-8.9-5.2M6.2 6.3A6 6 0 0 0 6 8.5c0 5-2 6.5-2 6.5h12"/><path d="M13.7 19a2 2 0 0 1-3.4 0M3 3l18 18"/></svg>';
 
 /* ---------- Overrides: Aenderungen liegen neben TRIP, nie darin ---------- */
 var OV={},RN={},SPENT={},NOTIF={},EDIT=false,mapObj=null;
@@ -710,20 +727,54 @@ function renderStrip(){
   $("#strip").innerHTML=TRIP.map(function(d,i){
     return '<button class="dtile'+(i===active?' on':'')+(d.date===t?' today':'')+(d.date<t?' done':'')+
     '" data-i="'+i+'"><div class="wd">'+d.wd+'</div><div class="dd">'+d.dd+'</div></button>';}).join('');
+  // Kachelklick: horizontal hart setzen, damit er nicht mit dem vertikalen
+  // Smooth-Scroll kollidiert — Browser fahren nur eine Smooth-Animation.
   $$("#strip .dtile").forEach(function(b){b.onclick=function(){
-    active=+b.dataset.i;renderStrip();renderDay();
-    $(".wrap").scrollIntoView({behavior:'smooth',block:'start'});};});
-  centerTile();
+    active=+b.dataset.i;renderStrip();renderDay();centerTile(false);
+    $(".wrap").scrollIntoView({behavior:smoothOk()?'smooth':'auto',block:'start'});};});
+}
+
+function smoothOk(){
+  return !(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+
+/* Tag wechseln. centerTile laeuft bewusst NACH renderDay im naechsten Frame:
+   Leaflet fokussiert bei der Initialisierung seinen Container, und ein
+   focus() scrollt — das bricht einen bereits laufenden Smooth-Scroll ab. */
+function goDay(i){
+  if(i<0||i>=TRIP.length)return;
+  active=i;renderStrip();renderDay();
+  requestAnimationFrame(function(){centerTile(true);});
 }
 
 /* Aktive Kachel horizontal mittig ziehen — ueber Rects statt offsetLeft,
    damit der offsetParent (die sticky Leiste) keine Rolle spielt. */
-function centerTile(){
+function centerTile(smooth){
   var s=$("#strip"),on=$("#strip .dtile.on");
   if(!s||!on)return;
   var r=on.getBoundingClientRect(),sr=s.getBoundingClientRect();
   var left=s.scrollLeft+(r.left-sr.left)-(sr.width-r.width)/2;
-  if(s.scrollTo){s.scrollTo({left:left,behavior:'smooth'});}else{s.scrollLeft=left;}
+  left=Math.max(0,Math.min(left,s.scrollWidth-s.clientWidth));
+  if(s.scrollTo&&smooth&&smoothOk()){s.scrollTo({left:left,behavior:'smooth'});}
+  else{s.scrollLeft=left;}
+}
+
+/* ---------- "Jetzt"-Zeile ---------- */
+var wantNowScroll=false,lastNowIdx=-1;
+
+function currentNowIdx(){
+  var d=TRIP[active];
+  if(!d||d.date!==today())return -1;
+  var n=new Date(),cur=n.getHours()*60+n.getMinutes(),idx=-1;
+  d.items.forEach(function(_,i){
+    var pp=item(active,i).t.split(':');
+    if(+pp[0]*60+ +pp[1]<=cur)idx=i;});
+  return idx;
+}
+function scrollToNow(){
+  var el=$("#p-tage .now-row");
+  if(!el)return;
+  el.scrollIntoView({behavior:smoothOk()?'smooth':'auto',block:'start'});
 }
 
 function hasNote(di,ii){var v=RN[ik(di,ii)];return !!(v&&(v.r||v.t));}
@@ -784,23 +835,31 @@ function renderDay(){
 
   var pts=[];
   merged.forEach(function(it,i){if(it.loc&&it.loc.lat)pts.push({it:it,i:i});});
-  var mapCard=pts.length?'<div class="card mapwrap"><div class="card-h"><div class="meta">Route · '+pts.length+
-    ' Orte</div><h3>Karte des Tages</h3></div><div id="map"></div><div class="maptools">'+
-    '<p id="maphint">Kartendaten © OpenStreetMap</p><button class="dlbtn" id="dltiles">'+ICO_DL+
-    'Offline speichern</button></div></div>':'';
+  // Karte sitzt im Tages-Card direkt unter dem Titel, ueber der Timeline —
+  // unterhalb der Liste hat sie auf dem Handy niemand gefunden.
+  var mapBlock=pts.length?'<div id="map"></div><div class="maptools">'+
+    '<p id="maphint">'+pts.length+' Orte auf der Route · Kartendaten © OpenStreetMap</p>'+
+    '<button class="dlbtn" id="dltiles">'+ICO_DL+'Offline</button></div>':'';
 
   $("#p-tage").innerHTML=bar+'<div class="card"><div class="card-h"><div class="meta">Tag '+d.n+' · '+d.wd+' '+d.dd+
     '.09. · '+esc(d.tag)+'</div><div class="dnav"><h3>'+esc(d.title)+'</h3>'+arrows+'</div><p>'+esc(d.sub)+
-    '</p></div><div class="card-b"><ul class="tl">'+items+'</ul>'+notes+'</div></div>'+mapCard;
+    '</p></div>'+mapBlock+'<div class="card-b"><ul class="tl">'+items+'</ul>'+notes+'</div></div>';
 
-  var step=function(delta){return function(){active+=delta;renderStrip();renderDay();};};
-  $("#dprev").onclick=step(-1);
-  $("#dnext").onclick=step(1);
+  $("#dprev").onclick=function(){goDay(active-1);};
+  $("#dnext").onclick=function(){goDay(active+1);};
   $("#editbtn").onclick=function(){EDIT=!EDIT;renderDay();};
 
   wireEdit();
   wireNotes();
   if(pts.length)buildMap(d,pts);
+
+  // Zur laufenden Zeile springen — nur wenn angefordert, sonst wuerde jeder
+  // Tageswechsel und jedes Zuruecksetzen die Seite wegscrollen.
+  lastNowIdx=nowIdx;
+  if(wantNowScroll&&nowIdx>=0){
+    wantNowScroll=false;
+    requestAnimationFrame(function(){requestAnimationFrame(scrollToNow);});
+  }
 }
 
 /* Eingaben schreiben direkt in den Store — kein Re-Render, sonst springt der Fokus raus. */
@@ -1074,6 +1133,29 @@ function syncReminders(){
     c.put('./reminders.json',new Response(list,{headers:{'Content-Type':'application/json'}}));
   }).catch(function(){});
 }
+function goTab(name){
+  var t=null;
+  $$("#tabs button").forEach(function(x){if(x.dataset.p===name)t=x;});
+  if(t&&t.onclick)t.onclick();
+}
+
+/* Glocke im Kopfbereich — gleicher Zustand wie die Karte im Info-Tab. */
+function renderBell(){
+  var b=$("#bell");if(!b)return;
+  if(!('Notification' in window)){b.hidden=true;return;}
+  var p=Notification.permission;
+  b.hidden=false;
+  b.className='bell'+(p==='granted'?' on':p==='denied'?' off':'');
+  b.innerHTML=(p==='denied'?ICO_BELL_OFF:ICO_BELL)+(p==='default'?'<i class="dot"></i>':'');
+  b.setAttribute('aria-label',p==='granted'?'Erinnerungen sind aktiv'
+    :p==='denied'?'Erinnerungen sind blockiert':'Erinnerungen einschalten');
+  b.onclick=function(){
+    if(p!=='default'){goTab('info');return;}      // Erklaerung steht im Info-Tab
+    Notification.requestPermission().then(function(){
+      renderBell();renderNotif();checkReminders();syncReminders();registerSync();});
+  };
+}
+
 function renderNotif(){
   var box=$("#notifbox");if(!box)return;
   if(!('Notification' in window)){
@@ -1086,7 +1168,8 @@ function renderNotif(){
     (p!=='default'?' disabled':'')+'>'+(p==='granted'?'Aktiv':p==='denied'?'Blockiert':'Einschalten')+'</button></div>';
   var b=$("#notifbtn");
   if(b&&p==='default')b.onclick=function(){
-    Notification.requestPermission().then(function(){renderNotif();checkReminders();syncReminders();registerSync();});};
+    Notification.requestPermission().then(function(){
+      renderNotif();renderBell();checkReminders();syncReminders();registerSync();});};
 }
 function registerSync(){
   if(!navigator.serviceWorker)return;
@@ -1097,7 +1180,9 @@ function registerSync(){
 }
 
 function boot(){
-  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();
+  wantNowScroll=true;                     // beim Start zur laufenden Zeile
+  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();
+  centerTile(false);
   checkReminders();syncReminders();registerSync();
 }
 
@@ -1110,9 +1195,16 @@ Store.get('ppl').then(function(v){people=v||2;return Store.get('busFull');})
 .then(function(v){NOTIF=v||{};boot();})
 .catch(function(){boot();});
 
-/* Karte in einem versteckten Panel misst 0×0 — nach dem Tabwechsel neu vermessen. */
+/* Rueckkehr in die App: nur neu rendern und springen, wenn die Zeit wirklich
+   in einen neuen Programmpunkt gelaufen ist — sonst wuerde ein kurzer Blick in
+   eine andere App die Seite jedes Mal wegscrollen. */
 document.addEventListener('visibilitychange',function(){
-  if(!document.hidden)checkReminders();});
+  if(document.hidden)return;
+  checkReminders();
+  if(EDIT)return;
+  var idx=currentNowIdx();
+  if(idx>=0&&idx!==lastNowIdx){wantNowScroll=true;renderNow();renderDay();}
+});
 
 /* Tagesleiste: "stuck"-Zustand ueber einen Sentinel, damit die Hoehenaenderung
    der Leiste selbst kein Flackern am Umschaltpunkt ausloest. */
