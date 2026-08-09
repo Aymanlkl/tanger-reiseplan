@@ -45,9 +45,11 @@ h1,h2,h3,h4{margin:0;font-weight:700;letter-spacing:-.022em;line-height:1.15}
 .hd .sub{color:#A9C0CB;font-size:13.5px;margin-bottom:16px;letter-spacing:-.005em}
 
 .flt{display:flex;gap:1px;background:rgba(255,255,255,.13);border-radius:var(--r-s);overflow:hidden;margin-bottom:16px}
-.flt div{flex:1;background:var(--ink-2);padding:9px 11px}
-.flt .k{font-family:var(--m);font-size:9px;letter-spacing:.13em;color:#7E9AA6;text-transform:uppercase}
-.flt .v{font-family:var(--m);font-size:15px;font-weight:700;color:#fff;margin-top:3px;font-variant-numeric:tabular-nums}
+.flt>div{flex:1 1 0;min-width:0;background:var(--ink-2);padding:9px;display:flex;flex-direction:column}
+.flt .k{font-family:var(--m);font-size:clamp(7px,2.1vw,9px);letter-spacing:.08em;color:#7E9AA6;text-transform:uppercase;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flt .v{font-family:var(--m);font-size:15px;font-weight:700;color:#fff;margin-top:auto;padding-top:3px;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
 .flt .v small{font-size:10px;font-weight:400;color:#A9C0CB;letter-spacing:0}
 
 .now{display:flex;align-items:center;gap:10px;background:var(--saffron);color:#2A1D00;
