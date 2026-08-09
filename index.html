@@ -31,7 +31,8 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 body{background:var(--paper);color:var(--text);font-family:var(--f);font-size:15px;line-height:1.5;
-  -webkit-font-smoothing:antialiased;padding-bottom:calc(74px + var(--sb));overflow-x:hidden}
+  -webkit-font-smoothing:antialiased;padding-bottom:calc(74px + var(--sb));
+  overflow-x:clip}  /* clip statt hidden: hidden macht body zum Scrollcontainer und killt position:sticky */
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 h1,h2,h3,h4{margin:0;font-weight:700;letter-spacing:-.022em;line-height:1.15}
 
@@ -56,7 +57,13 @@ h1,h2,h3,h4{margin:0;font-weight:700;letter-spacing:-.022em;line-height:1.15}
   border-radius:var(--r-s);padding:10px 13px;margin-bottom:16px;font-size:13.5px;font-weight:600}
 .now b{font-family:var(--m);font-size:17px;font-weight:700}
 
-.strip{display:flex;gap:7px;overflow-x:auto;padding:0 20px 16px;margin:0 -20px;scrollbar-width:none}
+/* Tagesleiste bleibt beim Scrollen oben kleben */
+#daysen{height:1px;margin-bottom:-1px}
+.daybar{position:sticky;top:0;z-index:30;background:var(--ink);padding-top:2px;
+  transition:padding-top .16s ease,box-shadow .16s ease}
+.daybar.stuck{padding-top:calc(var(--st) + 8px);box-shadow:0 10px 22px -12px rgba(6,14,18,.85)}
+
+.strip{display:flex;gap:7px;overflow-x:auto;padding:0 20px 16px;margin:0;scrollbar-width:none}
 .strip::-webkit-scrollbar{display:none}
 .strip::after{content:"";flex:0 0 6px}
 .dtile{flex:0 0 auto;width:52px;background:var(--ink-2);border-radius:10px;padding:8px 0 9px;
@@ -69,7 +76,7 @@ h1,h2,h3,h4{margin:0;font-weight:700;letter-spacing:-.022em;line-height:1.15}
 .dtile.on.today::after{background:#1A1200}
 .dtile.done .dd{opacity:.4}.dtile.done.on .dd{opacity:1}
 
-.wrap{padding:18px 16px 8px;max-width:640px;margin:0 auto}
+.wrap{padding:18px 16px 8px;max-width:640px;margin:0 auto;scroll-margin-top:calc(var(--st) + 80px)}
 .panel{display:none}
 .panel.on{display:block;animation:fade .28s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -197,8 +204,12 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
     <div><div class="k">Rück · Do 10.9.</div><div class="v">09:20 <small>TNG</small></div></div>
   </div>
   <div class="now" id="nowbox"></div>
-  <div class="strip" id="strip"></div>
 </header>
+
+<div id="daysen"></div>
+<div class="daybar" id="daybar">
+  <div class="strip" id="strip"></div>
+</div>
 
 <main class="wrap">
   <section class="panel on" id="p-tage"></section>
@@ -599,6 +610,21 @@ Store.get('ppl').then(function(v){people=v||2;return Store.get('busFull');})
 .then(function(v){busFull=!!v;return Store.get('food');})
 .then(function(v){withFood=!!v;renderNow();renderStrip();renderDay();renderCosts();renderCheck();})
 .catch(function(){renderNow();renderStrip();renderDay();renderCosts();renderCheck();});
+
+/* Tagesleiste: "stuck"-Zustand ueber einen Sentinel, damit die Hoehenaenderung
+   der Leiste selbst kein Flackern am Umschaltpunkt ausloest. */
+(function(){
+  var bar=$("#daybar"),sen=$("#daysen");
+  if(!bar||!sen)return;
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(es){
+      bar.classList.toggle('stuck',!es[0].isIntersecting);
+    },{threshold:0}).observe(sen);
+  }else{
+    var f=function(){bar.classList.toggle('stuck',sen.getBoundingClientRect().bottom<=0);};
+    window.addEventListener('scroll',f,{passive:true});f();
+  }
+})();
 
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
