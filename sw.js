@@ -1,5 +1,5 @@
 /* Tanger Reiseplan — offline service worker */
-var CACHE = 'tanger-v3';
+var CACHE = 'tanger-v4';
 var ASSETS = [
   './',
   './index.html',
