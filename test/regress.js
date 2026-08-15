@@ -56,9 +56,15 @@ console.log('\nDatenintegritaet');
   let loc=0, coord=0, info=0, hours=0, rail=0, eat=0;
   TRIP.forEach(d => d.items.forEach(i => { if(i.loc){loc++; if(i.loc.lat){coord++; if(i.info)info++}}
     if(i.hours)hours++; if(i.rail)rail++; if(i.eat)eat++ }));
-  ok('50 Orte, 49 mit Koordinaten', loc===50 && coord===49, `${loc}/${coord}`);
-  ok('jeder Ort mit Koordinaten beschrieben', info===49, `${info}`);
-  ok('hours 7 · rail 4 · eat 17', hours===7&&rail===4&&eat===17, `${hours}/${rail}/${eat}`);
+  ok('62 Orte, 61 mit Koordinaten', loc===62 && coord===61, `${loc}/${coord}`);
+  ok('jeder Ort mit Koordinaten beschrieben', info===61, `${info}`);
+  ok('hours 7 · rail 4 · eat 22', hours===7&&rail===4&&eat===22, `${hours}/${rail}/${eat}`);
+  ok('alle 15 Wunschorte drin (ausser Donabo)', [
+      'Villa Harris','Perdicaris','Kasbah-Museum','Dar Niaba','Marina Bay','Café Hafa',
+      'Borj Dar El Baroud','Merkala','Signpost','La Fuga','Le Mirage','Dar Chams','Rmilat','Bab Bhar'
+    ].every(w => TRIP.some(d => d.items.some(i => (i.h+'|'+((i.loc||{}).q||'')).includes(w)))));
+  ok('Zeiten je Tag aufsteigend', TRIP.every(d => d.items.every((i,n) => n===0 || i.t >= d.items[n-1].t)));
+  ok('Hotelfruehstueck an 6 Tagen', TRIP.filter(d => d.items.some(i => i.h==='Frühstück im Hotel')).length===6);
 
 console.log('\nitem(): alle Felder werden durchgereicht');
   const roh = TRIP[2].items[idxOf(2,'Cap Spartel')];
@@ -69,7 +75,7 @@ console.log('\nitem(): alle Felder werden durchgereicht');
   ok('hours durchgereicht', !!zus.hours);
 
 console.log('\nKarte');
-  const erwartet = [6,9,5,7,8,9,1,3,1];
+  const erwartet = [6,13,8,8,9,9,2,5,1];
   let mapOk = true;
   TRIP.forEach((d,i) => { drawn.markers.length=0; eval('active='+i+';renderDay();');
     const h = els['#p-tage'].innerHTML;
@@ -108,7 +114,7 @@ console.log('\nAusgaben');
   eval("SPENT={};");
 
 console.log('\nNotizen');
-  eval("RN={'1_6':{r:4,t:'Toller Minztee'}};active=1;renderDay();");
+  eval("RN={'1_10':{r:4,t:'Toller Minztee'}};active=1;renderDay();");   // Tag 2, Café Hafa
   const d2 = els['#p-tage'].innerHTML;
   ok('Bewertung und Text erhalten', /class="notebtn has"/.test(d2)
      && (d2.match(/class="star on"/g)||[]).length===4 && /Toller Minztee/.test(d2));
@@ -140,7 +146,7 @@ console.log('\nJetzt-Zeile');
   global.Date = class extends RD { constructor(...a){ super(...a.length?a:['2026-09-04T14:30:00']) } };
   global.Date.now = () => new RD('2026-09-04T14:30:00').getTime();
   eval('active=2;');
-  ok('laufender Punkt erkannt', eval('currentNowIdx()')===5, `${eval('currentNowIdx()')}`);
+  ok('laufender Punkt erkannt', eval('currentNowIdx()')===7, `${eval('currentNowIdx()')}`);
   log.now.length=0; eval('wantNowScroll=true;renderDay();');
   ok('springt zur Jetzt-Zeile', log.now.length===1);
   log.now.length=0; eval('goDay(3);goDay(2);');
