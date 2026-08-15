@@ -56,7 +56,7 @@ console.log('\nDatenintegritaet');
   let loc=0, coord=0, info=0, hours=0, rail=0, eat=0;
   TRIP.forEach(d => d.items.forEach(i => { if(i.loc){loc++; if(i.loc.lat){coord++; if(i.info)info++}}
     if(i.hours)hours++; if(i.rail)rail++; if(i.eat)eat++ }));
-  ok('82 Orte, 81 mit Koordinaten', loc===82 && coord===81, `${loc}/${coord}`);
+  ok('86 Orte, 85 mit Koordinaten', loc===86 && coord===85, `${loc}/${coord}`);
   ok('jeder Ort mit Koordinaten beschrieben',
      !TRIP.some(d=>d.items.some(i=>i.loc&&i.loc.lat&&!i.info)), `${info}`);
   ok('hours 8 · rail 4 · eat 25', hours===8&&rail===4&&eat===25, `${hours}/${rail}/${eat}`);
@@ -67,6 +67,10 @@ console.log('\nDatenintegritaet');
   ok('Vorbereitung liegt nachts',
      ['Al-Boraq-Tickets buchen','Ryanair-Check-in für morgen','Taxi für 06:15 Uhr bestellen','Packen und früh schlafen']
        .every(h => TRIP.some(d => d.items.some(i => i.h===h && i.t >= '22:00'))));
+  ok('Asilah hat 9 Stopps in der Altstadt',
+     ['Wandbilder-Rundgang & Galerie Monassilah','Palais Rassouni','Tour Al Qamra & Bab el Bahr',
+      'Fort Antonio da Fonseca','Bab Al Kasbah & Borj Al Kasabah'].every(h => TRIP[4].items.some(i=>i.h===h))
+     && !TRIP[4].items.some(i=>i.h==='Paradise Beach'));
   ok('Tag 7 fuehrt ans Mittelmeer, nicht mehr nach Achakkar',
      !TRIP[6].items.some(i=>/Achakkar/.test(i.h))
      && ['Ksar es-Seghir — Portugiesische Festung','Belyounech — Baden unter dem Jbel Mousa','Späte Mahlzeit in Dalia']
@@ -96,7 +100,7 @@ console.log('\nitem(): alle Felder werden durchgereicht');
   ok('hours durchgereicht', !!zus.hours);
 
 console.log('\nKarte');
-  const erwartet = [6,14,9,9,10,14,8,10,1];
+  const erwartet = [6,14,9,9,14,14,8,10,1];
   let mapOk = true;
   TRIP.forEach((d,i) => { drawn.markers.length=0; eval('active='+i+';renderDay();');
     const h = els['#p-tage'].innerHTML;
