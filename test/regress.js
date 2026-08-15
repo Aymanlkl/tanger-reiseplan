@@ -56,10 +56,21 @@ console.log('\nDatenintegritaet');
   let loc=0, coord=0, info=0, hours=0, rail=0, eat=0;
   TRIP.forEach(d => d.items.forEach(i => { if(i.loc){loc++; if(i.loc.lat){coord++; if(i.info)info++}}
     if(i.hours)hours++; if(i.rail)rail++; if(i.eat)eat++ }));
-  ok('62 Orte, 61 mit Koordinaten', loc===62 && coord===61, `${loc}/${coord}`);
-  ok('jeder Ort mit Koordinaten beschrieben', info===61, `${info}`);
-  ok('hours 7 · rail 4 · eat 22', hours===7&&rail===4&&eat===22, `${hours}/${rail}/${eat}`);
-  ok('alle 15 Wunschorte drin (ausser Donabo)', [
+  ok('75 Orte, 74 mit Koordinaten', loc===75 && coord===74, `${loc}/${coord}`);
+  ok('jeder Ort mit Koordinaten beschrieben',
+     !TRIP.some(d=>d.items.some(i=>i.loc&&i.loc.lat&&!i.info)), `${info}`);
+  ok('hours 7 · rail 4 · eat 24', hours===7&&rail===4&&eat===24, `${hours}/${rail}/${eat}`);
+  ok('hoechstens 2 Restaurants pro Tag',
+     TRIP.every(d => d.items.filter(i=>i.eat&&!i.snack).length<=2),
+     TRIP.map(d=>d.items.filter(i=>i.eat&&!i.snack).length).join(','));
+  ok('kein Hammam, kein Einkaufen mehr', !/Hammam|Souvenir/.test(src));
+  ok('Vorbereitung liegt nachts',
+     ['Al-Boraq-Tickets buchen','Ryanair-Check-in für morgen','Taxi für 06:15 Uhr bestellen','Packen und früh schlafen']
+       .every(h => TRIP.some(d => d.items.some(i => i.h===h && i.t >= '22:00'))));
+  ok('alle 8 Wunsch-Restaurants gesetzt',
+     ['Cappero Resto','99grill','Napolitano','La Boca Negra','Puerto Marina','Sushi Pro','Rio do Texas','Sardinen vom Grill']
+       .every(n => TRIP.some(d => d.items.some(i => i.h===n))));
+  ok('alle 15 Sehenswuerdigkeiten drin (ausser Donabo)', [
       'Villa Harris','Perdicaris','Kasbah-Museum','Dar Niaba','Marina Bay','Café Hafa',
       'Borj Dar El Baroud','Merkala','Signpost','La Fuga','Le Mirage','Dar Chams','Rmilat','Bab Bhar'
     ].every(w => TRIP.some(d => d.items.some(i => (i.h+'|'+((i.loc||{}).q||'')).includes(w)))));
@@ -75,7 +86,7 @@ console.log('\nitem(): alle Felder werden durchgereicht');
   ok('hours durchgereicht', !!zus.hours);
 
 console.log('\nKarte');
-  const erwartet = [6,13,8,8,9,9,2,5,1];
+  const erwartet = [6,14,9,9,10,10,5,10,1];
   let mapOk = true;
   TRIP.forEach((d,i) => { drawn.markers.length=0; eval('active='+i+';renderDay();');
     const h = els['#p-tage'].innerHTML;
@@ -84,6 +95,14 @@ console.log('\nKarte');
   ok('OSM-Kacheln', /openstreetmap/.test(drawn.tiles||''));
   const urls = eval('active=0;renderDay();tileUrls()');
   ok('Kachel-URLs, Deckel 160', urls.length>0 && urls.length<=160 && /^https:\/\/tile\.openstreetmap\.org\//.test(urls[0]), `${urls.length}`);
+
+console.log('\nMaps-Links');
+  ok('eigener Link hat Vorrang',
+     eval('mapHref({q:"x",url:"https://maps.app.goo.gl/ABC"})')==='https://maps.app.goo.gl/ABC');
+  ok('sonst Namenssuche',
+     eval('mapHref({q:"Cap Spartel"})').startsWith('https://www.google.com/maps/search/'));
+  ok('2 Lokale mit eigenem Link',
+     TRIP.reduce((a,d)=>a+d.items.filter(i=>i.loc&&i.loc.url).length,0)===2);
 
 console.log('\nDetail-Sheet');
   eval(`openSheet(2,${idxOf(2,'Parc Perdicaris · Rmilat')});`);
@@ -100,6 +119,14 @@ console.log('\nOeffnungszeiten');
   ok('an den Reisedaten warnungsfrei', warnfrei);
   ok('Dienstag warnt', /Am Di geschlossen/.test(
      eval(`hoursMsg({date:"2026-09-08"},{t:"17:15",hours:{days:[0,1,3,4,5,6],from:"10:00",to:"18:00"}})`)));
+  // Schlusszeit nach Mitternacht darf nicht faelschlich warnen
+  const A=[0,1,2,3,4,5,6];
+  ok('bis 01:00 -> 21:00 ist offen',
+     eval(`hoursMsg({date:"2026-09-08"},{t:"21:00",hours:{days:[${A}],from:"12:00",to:"01:00"}})`)==='');
+  ok('bis 01:00 -> 00:30 ist offen',
+     eval(`hoursMsg({date:"2026-09-08"},{t:"00:30",hours:{days:[${A}],from:"12:00",to:"01:00"}})`)==='');
+  ok('bis 01:00 -> 09:00 warnt',
+     /Geöffnet von 12:00 bis 01:00/.test(eval(`hoursMsg({date:"2026-09-08"},{t:"09:00",hours:{days:[${A}],from:"12:00",to:"01:00"}})`)));
 
 console.log('\nFahrplan');
   eval('active=5;renderDay();');
@@ -114,7 +141,7 @@ console.log('\nAusgaben');
   eval("SPENT={};");
 
 console.log('\nNotizen');
-  eval("RN={'1_10':{r:4,t:'Toller Minztee'}};active=1;renderDay();");   // Tag 2, Café Hafa
+  eval("RN={'1_11':{r:4,t:'Toller Minztee'}};active=1;renderDay();");   // Tag 2, Café Hafa
   const d2 = els['#p-tage'].innerHTML;
   ok('Bewertung und Text erhalten', /class="notebtn has"/.test(d2)
      && (d2.match(/class="star on"/g)||[]).length===4 && /Toller Minztee/.test(d2));
@@ -123,7 +150,7 @@ console.log('\nNotizen');
 console.log('\nBearbeitungsmodus');
   eval('EDIT=true;active=0;renderDay();');
   const ed = els['#p-tage'].innerHTML;
-  ok('Felder editierbar', (ed.match(/class="ed-t"/g)||[]).length===10 && (ed.match(/class="ed-p"/g)||[]).length===10);
+  ok('Felder editierbar', (ed.match(/class="ed-t"/g)||[]).length===11 && (ed.match(/class="ed-p"/g)||[]).length===11);
   eval("EDIT=false;setOv(0,0,'h','Landung — verspätet');renderDay();");
   ok('Override sichtbar, TRIP unangetastet', /Landung — verspätet/.test(els['#p-tage'].innerHTML)
      && TRIP[0].items[0].h==='Landung in Tanger');
