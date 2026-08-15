@@ -1,5 +1,5 @@
 /* Tanger Reiseplan — offline service worker */
-var CACHE = 'tanger-v6';
+var CACHE = 'tanger-v7';
 var TILES = 'tanger-maps-v1';   // Kartenkacheln, von der App gefuellt
 var DATA  = 'tanger-data-v1';   // Erinnerungsliste fuer periodicSync
 var KEEP  = [CACHE, TILES, DATA];
