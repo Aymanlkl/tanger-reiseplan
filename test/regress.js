@@ -56,7 +56,7 @@ console.log('\nDatenintegritaet');
   let loc=0, coord=0, info=0, hours=0, rail=0, eat=0;
   TRIP.forEach(d => d.items.forEach(i => { if(i.loc){loc++; if(i.loc.lat){coord++; if(i.info)info++}}
     if(i.hours)hours++; if(i.rail)rail++; if(i.eat)eat++ }));
-  ok('86 Orte, 85 mit Koordinaten', loc===86 && coord===85, `${loc}/${coord}`);
+  ok('88 Orte, 87 mit Koordinaten', loc===88 && coord===87, `${loc}/${coord}`);
   ok('jeder Ort mit Koordinaten beschrieben',
      !TRIP.some(d=>d.items.some(i=>i.loc&&i.loc.lat&&!i.info)), `${info}`);
   ok('hours 8 · rail 4 · eat 25', hours===8&&rail===4&&eat===25, `${hours}/${rail}/${eat}`);
@@ -65,8 +65,18 @@ console.log('\nDatenintegritaet');
      TRIP.map(d=>d.items.filter(i=>i.eat&&!i.snack).length).join(','));
   ok('kein Hammam, kein Einkaufen mehr', !/Hammam|Souvenir/.test(src));
   ok('Vorbereitung liegt nachts',
-     ['Al-Boraq-Tickets buchen','Ryanair-Check-in für morgen','Taxi für 06:15 Uhr bestellen','Packen und früh schlafen']
+     ['Zugtickets offline speichern','Ryanair-Check-in für morgen','Taxi für 06:15 Uhr bestellen','Packen und früh schlafen']
        .every(h => TRIP.some(d => d.items.some(i => i.h===h && i.t >= '22:00'))));
+  ok('Zug Rabat: echte Zeiten aus Dossier KVDYJH',
+     TRIP[5].items.some(i=>i.h==='Ankunft Rabat Agdal' && i.t==='09:22')
+     && TRIP[5].items.some(i=>i.h==='Rückzug ab Rabat Agdal' && i.t==='20:56')
+     && TRIP[5].items.some(i=>i.h==='Ankunft Tanger' && i.t==='22:17'));
+  ok('Rabat: Abendessen vor der Rueckfahrt statt in Tanger',
+     TRIP[5].items.some(i=>i.h==='Frühes Abendessen in Rabat')
+     && !TRIP[5].items.some(i=>i.h==='Sushi Pro'));
+  ok('Bahnhofs-Taxi mit Puffer vor dem Zug',
+     (()=>{const t=TRIP[5].items.find(i=>i.h==='Taxi zum Bahnhof Rabat Agdal');
+           return t && t.t<'20:56' && t.t>='20:00';})());
   ok('Asilah hat 9 Stopps in der Altstadt',
      ['Wandbilder-Rundgang & Galerie Monassilah','Palais Rassouni','Tour Al Qamra & Bab el Bahr',
       'Fort Antonio da Fonseca','Bab Al Kasbah & Borj Al Kasabah'].every(h => TRIP[4].items.some(i=>i.h===h))
@@ -78,7 +88,7 @@ console.log('\nDatenintegritaet');
   ok('Belyounech-Warnung steht am Tag',
      (TRIP[6].notes||[]).some(n => n.k==='warn' && /keine Lokale/.test(n.t)));
   ok('Rabat hat 12 Stopps',
-     TRIP[5].items.length===17 && !TRIP[5].items.some(i=>i.h==='Museum Mohammed VI'));
+     TRIP[5].items.length===18 && !TRIP[5].items.some(i=>i.h==='Museum Mohammed VI'));
   ok('Rabat: alles mit Tuer liegt vor 18:00',
      TRIP[5].items.filter(i=>i.hours).every(i=>i.t<'18:00'));
   ok('alle 8 Wunsch-Restaurants gesetzt',
@@ -100,7 +110,7 @@ console.log('\nitem(): alle Felder werden durchgereicht');
   ok('hours durchgereicht', !!zus.hours);
 
 console.log('\nKarte');
-  const erwartet = [6,14,9,9,14,14,8,10,1];
+  const erwartet = [7,14,9,9,14,15,8,10,1];
   let mapOk = true;
   TRIP.forEach((d,i) => { drawn.markers.length=0; eval('active='+i+';renderDay();');
     const h = els['#p-tage'].innerHTML;
