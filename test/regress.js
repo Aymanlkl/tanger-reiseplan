@@ -56,10 +56,10 @@ console.log('\nDatenintegritaet');
   let loc=0, coord=0, info=0, hours=0, rail=0, eat=0;
   TRIP.forEach(d => d.items.forEach(i => { if(i.loc){loc++; if(i.loc.lat){coord++; if(i.info)info++}}
     if(i.hours)hours++; if(i.rail)rail++; if(i.eat)eat++ }));
-  ok('75 Orte, 74 mit Koordinaten', loc===75 && coord===74, `${loc}/${coord}`);
+  ok('79 Orte, 78 mit Koordinaten', loc===79 && coord===78, `${loc}/${coord}`);
   ok('jeder Ort mit Koordinaten beschrieben',
      !TRIP.some(d=>d.items.some(i=>i.loc&&i.loc.lat&&!i.info)), `${info}`);
-  ok('hours 7 · rail 4 · eat 24', hours===7&&rail===4&&eat===24, `${hours}/${rail}/${eat}`);
+  ok('hours 8 · rail 4 · eat 25', hours===8&&rail===4&&eat===25, `${hours}/${rail}/${eat}`);
   ok('hoechstens 2 Restaurants pro Tag',
      TRIP.every(d => d.items.filter(i=>i.eat&&!i.snack).length<=2),
      TRIP.map(d=>d.items.filter(i=>i.eat&&!i.snack).length).join(','));
@@ -67,6 +67,10 @@ console.log('\nDatenintegritaet');
   ok('Vorbereitung liegt nachts',
      ['Al-Boraq-Tickets buchen','Ryanair-Check-in für morgen','Taxi für 06:15 Uhr bestellen','Packen und früh schlafen']
        .every(h => TRIP.some(d => d.items.some(i => i.h===h && i.t >= '22:00'))));
+  ok('Rabat hat 12 Stopps',
+     TRIP[5].items.length===17 && !TRIP[5].items.some(i=>i.h==='Museum Mohammed VI'));
+  ok('Rabat: alles mit Tuer liegt vor 18:00',
+     TRIP[5].items.filter(i=>i.hours).every(i=>i.t<'18:00'));
   ok('alle 8 Wunsch-Restaurants gesetzt',
      ['Cappero Resto','99grill','Napolitano','La Boca Negra','Puerto Marina','Sushi Pro','Rio do Texas','Sardinen vom Grill']
        .every(n => TRIP.some(d => d.items.some(i => i.h===n))));
@@ -86,7 +90,7 @@ console.log('\nitem(): alle Felder werden durchgereicht');
   ok('hours durchgereicht', !!zus.hours);
 
 console.log('\nKarte');
-  const erwartet = [6,14,9,9,10,10,5,10,1];
+  const erwartet = [6,14,9,9,10,14,5,10,1];
   let mapOk = true;
   TRIP.forEach((d,i) => { drawn.markers.length=0; eval('active='+i+';renderDay();');
     const h = els['#p-tage'].innerHTML;
