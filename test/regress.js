@@ -120,6 +120,15 @@ console.log('\nKarte');
   const urls = eval('active=0;renderDay();tileUrls()');
   ok('Kachel-URLs, Deckel 160', urls.length>0 && urls.length<=160 && /^https:\/\/tile\.openstreetmap\.org\//.test(urls[0]), `${urls.length}`);
 
+console.log('\nDokumentenablage');
+  ok('Pfad wird sauber kodiert',
+     eval('docPath("Zug Ticket.pdf")')==='docs/Zug%20Ticket.pdf');
+  ok('ohne Cache-API sauberer Hinweis statt Absturz',
+     /keine Dateien offline ablegen|Noch nichts hinterlegt/.test(els['#docs'].innerHTML),
+     els['#docs'].innerHTML.slice(0,60));
+  ok('Dateien landen nicht im Repo',
+     !require('fs').readdirSync('/Users/aymaneloukili/Downloads/Tanger').some(f=>/\.pdf$/i.test(f)));
+
 console.log('\nMaps-Links');
   ok('eigener Link hat Vorrang',
      eval('mapHref({q:"x",url:"https://maps.app.goo.gl/ABC"})')==='https://maps.app.goo.gl/ABC');

@@ -378,6 +378,19 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
   stroke-linecap:round;stroke-linejoin:round;transition:transform .16s var(--ease)}
 .tl .body button.ttl:active svg{transform:translateX(2px)}
 
+/* ---------- Offline-Dokumente ---------- */
+.docrow{display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--line-2)}
+.docrow:first-child{border-top:0}
+.docrow a{flex:1;display:flex;align-items:center;gap:8px;min-width:0;color:var(--ink);text-decoration:none;
+  font-size:13.5px;font-weight:600;word-break:break-all}
+.docrow a svg{flex:0 0 15px;height:15px;stroke:var(--saffron-deep);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.docdel{flex:0 0 26px;height:26px;border-radius:7px;background:var(--line-2);color:var(--muted);
+  display:grid;place-items:center;transition:background .18s var(--ease),color .18s var(--ease)}
+.docdel:active{background:var(--alert-wash);color:var(--alert)}
+.docdel svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.6;stroke-linecap:round}
+.dochint{margin:0 0 12px;font-size:12.5px;color:var(--muted);line-height:1.5}
+label.sbtn{cursor:pointer}
+
 button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -512,6 +525,12 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
         <tr><td><strong>Kleidung</strong><small>Am Strand alles frei, in der Medina lieber Schultern und Knie bedeckt</small></td><td>—</td></tr>
       </table>
       <div class="note warn"><b>Guides in der Medina:</b> Am Petit Socco wirst du angesprochen. Freundlich, aber klar ablehnen — „Non merci, ça va". Wenn du einen Guide willst, buch ihn über die Rezeption, ca. 300 MAD für einen halben Tag.</div></div></div>
+
+    <div class="card"><div class="card-h"><div class="meta">Offline dabei</div><h3>Tickets &amp; Dokumente</h3>
+      <p>Bleibt auf diesem Handy. Nichts davon wird hochgeladen oder geteilt.</p></div>
+      <div class="card-b"><div id="docs"></div>
+        <label class="sbtn" for="docfile">Datei hinzufügen</label>
+        <input type="file" id="docfile" accept="application/pdf,image/*" multiple hidden></div></div>
 
     <div class="card"><div class="card-h"><div class="meta">Erinnerungen</div><h3>Nichts Wichtiges verpassen</h3>
       <p>Für die als <b>wichtig</b> markierten Punkte — Zugtickets, Check-in, Taxi bestellen.</p></div>
@@ -747,6 +766,7 @@ var ICO_OK='<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></svg>';
 var ICO_NOTE='<svg viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9L14.5 20h-9A1.5 1.5 0 0 1 4 18.5Z"/><path d="M20 14.5h-5.5V20"/></svg>';
 var ICO_EDIT='<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.5 2.5 0 0 0-3.5-3.5L4.5 16.5Z"/><path d="M14.5 6.5 17.5 9.5"/></svg>';
 var ICO_BELL='<svg viewBox="0 0 24 24"><path d="M18 8.5a6 6 0 1 0-12 0c0 5-2 6.5-2 6.5h16s-2-1.5-2-6.5Z"/><path d="M13.7 19a2 2 0 0 1-3.4 0"/></svg>';
+var ICO_DOC='<svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>';
 var ICO_X='<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>';
 var ICO_CHEV='<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
 var ICO_TARGET='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>';
@@ -1337,9 +1357,45 @@ function registerSync(){
   }).catch(function(){});
 }
 
+/* ---------- Eigene Dokumente, nur lokal ---------- */
+var DOCS_CACHE='tanger-docs-v1';
+function docPath(n){return 'docs/'+encodeURIComponent(n);}
+
+function renderDocs(){
+  var box=$("#docs");if(!box)return;
+  if(!window.caches){box.innerHTML='<p class="dochint">Dieser Browser kann keine Dateien offline ablegen.</p>';return;}
+  caches.open(DOCS_CACHE).then(function(c){return c.keys();}).then(function(keys){
+    if(!keys.length){
+      box.innerHTML='<p class="dochint">Noch nichts hinterlegt. Zugtickets, Bordkarten, Hotelbuchung — alles, '+
+        'was du in der Medina ohne Netz brauchst. Die Dateien bleiben im Browser dieses Geräts.</p>';return;}
+    box.innerHTML=keys.map(function(r){
+      var n=decodeURIComponent(r.url.split('/docs/')[1]||'');
+      return '<div class="docrow"><a href="'+docPath(n)+'" target="_blank" rel="noopener">'+ICO_DOC+esc(n)+'</a>'+
+        '<button class="docdel" data-n="'+encodeURIComponent(n)+'" aria-label="Entfernen">'+ICO_X+'</button></div>';
+    }).join('');
+    $$("#docs .docdel").forEach(function(b){b.onclick=function(){
+      caches.open(DOCS_CACHE)
+        .then(function(c){return c.delete(docPath(decodeURIComponent(b.dataset.n)));})
+        .then(renderDocs).catch(function(){});};});
+  }).catch(function(){});
+}
+
+function wireDocs(){
+  var inp=$("#docfile");if(!inp||!window.caches)return;
+  inp.onchange=function(e){
+    var files=Array.prototype.slice.call(e.target.files||[]);
+    if(!files.length)return;
+    caches.open(DOCS_CACHE).then(function(c){
+      return Promise.all(files.map(function(f){
+        return c.put(docPath(f.name),new Response(f,{headers:{'Content-Type':f.type||'application/octet-stream'}}));
+      }));
+    }).then(function(){e.target.value='';renderDocs();}).catch(function(){});
+  };
+}
+
 function boot(){
   wantNowScroll=true;                     // beim Start zur laufenden Zeile
-  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();
+  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();
   centerTile(false);
   checkReminders();syncReminders();registerSync();
 }
