@@ -166,6 +166,18 @@ console.log('\nFahrplan');
   ok('ONCF-Link mit Strecke und Datum', /oncf-voyages\.ma/.test(els['#p-tage'].innerHTML)
      && /Tanger Ville → Rabat Agdal/.test(els['#p-tage'].innerHTML) && /Mo 07\.09\./.test(els['#p-tage'].innerHTML));
 
+console.log('\nKostenmodell');
+  ok('Essensbudget passt zu den geplanten Lokalen', /withFood\?220\*people\*9/.test(src));
+  ok('kein Hammam-Posten mehr', !COSTS_E.some(c=>/Hammam/.test(c.n)));
+  ok('kein Paradise-Beach-Taxi mehr', !COSTS_T.some(c=>/Paradise/.test(c.n)));
+  ok('Mietwagen statt Achakkar-Taxi',
+     COSTS_T.some(c=>/Mietwagen/.test(c.n)) && !COSTS_T.some(c=>/Achakkar/.test(c.n)));
+  ok('Al Boraq mit gebuchtem Preis', COSTS_T.some(c=>/Boraq/.test(c.n) && c.v===219 && /gebucht/.test(c.d||'')));
+  ok('Rabat-Museen statt Museum Mohammed VI', COSTS_E.some(c=>/Museen in Rabat/.test(c.n)));
+  ok('kein unbelegtes kostenlos bei Museen mit Eintritt',
+     !TRIP.some(d=>d.items.some(i=>i.f && /Musée|Museum|Fondation|Palais Rassouni/.test(i.h))));
+  ok('Zug-Chips zeigen nicht mehr die alte Schaetzung', !/115–172 MAD/.test(src));
+
 console.log('\nAusgaben');
   eval("SPENT={t0:150};EST={t:{t0:175,t1:275},e:{}};updateCmp();");
   ok('unter Budget', els['#cmpT'].className.includes('under') && /−25 MAD/.test(els['#cmpT'].innerHTML));
