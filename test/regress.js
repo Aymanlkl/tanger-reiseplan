@@ -593,6 +593,13 @@ console.log('\nViewport und Diagnose');
   ok('Werkzeugleiste darf umbrechen', /\.maptools\{[^}]*flex-wrap:wrap/.test(src));
   ok('Kartenhinweis nimmt die volle Breite', /\.maptools p\{[^}]*flex:1 0 100%/.test(src));
 
+  // black-translucent setzt den WebView auf y=0, gibt ihm aber nur
+  // screen.height minus obere Systemzone an Hoehe — unten bleibt Schirm uebrig.
+  ok('kein black-translucent mehr',
+     !/black-translucent/.test(src)
+     && /status-bar-style" content="black"/.test(src));
+  ok('Messtabelle zeigt die fehlende Hoehe',
+     /Fenster fehlt zum Schirm/.test(src) && /screen\.height-window\.innerHeight/.test(src));
   ok('viewport-fit=cover ohne konkurrierende Angaben',
      /viewport-fit=cover/.test(src) && !/maximum-scale/.test(src) && !/user-scalable=no/.test(src));
   ok('Zoomsperre laeuft ueber touch-action', /touch-action:pan-y/.test(src));

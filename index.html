@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Tanger">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="description" content="Reiseplan Tanger · Rabat · Asilah, 2.–10. September">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -2728,6 +2728,7 @@ function renderDiag(){
    ['Sichtbarer Viewport',vv?Math.round(vv.height)+' px':'nicht verfügbar'],
    ['Bildschirm',         screen.height+' px · '+(window.devicePixelRatio||1)+'x'],
    ['Systemzone oben',    sbTop],
+   ['Fenster fehlt zum Schirm', Math.max(0,screen.height-window.innerHeight)+'px'],
    ['Systemzone unten',   sbBot],
    ['Leiste Unterkante',  r?Math.round(r.bottom)+' px':'—'],
    ['Abstand zum Rand',   r?Math.round(window.innerHeight-r.bottom)+' px':'—'],
