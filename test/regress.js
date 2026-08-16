@@ -648,8 +648,19 @@ console.log('\nViewport und Diagnose');
   ok('viewport-fit=cover ohne konkurrierende Angaben',
      /viewport-fit=cover/.test(src) && !/maximum-scale/.test(src) && !/user-scalable=no/.test(src));
   ok('Zoomsperre laeuft ueber touch-action', /touch-action:pan-y/.test(src));
-  ok('Streifen unter der Leiste bekommt die Seitenfarbe',
-     /\.tabs::after\{content:"";position:absolute;left:0;right:0;top:100%/.test(src));
+  // Das deckende Band ueber die volle Breite plus Sicherheitsstreifen darunter
+  // WAR die graue Zone. Die Pille schwebt, darunter wird nichts gemalt.
+  ok('kein Sicherheitsstreifen mehr', !/\.tabs::after/.test(src));
+  ok('Leiste malt nichts und faengt nichts ab',
+     /\.tabs\{[^}]*pointer-events:none/.test(src)
+     && !/\.tabs\{[^}]*background:/.test(src));
+  ok('nur die Pille ist bedienbar', /\.tabpill\{[^}]*pointer-events:auto/.test(src));
+  ok('Pille traegt Hintergrund und Radius',
+     /\.tabpill\{[^}]*border-radius:\d+px/.test(src)
+     && /\.tabpill\{[^}]*background:rgba/.test(src));
+  ok('Knoepfe liegen in der Pille',
+     /<nav class="tabs" id="tabs">\s*<div class="tabpill"/.test(src)
+     && /<i class="tabind" id="tabind"><\/i>\s*<\/div>\s*<\/nav>/.test(src));
   ok('Diagnosetabelle vorhanden', /id="diag"/.test(src) && /function renderDiag/.test(src));
   ok('Diagnose misst die Leistenunterkante gegen den Fensterrand',
      /Abstand zum Rand/.test(src) && /window\.innerHeight-r\.bottom/.test(src));
@@ -676,10 +687,13 @@ console.log('\nApp-Huelle');
      && /\.tabs\{position:fixed;left:0;right:0;bottom:0/.test(src));
   ok('kein 100dvh mehr — schliesst die Systemzonen im Standalone nicht ein',
      !/height:100dvh/.test(src));
-  ok('Bodenfreiheit deckt genau die Leistenhoehe',
-     /#shell\{padding-bottom:calc\(56px \+ max\(6px,var\(--sb\)\)\)\}/.test(src));
-  ok('Systemzone unten wird nicht doppelt gerechnet',
-     /padding:5px 6px max\(6px,var\(--sb\)\)/.test(src) && !/calc\(7px \+ var\(--sb\)\)/.test(src));
+  // Die Pille reserviert keinen Platz — der Inhalt braucht die Luft selbst.
+  ok('Bodenfreiheit laesst das letzte Element frei stehen',
+     (()=>{const m=src.match(/#shell\{padding-bottom:calc\((\d+)px \+ max\(6px,var\(--sb\)\) \+ (\d+)px\)\}/);
+           return !!m && (+m[1] + +m[2]) >= 88})());
+  ok('Leiste loest die Systemzone selbst auf',
+     /\.tabs\{[^}]*padding:0 14px calc\(env\(safe-area-inset-bottom,0px\) \+ 6px\)/.test(src));
+  ok('Systemzone unten wird nicht doppelt gerechnet', !/calc\(7px \+ var\(--sb\)\)/.test(src));
   ok('Summenbox darf umbrechen', /\.tagsum\{display:flex;flex-wrap:wrap/.test(src));
   ok('Markup liegt in der Huelle',
      /<body>\s*<div id="shell">/.test(src) && /<\/div><!-- \/shell -->/.test(src));
