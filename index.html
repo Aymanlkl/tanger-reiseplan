@@ -393,6 +393,13 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 .ed-c,.ed-u{font-family:var(--m);font-size:11.5px}
 .ed-q:focus,.ed-c:focus,.ed-u:focus{outline:none;border-color:var(--saffron)}
 .ed-c.bad{border-color:var(--alert);background:var(--alert-wash)}
+.ed-add{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:12px;
+  padding:12px;border:1.5px dashed var(--line);border-radius:var(--r-s);background:var(--paper);
+  color:var(--ink-3);font-size:13.5px;font-weight:600;transition:border-color .18s var(--ease),color .18s var(--ease)}
+.ed-add:active{border-color:var(--saffron);color:var(--saffron-deep)}
+.ed-add svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
+.chip.neu{background:var(--sea);color:#fff}
+
 .ed-preis{display:flex;gap:7px;align-items:stretch}
 .ed-preis .ed-v{flex:1;font-family:var(--m)}
 .ed-pp{flex:0 0 auto;padding:6px 11px;border-radius:6px;background:var(--line-2);color:var(--muted);
@@ -974,8 +981,7 @@ function chipMAD(c){
    Aendert sich ein Restaurant, aendert sich die Summe von selbst. */
 function foodPerPerson(){
   var sum=0,ohne=0;
-  TRIP.forEach(function(d,di){d.items.forEach(function(_,ii){
-    var it=item(di,ii);
+  TRIP.forEach(function(d,di){dayItems(di).forEach(function(it){
     if(!it.eat)return;
     if(it.v)sum+=it.pp?it.v:it.v/Math.max(people,1);
     else if(!/Zimmerpreis/i.test(it.cn||''))ohne++;
@@ -995,6 +1001,7 @@ var ICO_OK='<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></svg>';
 var ICO_NOTE='<svg viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9L14.5 20h-9A1.5 1.5 0 0 1 4 18.5Z"/><path d="M20 14.5h-5.5V20"/></svg>';
 var ICO_EDIT='<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.5 2.5 0 0 0-3.5-3.5L4.5 16.5Z"/><path d="M14.5 6.5 17.5 9.5"/></svg>';
 var ICO_BELL='<svg viewBox="0 0 24 24"><path d="M18 8.5a6 6 0 1 0-12 0c0 5-2 6.5-2 6.5h16s-2-1.5-2-6.5Z"/><path d="M13.7 19a2 2 0 0 1-3.4 0"/></svg>';
+var ICO_PLUS='<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
 var ICO_HIER='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="8"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/></svg>';
 var ICO_CAM='<svg viewBox="0 0 24 24"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3.4"/></svg>';
 var ICO_DOC='<svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>';
@@ -1004,7 +1011,8 @@ var ICO_TARGET='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle 
 var ICO_BELL_OFF='<svg viewBox="0 0 24 24"><path d="M18 8.5a6 6 0 0 0-8.9-5.2M6.2 6.3A6 6 0 0 0 6 8.5c0 5-2 6.5-2 6.5h12"/><path d="M13.7 19a2 2 0 0 1-3.4 0M3 3l18 18"/></svg>';
 
 /* ---------- Overrides: Aenderungen liegen neben TRIP, nie darin ---------- */
-var OV={},RN={},SPENT={},NOTIF={},EXTRA=[],OWN=[],WX=null,DARK=false,EDIT=false,mapObj=null,pinTarget=null;
+var sortTimer=null;
+var OV={},RN={},SPENT={},NOTIF={},EXTRA=[],OWN=[],ADD={},WX=null,DARK=false,EDIT=false,mapObj=null,pinTarget=null;
 var POS=null,posMarker=null,posKreis=null,watchId=null;
 function ik(di,ii){return di+'_'+ii;}
 
@@ -1080,8 +1088,7 @@ function preisChip(it){
    Tagessumme etwas anderes als das, was oben in der Gesamtsumme steht. */
 function tagKosten(di){
   var sum=0;
-  TRIP[di].items.forEach(function(_,ii){
-    var it=item(di,ii);
+  dayItems(di).forEach(function(it){
     if(it.eat&&!withFood)return;
     sum+=itemKosten(it);
   });
@@ -1118,6 +1125,73 @@ function setOv(di,ii,field,val){
   var n=0,x;for(x in OV[k])n++;
   if(!n)delete OV[k];
   Store.set('overrides',OV);
+}
+
+/* ---------- Eigene Punkte ---------- */
+/* Selbst angelegte Punkte liegen in ADD, getrennt von TRIP. Jeder Punkt hat
+   einen Schluessel: "3" fuer den vierten Originalpunkt, "a17" fuer einen
+   eigenen. Notizen und Fotos haengen daran, deshalb bleibt er stabil. */
+function addListe(di){return ADD[di]||[];}
+function findAdd(di,kk){
+  kk=''+kk;
+  var l=addListe(di),i;
+  for(i=0;i<l.length;i++)if('a'+l[i].id===kk)return l[i];
+  return null;
+}
+/* Original- und eigene Punkte zusammen, nach Uhrzeit sortiert. */
+function dayItems(di){
+  var out=TRIP[di].items.map(function(_,ii){var it=item(di,ii);it.kk=''+ii;return it;});
+  addListe(di).forEach(function(a){
+    var it={},k;for(k in a)it[k]=a[k];
+    it.kk='a'+a.id;it.neu=1;if(it.p===undefined)it.p='';
+    out.push(it);
+  });
+  out.sort(function(x,y){return x.t===y.t?0:(x.t<y.t?-1:1);});
+  return out;
+}
+function itemK(di,kk){
+  kk=''+kk;
+  if(kk.charAt(0)!=='a')return (function(){var it=item(di,+kk);it.kk=kk;return it;})();
+  var a=findAdd(di,kk);if(!a)return null;
+  var it={},k;for(k in a)it[k]=a[k];
+  it.kk=kk;it.neu=1;if(it.p===undefined)it.p='';
+  return it;
+}
+function setFeld(di,kk,field,val){
+  kk=''+kk;
+  if(kk.charAt(0)!=='a')return setOv(di,+kk,field,val);
+  var a=findAdd(di,kk);if(!a)return;
+  if(field==='v')a.v=val||0;
+  else if(field==='pp')a.pp=val?1:0;
+  else if(field==='q'||field==='url'){
+    a.loc=a.loc||{};
+    if(val)a.loc[field]=val;else delete a.loc[field];
+    if(!a.loc.q)delete a.loc;
+  }else a[field]=val;
+  Store.set('added',ADD);
+}
+function setKoordK(di,kk,ll){
+  kk=''+kk;
+  if(kk.charAt(0)!=='a')return setCoords(di,+kk,ll);
+  var a=findAdd(di,kk);if(!a)return;
+  if(!ll){if(a.loc){delete a.loc.lat;delete a.loc.lng;}}
+  else{a.loc=a.loc||{q:a.h};a.loc.lat=Math.round(ll.lat*1e5)/1e5;a.loc.lng=Math.round(ll.lng*1e5)/1e5;}
+  Store.set('added',ADD);
+}
+function neuerPunkt(di){
+  var l=dayItems(di),letzte=l.length?l[l.length-1].t:'12:00';
+  var p=letzte.split(':'),m=Math.min(+p[0]*60+ +p[1]+30,23*60+30);
+  var t=('0'+Math.floor(m/60)).slice(-2)+':'+('0'+(m%60)).slice(-2);
+  var max=0;addListe(di).forEach(function(a){if(a.id>max)max=a.id;});
+  ADD[di]=addListe(di).concat([{id:max+1,t:t,h:'Neuer Punkt',p:'',v:0}]);
+  Store.set('added',ADD);
+  return 'a'+(max+1);
+}
+function loeschePunkt(di,kk){
+  ADD[di]=addListe(di).filter(function(a){return 'a'+a.id!==kk;});
+  if(!ADD[di].length)delete ADD[di];
+  Store.set('added',ADD);
+  delete RN[ik(di,kk)];Store.set('rnotes',RN);
 }
 
 /* ---------- Oeffnungszeiten ---------- */
@@ -1203,8 +1277,8 @@ function currentNowIdx(){
   var d=TRIP[active];
   if(!d||d.date!==today())return -1;
   var cur=nowMin(),idx=-1;
-  d.items.forEach(function(_,i){
-    var pp=item(active,i).t.split(':');
+  dayItems(active).forEach(function(it,i){
+    var pp=it.t.split(':');
     if(+pp[0]*60+ +pp[1]<=cur)idx=i;});
   return idx;
 }
@@ -1234,38 +1308,41 @@ function notePanel(di,ii){
 function renderDay(){
   if(mapObj){mapObj.remove();mapObj=null;}          // Container wird gleich ueberschrieben
   var d=TRIP[active],t=today(),nowIdx=-1;
-  var merged=d.items.map(function(_,i){return item(active,i);});
+  var merged=dayItems(active);
   if(d.date===t){var cur=nowMin();
     merged.forEach(function(it,i){var pp=it.t.split(':');if(+pp[0]*60+ +pp[1]<=cur)nowIdx=i;});}
 
   var items=merged.map(function(it,i){
+    var kk=it.kk;
     if(EDIT){
       var L=it.loc||{};
       var koord=(L.lat!==undefined&&L.lat!==null)?(L.lat+', '+L.lng):'';
-      return '<li class="editing"><div class="time"><input class="ed-t" data-i="'+i+'" value="'+esc(it.t)+
-      '" aria-label="Uhrzeit"></div><div class="body"><input class="ed-h" data-i="'+i+'" value="'+esc(it.h)+
-      '" aria-label="Titel"><textarea class="ed-p" data-i="'+i+'" rows="2" aria-label="Beschreibung">'+esc(it.p)+
+      return '<li class="editing"><div class="time"><input class="ed-t" data-i="'+kk+'" value="'+esc(it.t)+
+      '" aria-label="Uhrzeit"></div><div class="body"><input class="ed-h" data-i="'+kk+'" value="'+esc(it.h)+
+      '" aria-label="Titel"><textarea class="ed-p" data-i="'+kk+'" rows="2" aria-label="Beschreibung">'+esc(it.p)+
       '</textarea><div class="ed-loc">'+
       '<label>Ort — steuert die Suche in Maps</label>'+
-      '<input class="ed-q" data-i="'+i+'" value="'+esc(L.q||'')+'" placeholder="z. B. Café Hafa, Tanger">'+
+      '<input class="ed-q" data-i="'+kk+'" value="'+esc(L.q||'')+'" placeholder="z. B. Café Hafa, Tanger">'+
       '<label>Koordinaten — setzen den Marker</label>'+
-      '<input class="ed-c" data-i="'+i+'" value="'+esc(koord)+'" placeholder="35.7914, -5.8220 oder Maps-Link">'+
+      '<input class="ed-c" data-i="'+kk+'" value="'+esc(koord)+'" placeholder="35.7914, -5.8220 oder Maps-Link">'+
       '<label>Preis in MAD — fließt in die Kostenseite</label>'+
-      '<div class="ed-preis"><input class="ed-v" data-i="'+i+'" type="number" inputmode="decimal" min="0" step="1" '+
+      '<div class="ed-preis"><input class="ed-v" data-i="'+kk+'" type="number" inputmode="decimal" min="0" step="1" '+
       'value="'+(it.v||'')+'" placeholder="0">'+
-      '<button class="ed-pp'+(it.pp?' on':'')+'" data-i="'+i+'">'+(it.pp?'pro Person':'für alle')+'</button></div>'+
+      '<button class="ed-pp'+(it.pp?' on':'')+'" data-i="'+kk+'">'+(it.pp?'pro Person':'für alle')+'</button></div>'+
       '<label>Eigener Maps-Link — hat Vorrang</label>'+
-      '<input class="ed-u" data-i="'+i+'" value="'+esc(L.url||'')+'" placeholder="https://maps.app.goo.gl/…">'+
-      '<button class="ed-pin'+(pinTarget===i?' armed':'')+'" data-i="'+i+'">'+
-      (pinTarget===i?'Jetzt auf die Karte tippen':'Punkt auf der Karte antippen')+'</button>'+
-      '</div>'+(it.edited?'<button class="ed-reset" data-i="'+i+'">Auf Original zurücksetzen</button>':'')+
+      '<input class="ed-u" data-i="'+kk+'" value="'+esc(L.url||'')+'" placeholder="https://maps.app.goo.gl/…">'+
+      '<button class="ed-pin'+(pinTarget===kk?' armed':'')+'" data-i="'+kk+'">'+
+      (pinTarget===kk?'Jetzt auf die Karte tippen':'Punkt auf der Karte antippen')+'</button>'+
+      '</div>'+(it.neu?'<button class="ed-reset" data-i="'+kk+'">Diesen Punkt löschen</button>'
+        :(it.edited?'<button class="ed-reset" data-i="'+kk+'">Auf Original zurücksetzen</button>':''))+
       '</div></li>';
     }
 
     var ch=preisChip(it);
     if(it.f)ch+='<span class="chip free">kostenlos</span>';
     if(it.k)ch+='<span class="chip pay">'+esc(it.k)+'</span>';
-    if(it.edited)ch+='<span class="chip edit">geändert</span>';
+    if(it.neu)ch+='<span class="chip neu">selbst ergänzt</span>';
+    else if(it.edited)ch+='<span class="chip edit">geändert</span>';
 
     var extra='',hw=hoursMsg(d,it);
     if(hw)extra+='<div class="note warn small"><b>'+esc(hw)+'</b> <i>Öffnungszeiten sind Richtwerte — vor Ort prüfen.</i></div>';
@@ -1275,19 +1352,19 @@ function renderDay(){
     var acts='';
     if(it.loc)acts+='<a class="mapl" href="'+mapHref(it.loc)+
       '" target="_blank" rel="noopener">'+PIN+'Auf Karte öffnen</a>';
-    if(it.loc&&it.loc.lat)acts+='<span class="entf" data-i="'+i+'"'+(entfText(it.loc)?'':' hidden')+'>'+
+    if(it.loc&&it.loc.lat)acts+='<span class="entf" data-i="'+kk+'"'+(entfText(it.loc)?'':' hidden')+'>'+
       esc(entfText(it.loc))+'</span>';
-    acts+='<button class="notebtn'+(hasNote(active,i)?' has':'')+'" data-i="'+i+'">'+ICO_NOTE+
-      (hasNote(active,i)?'Notiz ansehen':'Notiz')+'</button>';
+    acts+='<button class="notebtn'+(hasNote(active,kk)?' has':'')+'" data-i="'+kk+'">'+ICO_NOTE+
+      (hasNote(active,kk)?'Notiz ansehen':'Notiz')+'</button>';
     if(acts)acts='<div class="acts">'+acts+'</div>';
 
     // Punkte mit Beschreibung bekommen einen antippbaren Titel -> Detail-Sheet
-    var title=it.info?'<button class="ttl" data-d="'+i+'">'+esc(it.h)+ICO_CHEV+'</button>'
+    var title=it.info?'<button class="ttl" data-d="'+kk+'">'+esc(it.h)+ICO_CHEV+'</button>'
       :'<strong>'+esc(it.h)+'</strong>';
 
     return '<li'+(i===nowIdx?' class="now-row"':'')+'><div class="time">'+esc(it.t)+'</div><div class="body">'+
       title+(it.p?'<p>'+esc(it.p)+'</p>':'')+ch+extra+acts+
-      notePanel(active,i)+'</div></li>';}).join('');
+      notePanel(active,kk)+'</div></li>';}).join('');
 
   var notes=(d.notes||[]).map(function(n){return '<div class="note '+n.k+'">'+n.t+'</div>';}).join('');
   if(merged.some(function(it){return it.rail;}))
@@ -1322,15 +1399,20 @@ function renderDay(){
 
   $("#p-tage").innerHTML=bar+fixLeiste(active)+'<div class="card"><div class="card-h"><div class="meta">Tag '+d.n+' · '+d.wd+' '+d.dd+
     '.09. · '+esc(d.tag)+'</div><div class="dnav"><h3>'+esc(d.title)+'</h3>'+arrows+'</div><p>'+esc(d.sub)+
-    '</p></div>'+mapBlock+'<div class="card-b"><ul class="tl">'+items+'</ul>'+summenZeile+notes+fotoBlock+'</div></div>';
+    '</p></div>'+mapBlock+'<div class="card-b"><ul class="tl">'+items+'</ul>'+
+    (EDIT?'<button class="ed-add" id="edadd">'+ICO_PLUS+'Punkt hinzufügen</button>':'')+summenZeile+notes+fotoBlock+'</div></div>';
 
   $("#dprev").onclick=function(){goDay(active-1);};
   $("#dnext").onclick=function(){goDay(active+1);};
-  $("#editbtn").onclick=function(){EDIT=!EDIT;renderDay();};
+  $("#editbtn").onclick=function(){EDIT=!EDIT;pinTarget=null;renderDay();};
+  var addBtn=$("#edadd");
+  if(addBtn)addBtn.onclick=function(){
+    neuerPunkt(active);renderDay();renderCosts();
+    var neu=$("#p-tage .tl li:last-child .ed-h");if(neu&&neu.focus)neu.focus();
+  };
 
   wireEdit();
   wireNotes();
-  $$("#p-tage .ttl").forEach(function(b){b.onclick=function(){openSheet(active,+b.dataset.d);};});
   renderFotos();wireFotos();
   if(pts.length)buildMap(d,pts);
 
@@ -1348,31 +1430,34 @@ function wireEdit(){
   if(!EDIT){pinTarget=null;return;}
   [['.ed-t','t'],['.ed-h','h'],['.ed-p','p'],['.ed-q','q'],['.ed-u','url']].forEach(function(pair){
     $$("#p-tage "+pair[0]).forEach(function(el){
-      el.oninput=function(){setOv(active,+el.dataset.i,pair[1],el.value);};});
+      el.oninput=function(){
+        setFeld(active,el.dataset.i,pair[1],el.value);
+        if(pair[1]==='t')clearTimeout(sortTimer),sortTimer=setTimeout(renderDay,900);
+      };});
   });
   // Koordinaten: nur speichern, wenn sie lesbar sind — sonst rot markieren
   $$("#p-tage .ed-c").forEach(function(el){
     el.oninput=function(){
       var t=el.value.trim();
-      if(!t){setCoords(active,+el.dataset.i,null);el.classList.remove('bad');return;}
+      if(!t){setKoordK(active,el.dataset.i,null);el.classList.remove('bad');return;}
       var ll=parseLatLng(t);
       el.classList.toggle('bad',!ll);
-      if(ll)setCoords(active,+el.dataset.i,ll);
+      if(ll)setKoordK(active,el.dataset.i,ll);
     };});
   $$("#p-tage .ed-v").forEach(function(el){
     el.oninput=function(){
       var v=parseFloat(el.value);
-      setOv(active,+el.dataset.i,'v',(el.value===''||isNaN(v))?0:Math.round(v));
+      setFeld(active,el.dataset.i,'v',(el.value===''||isNaN(v))?0:Math.round(v));
       renderCosts();                       // Kostenseite sofort mitziehen
       var t=$(".tagsum b");
       if(t)t.textContent=Math.round(tagKosten(active)).toLocaleString('de-DE')+' MAD';
     };});
   $$("#p-tage .ed-pp").forEach(function(b){b.onclick=function(){
-    var i=+b.dataset.i,neu=item(active,i).pp?0:1;
-    setOv(active,i,'pp',neu);
+    var kk=b.dataset.i,it=itemK(active,kk);
+    setFeld(active,kk,'pp',it&&it.pp?0:1);
     renderDay();renderCosts();};});
   $$("#p-tage .ed-pin").forEach(function(b){b.onclick=function(){
-    var i=+b.dataset.i;
+    var i=b.dataset.i;
     pinTarget=(pinTarget===i)?null:i;
     renderDay();
     if(pinTarget!==null){
@@ -1382,15 +1467,19 @@ function wireEdit(){
       if(m)m.scrollIntoView({behavior:smoothOk()?'smooth':'auto',block:'center'});
     }};});
   $$("#p-tage .ed-reset").forEach(function(b){b.onclick=function(){
-    delete OV[ik(active,+b.dataset.i)];Store.set('overrides',OV);renderDay();};});
+    var kk=b.dataset.i;
+    if(kk.charAt(0)==='a')loeschePunkt(active,kk);
+    else{delete OV[ik(active,kk)];Store.set('overrides',OV);}
+    renderDay();renderCosts();};});
 }
 
 function wireNotes(){
   $$("#p-tage .notebtn").forEach(function(b){b.onclick=function(){
     var p=$("#rn"+b.dataset.i);if(p)p.hidden=!p.hidden;};});
+  $$("#p-tage .ttl").forEach(function(b){b.onclick=function(){openSheet(active,b.dataset.d);};});
 
   $$("#p-tage .stars").forEach(function(box){
-    var ii=+box.dataset.i;
+    var ii=box.dataset.i;
     $$("#rn"+ii+" .star").forEach(function(s){s.onclick=function(){
       var val=+s.dataset.s,cur=(RN[ik(active,ii)]||{}).r||0;
       if(val===cur)val=0;                                  // nochmal tippen = Bewertung loeschen
@@ -1406,7 +1495,7 @@ function wireNotes(){
       tm=setTimeout(function(){
         saveNote(active,+ta.dataset.i,{t:ta.value});
         var nb=$('#p-tage .notebtn[data-i="'+ta.dataset.i+'"]');
-        if(nb)nb.classList.toggle('has',hasNote(active,+ta.dataset.i));
+        if(nb)nb.classList.toggle('has',hasNote(active,ta.dataset.i));
       },400);
     };
   });
@@ -1441,7 +1530,8 @@ function updateCmp(){
 
 /* ---------- Detail-Sheet ---------- */
 function openSheet(di,ii){
-  var d=TRIP[di],it=item(di,ii),sh=$("#sheet"),bg=$("#sheetbg");
+  var d=TRIP[di],it=itemK(di,''+ii),sh=$("#sheet"),bg=$("#sheetbg");
+  if(!it)return;
   if(!sh||!bg)return;
 
   var chips=preisChip(it);
@@ -1566,7 +1656,7 @@ function buildMap(d,pts){
   // Im Bearbeitungsmodus setzt ein Tipp auf die Karte den Ort des gewaehlten Punkts.
   mapObj.on('click',function(e){
     if(!EDIT||pinTarget===null)return;
-    setCoords(active,pinTarget,e.latlng);
+    setKoordK(active,pinTarget,e.latlng);
     pinTarget=null;
     renderDay();
   });
@@ -1821,8 +1911,7 @@ $("#tglTheme").onclick=function(){DARK=!DARK;Store.set('dark',DARK);applyTheme()
 function naechsterFix(di){
   if(TRIP[di].date!==today())return null;
   var jetzt=nowMin(),treffer=null;
-  TRIP[di].items.forEach(function(_,ii){
-    var it=item(di,ii);
+  dayItems(di).forEach(function(it){
     if(!it.fix||treffer)return;
     var p=it.t.split(':'),min=+p[0]*60+ +p[1];
     if(min>=jetzt)treffer={it:it,min:min,rest:min-jetzt};
@@ -1867,7 +1956,8 @@ function entfText(loc){
    sonst flackert die Seite bei jeder GPS-Meldung. */
 function updateEntfernungen(){
   $$("#p-tage .entf").forEach(function(el){
-    var it=item(active,+el.dataset.i);
+    var it=itemK(active,el.dataset.i);
+    if(!it)return;
     var t=entfText(it.loc);
     el.textContent=t;
     el.hidden=!t;
@@ -2033,13 +2123,12 @@ function loadWx(){
 /* ---------- Erinnerungen fuer die "wichtig"-Punkte ---------- */
 function reminders(){
   var out=[];
-  TRIP.forEach(function(d,di){d.items.forEach(function(_,ii){
-    var m=item(di,ii);
+  TRIP.forEach(function(d,di){dayItems(di).forEach(function(m){
     if(m.k!=='wichtig')return;
     // Vorabend 20 Uhr marokkanischer Zeit, nicht Gerätezeit
     var vortag=new Date(maZeit(d.date,12,0)-86400000);
     var vd=vortag.getUTCFullYear()+'-'+('0'+(vortag.getUTCMonth()+1)).slice(-2)+'-'+('0'+vortag.getUTCDate()).slice(-2);
-    out.push({id:ik(di,ii),when:maZeit(vd,20,0),t:m.t,h:m.h,n:d.n});
+    out.push({id:ik(di,m.kk),when:maZeit(vd,20,0),t:m.t,h:m.h,n:d.n});
   });});
   return out;
 }
@@ -2209,7 +2298,8 @@ Store.get('ppl').then(function(v){people=v||2;return Store.get('busMA');})
 .then(function(v){RN=v||{};return Store.get('spent');})
 .then(function(v){SPENT=v||{};return Store.get('extra');})
 .then(function(v){EXTRA=Array.isArray(v)?v:[];return Store.get('checkOwn');})
-.then(function(v){OWN=Array.isArray(v)?v:[];return Store.get('dark');})
+.then(function(v){OWN=Array.isArray(v)?v:[];return Store.get('added');})
+.then(function(v){ADD=(v&&typeof v==='object')?v:{};return Store.get('dark');})
 .then(function(v){DARK=!!v;return Store.get('notified');})
 .then(function(v){NOTIF=v||{};boot();})
 .catch(function(){boot();});

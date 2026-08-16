@@ -297,6 +297,40 @@ console.log('\nTagespreise bearbeitbar');
      (()=>{eval('active=0;renderDay();');
            return /ohne Hotel, Flug und Parken/.test(els['#p-tage'].innerHTML);})());
 
+console.log('\nEigene Punkte hinzufuegen');
+  eval("ADD={};active=1;EDIT=false;renderDay();");
+  const vorher = eval('dayItems(1).length');
+  const kk = eval('neuerPunkt(1)');
+  ok('neuer Punkt bekommt einen eigenen Schluessel', /^a\d+$/.test(kk), kk);
+  ok('Tagesliste waechst', eval('dayItems(1).length')===vorher+1);
+  ok('TRIP bleibt unangetastet', TRIP[1].items.length===vorher);
+  eval(`setFeld(1,'${kk}','h','Kaffee & Lebensmittel');setFeld(1,'${kk}','t','16:45');setFeld(1,'${kk}','v',45);setFeld(1,'${kk}','pp',0);`);
+  const neu = eval(`itemK(1,'${kk}')`);
+  ok('Titel, Zeit und Preis werden gespeichert',
+     neu.h==='Kaffee & Lebensmittel' && neu.t==='16:45' && neu.v===45 && !neu.pp);
+  ok('Punkt sortiert sich nach Uhrzeit ein',
+     (()=>{const l=eval('dayItems(1)');
+           const n=l.findIndex(x=>x.kk===kk);
+           return n>0 && l[n-1].t<='16:45' && (n===l.length-1 || l[n+1].t>='16:45');})());
+  ok('Preis zaehlt in der Tagessumme',
+     (()=>{const mit=eval('tagKosten(1)');
+           eval(`setFeld(1,'${kk}','v',0);`);
+           const ohne=eval('tagKosten(1)');
+           eval(`setFeld(1,'${kk}','v',45);`);
+           return mit-ohne===45;})());
+  eval("EDIT=true;renderDay();");
+  ok('im Bearbeitungsmodus mit Loeschknopf', /Diesen Punkt löschen/.test(els['#p-tage'].innerHTML));
+  ok('Knopf zum Hinzufuegen vorhanden', /id="edadd"/.test(els['#p-tage'].innerHTML));
+  eval("EDIT=false;renderDay();");
+  ok('als selbst ergaenzt markiert', /chip neu/.test(els['#p-tage'].innerHTML));
+  eval(`saveNote(1,'${kk}',{t:'zwei Tueten'});`);
+  ok('Notiz haengt am eigenen Punkt', eval(`hasNote(1,'${kk}')`)===true);
+  eval(`loeschePunkt(1,'${kk}');`);
+  ok('Loeschen entfernt Punkt und Notiz',
+     eval('dayItems(1).length')===vorher && eval(`hasNote(1,'${kk}')`)===false);
+  eval("ADD={};renderDay();");
+
+
 console.log('\nAbrechnung');
   eval("SPENT={};EXTRA=[];people=2;withFood=false;withHotel=false;withFlug=false;withPark=false;renderCosts();");
   ok('leer: noch nichts erfasst', /noch nichts erfasst/.test(els['#tblBilanz'].innerHTML));
@@ -381,7 +415,7 @@ console.log('\nOrt bearbeiten');
   ok('eigener Link wirkt auf den Knopf',
      eval(`mapHref(item(2,${K}).loc)`)==='https://maps.app.goo.gl/TEST');
   // Kartentipp
-  eval('EDIT=true;active=2;pinTarget='+K+';renderDay();');
+  eval('EDIT=true;active=2;pinTarget="'+K+'";renderDay();');
   ok('Bearbeitungsfelder fuer den Ort vorhanden',
      /class="ed-q"/.test(els['#p-tage'].innerHTML) && /class="ed-c"/.test(els['#p-tage'].innerHTML)
      && /class="ed-u"/.test(els['#p-tage'].innerHTML));
