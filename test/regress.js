@@ -699,10 +699,14 @@ console.log('\nApp-Huelle');
      !/height:100dvh/.test(src));
   // Die Pille reserviert keinen Platz — der Inhalt braucht die Luft selbst.
   ok('Bodenfreiheit laesst das letzte Element frei stehen',
-     (()=>{const m=src.match(/#shell\{padding-bottom:calc\((\d+)px \+ max\(6px,var\(--sb\)\) \+ (\d+)px\)\}/);
-           return !!m && (+m[1] + +m[2]) >= 88})());
+     (()=>{const m=src.match(/#shell\{padding-bottom:calc\((\d+)px \+ max\((\d+)px,var\(--sb\)\) \+ (\d+)px\)\}/);
+           return !!m && (+m[1] + +m[2] + +m[3]) >= 100})());
   ok('Leiste liest die korrigierte Systemzone',
-     /\.tabs\{[^}]*padding:0 14px calc\(var\(--sb\) \+ 6px\)/.test(src));
+     /\.tabs\{[^}]*padding:0 14px calc\(max\(var\(--sb\),\d+px\) \+ \d+px\)/.test(src));
+  // Ohne gemeldete Home-Zone saesse die Pille sonst fast auf der Kante.
+  ok('Pille haelt auch ohne gemeldete Home-Zone Abstand',
+     (()=>{const m=src.match(/\.tabs\{[^}]*padding:0 14px calc\(max\(var\(--sb\),(\d+)px\) \+ (\d+)px\)/);
+           return !!m && (+m[1] + +m[2]) >= 14})());
 
   // Eine Quelle der Wahrheit. Mischt irgendein Element rohes env() mit dem
   // korrigierten var(--sb), faellt genau dieses Element aus der Korrektur —
