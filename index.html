@@ -426,7 +426,7 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
       <div class="card-h"><div class="meta">Entscheidung</div><h3>Ja — wegen einer der zwei Routen</h3>
         <p>Tanger City Tour, roter Doppeldecker. Ein Ticket gilt 48 Stunden für beide Linien, Audioguide auf Deutsch.</p></div>
       <div class="card-b">
-        <div class="verdict yes"><div class="m">✓</div><div><strong>Route Grottes d'Hercule</strong><p>Ersetzt genau den Ausflug, für den du sonst ein Grand Taxi für 300–400 MAD chartern müsstest. Bei 80 MAD pro Person ein klarer Gewinn.</p></div></div>
+        <div class="verdict yes"><div class="m">✓</div><div><strong>Route Grottes d'Hercule</strong><p>Ersetzt genau den Ausflug, für den du sonst ein Grand Taxi für 300–400 MAD chartern müsstest. Selbst mit einem ermäßigten und einem regulären Ticket, zusammen 210 MAD, bleibt es der günstigere Weg.</p></div></div>
         <div class="verdict mid"><div class="m">~</div><div><strong>Route Tanger Ville</strong><p>Netter Bonus im selben Ticket, aber allein keine Fahrt wert. Der Bus fährt nicht in die Medina — die machst du zu Fuß.</p></div></div>
         <div class="verdict no"><div class="m">!</div><div><strong>Erst prüfen, ob er fährt</strong><p>Auf der offiziellen Website steht aktuell, der Service sei vorübergehend eingestellt. Frag am Ankunftstag am Hafen-Kiosk — fünf Minuten vom Hotel.</p></div></div>
       </div>
@@ -436,7 +436,7 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
       <div class="card-h"><div class="meta">Preise · 48 Stunden</div><h3>Was es kostet</h3></div>
       <div class="card-b">
         <table class="cost">
-          <tr><td>Erwachsener<small>Marokkaner &amp; Residenten — Ausweis wird kontrolliert</small></td><td>80 MAD</td></tr>
+          <tr><td>Erwachsener<small>Marokkaner &amp; Residenten — Ausweis wird kontrolliert. Auch eine Aufenthaltskarte zählt.</small></td><td>80 MAD</td></tr>
           <tr><td>Erwachsener<small>Regulärer Tarif</small></td><td>130 MAD</td></tr>
           <tr><td>Kind 6–14<small>bzw. 60 MAD regulär</small></td><td>40 MAD</td></tr>
           <tr><td>Kind 0–5</td><td>frei</td></tr>
@@ -481,7 +481,7 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
       <div class="eur" id="toteur">–</div>
     </div>
 
-    <button class="tgl on" id="tglBus"><div class="sw"></div><div class="lb">Bus zum 80-MAD-Tarif<small>Umschalten auf 130 MAD, falls kein marokkanischer Ausweis</small></div></button>
+    <div class="pplbar"><span>Wie viele mit marokkanischem Ausweis?<small>Ermäßigter Bustarif, wird kontrolliert</small></span><div class="pplbtn" id="mabtn"></div></div>
     <button class="tgl" id="tglFood"><div class="sw"></div><div class="lb">Essen mitrechnen<small>ca. 220 MAD pro Person und Tag — Schnitt der geplanten Lokale</small></div></button>
 
     <div class="card"><div class="card-h"><div class="meta">Bewegung</div><h3>Transport</h3></div>
@@ -595,7 +595,7 @@ items:[
 {n:3,date:"2026-09-04",wd:"Fr",dd:"04",tag:"Bus · Linie 1",title:"Cap Spartel & Herkuleshöhlen",sub:"Heute das 48-Stunden-Ticket kaufen — es gilt dann bis Sonntagmorgen.",
 items:[
 {t:"08:00",h:"Frühstück im Hotel",p:"Früh frühstücken, der erste Bus fährt um 10 Uhr ab dem Hafen.",c:"im Zimmerpreis",eat:1,loc:{q:"Hôtel Mamora, Tanger",lat:35.78536,lng:-5.80971},info:"Die Dachterrasse über dem Hafen liegt morgens noch im Schatten und ist der ruhigste Ort im Haus. Guter Moment, um den Tag durchzugehen — vom Frühstückstisch sind es zwei Minuten bis zum Petit Socco.",snack:1},
-{t:"09:00",h:"Ticket am Hafen-Kiosk",p:"Fahrplanzettel für die Herkules-Linie unbedingt mitnehmen. Nur fünf Abfahrten am Tag.",c:"80 MAD",k:"wichtig",loc:{q:"Port de Tanger Ville",lat:35.78912,lng:-5.80454},info:"Startpunkt beider Buslinien am Hafeneingang. Hier kaufst du das 48-Stunden-Ticket und nimmst den Fahrplanzettel mit — es gibt nur fünf Abfahrten am Tag, danach richtet sich der ganze Tag."},
+{t:"09:00",h:"Ticket am Hafen-Kiosk",p:"Fahrplanzettel für die Herkules-Linie unbedingt mitnehmen. Nur fünf Abfahrten am Tag.",c:"80 + 130 MAD",k:"wichtig",loc:{q:"Port de Tanger Ville",lat:35.78912,lng:-5.80454},info:"Startpunkt beider Buslinien am Hafeneingang. Hier kauft ihr das 48-Stunden-Ticket und nehmt den Fahrplanzettel mit — es gibt nur fünf Abfahrten am Tag, danach richtet sich der ganze Tag. Zum Tarif: Der ermäßigte Preis von 80 MAD gilt für Marokkaner und für Residenten, und der Ausweis wird kontrolliert. Für ein gemischtes Paar heißt das zwei verschiedene Tickets, 80 und 130 MAD. Wenn deine Frau eine marokkanische Aufenthaltskarte hat, gilt für sie ebenfalls der ermäßigte Tarif — in dem Fall am Schalter danach fragen."},
 {t:"10:00",h:"Abfahrt Linie Grottes d'Hercule",p:"Start am Hafen, Oberdeck offen."},
 {t:"10:45",h:"Parc Perdicaris · Rmilat",p:"Pinienwald über der Küste, kaum Menschen.",f:1,loc:{q:"Parc Perdicaris, Tanger",lat:35.78558,lng:-5.89462},info:"Ein großer Pinien- und Eukalyptuswald auf den Klippen westlich der Stadt, benannt nach einem Amerikaner, der hier 1904 entführt wurde. Angelegte Spazierwege führen durch den Wald zu Aussichtspunkten über dem Atlantik. Kaum Touristen, viel Schatten, Eintritt frei — rechne mit einer knappen Stunde für die Runde."},
 {t:"12:15",h:"Cap Spartel",p:"Leuchtturm an der Ecke Afrikas — hier trifft der Atlantik aufs Mittelmeer.",c:"60 MAD",loc:{q:"Cap Spartel",lat:35.79153,lng:-5.92567},hours:{days:[0,1,2,3,4,5,6],from:"09:00",to:"18:00"},info:"Die Nordwestecke Afrikas, wo Atlantik und Mittelmeer aufeinandertreffen. Der Leuchtturm von 1864 kann besichtigt werden, davor liegt eine Terrasse mit Blick auf beide Meere. Windig, auch im September — nimm etwas zum Überziehen mit."},
@@ -752,7 +752,7 @@ function $$(s){return Array.prototype.slice.call(document.querySelectorAll(s));}
 function esc(s){return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
 function today(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
 
-var active=0,people=2,busFull=false,withFood=false;
+var active=0,people=2,busMA=1,withFood=false;
 
 var MAPS='https://www.google.com/maps/search/?api=1&query=';
 var ONCF='https://www.oncf-voyages.ma/';
@@ -1182,8 +1182,16 @@ function renderCosts(){
 
   var estT={},estE={};
   var sumT=0,rowsT=COSTS_T.map(function(c,i){
-    var v=(c.id==='bus'&&busFull)?130:c.v, tot=(c.per==='p')?v*people:v; sumT+=tot; estT['t'+i]=tot;
-    var sub=(c.d?esc(c.d):'')+(c.per==='p'?(c.d?' · ':'')+v+' pro Person':'');
+    var v=c.v, tot, sub;
+    if(c.id==='bus'){
+      var ma=Math.min(busMA,people);                 // Ausweise koennen nicht mehr sein als Personen
+      tot=80*ma+130*(people-ma);
+      sub=esc(c.d)+' · '+ma+'× 80 + '+(people-ma)+'× 130 MAD';
+    }else{
+      tot=(c.per==='p')?v*people:v;
+      sub=(c.d?esc(c.d):'')+(c.per==='p'?(c.d?' · ':'')+v+' pro Person':'');
+    }
+    sumT+=tot; estT['t'+i]=tot;
     return '<tr><td>'+esc(c.n)+(sub?'<small>'+sub+'</small>':'')+'</td><td>'+tot+spendInput('t'+i)+'</td></tr>';}).join('');
   $("#tblT").innerHTML=rowsT+'<tr class="sumrow"><td>Summe Transport</td><td>'+sumT+' MAD</td></tr>'+
     '<tr class="cmprow" id="cmpT"></tr>';
@@ -1204,7 +1212,14 @@ function renderCosts(){
   $("#tot").innerHTML=sum.toLocaleString('de-DE')+'<span>MAD</span>';
   $("#toteur").textContent='rund '+Math.round(sum/11).toLocaleString('de-DE')+' €'+
     (withFood?' · inklusive Essen':' · ohne Essen und Hotel');
-  $("#tglBus").className='tgl'+(busFull?'':' on');
+  var maBox=$("#mabtn");
+  if(maBox){
+    var opts=[];for(var m=0;m<=people;m++)opts.push(m);
+    maBox.innerHTML=opts.map(function(n){
+      return '<button class="'+(n===Math.min(busMA,people)?'on':'')+'" data-n="'+n+'">'+n+'</button>';}).join('');
+    $$("#mabtn button").forEach(function(b){b.onclick=function(){
+      busMA=+b.dataset.n;Store.set('busMA',busMA);renderCosts();};});
+  }
   $("#tglFood").className='tgl'+(withFood?' on':'');
 }
 
@@ -1251,7 +1266,6 @@ requestAnimationFrame(function(){
 window.addEventListener('resize',moveInd);
 window.addEventListener('orientationchange',function(){setTimeout(moveInd,150);});
 
-$("#tglBus").onclick=function(){busFull=!busFull;Store.set('busFull',busFull);renderCosts();};
 $("#tglFood").onclick=function(){withFood=!withFood;Store.set('food',withFood);renderCosts();};
 
 (function(){
@@ -1400,8 +1414,8 @@ function boot(){
   checkReminders();syncReminders();registerSync();
 }
 
-Store.get('ppl').then(function(v){people=v||2;return Store.get('busFull');})
-.then(function(v){busFull=!!v;return Store.get('food');})
+Store.get('ppl').then(function(v){people=v||2;return Store.get('busMA');})
+.then(function(v){busMA=(v===null||v===undefined)?1:v;return Store.get('food');})
 .then(function(v){withFood=!!v;return Store.get('overrides');})
 .then(function(v){OV=v||{};return Store.get('rnotes');})
 .then(function(v){RN=v||{};return Store.get('spent');})

@@ -166,6 +166,19 @@ console.log('\nFahrplan');
   ok('ONCF-Link mit Strecke und Datum', /oncf-voyages\.ma/.test(els['#p-tage'].innerHTML)
      && /Tanger Ville → Rabat Agdal/.test(els['#p-tage'].innerHTML) && /Mo 07\.09\./.test(els['#p-tage'].innerHTML));
 
+console.log('\nBustarif gemischt');
+  // 2 Personen, 1 marokkanischer Ausweis -> 80 + 130
+  eval("people=2;busMA=1;renderCosts();");
+  ok('1 von 2 ermaessigt -> 210 MAD', /210/.test(els['#tblT'].innerHTML) && /1× 80 \+ 1× 130/.test(els['#tblT'].innerHTML),
+     (els['#tblT'].innerHTML.match(/1× 80[^<]*/)||[''])[0]);
+  eval("busMA=2;renderCosts();");
+  ok('beide ermaessigt -> 160 MAD', /2× 80 \+ 0× 130/.test(els['#tblT'].innerHTML));
+  eval("busMA=0;renderCosts();");
+  ok('keiner ermaessigt -> 260 MAD', /0× 80 \+ 2× 130/.test(els['#tblT'].innerHTML));
+  eval("people=2;busMA=4;renderCosts();");
+  ok('mehr Ausweise als Personen wird gedeckelt', /2× 80 \+ 0× 130/.test(els['#tblT'].innerHTML));
+  eval("busMA=1;renderCosts();");
+
 console.log('\nKostenmodell');
   ok('Essensbudget passt zu den geplanten Lokalen', /withFood\?220\*people\*9/.test(src));
   ok('kein Hammam-Posten mehr', !COSTS_E.some(c=>/Hammam/.test(c.n)));
