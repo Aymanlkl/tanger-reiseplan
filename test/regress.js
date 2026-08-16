@@ -74,10 +74,19 @@ console.log('\nDatenintegritaet');
   let loc=0, coord=0, info=0, hours=0, rail=0, eat=0;
   TRIP.forEach(d => d.items.forEach(i => { if(i.loc){loc++; if(i.loc.lat){coord++; if(i.info)info++}}
     if(i.hours)hours++; if(i.rail)rail++; if(i.eat)eat++ }));
-  ok('88 Orte, 87 mit Koordinaten', loc===88 && coord===87, `${loc}/${coord}`);
+  ok('90 Orte, 89 mit Koordinaten', loc===90 && coord===89, `${loc}/${coord}`);
   ok('jeder Ort mit Koordinaten beschrieben',
      !TRIP.some(d=>d.items.some(i=>i.loc&&i.loc.lat&&!i.info)), `${info}`);
-  ok('hours 8 · rail 4 · eat 25', hours===8&&rail===4&&eat===25, `${hours}/${rail}/${eat}`);
+  ok('hours 8 · rail 4 · eat 26', hours===8&&rail===4&&eat===26, `${hours}/${rail}/${eat}`);
+  // Echte ONCF-Zeiten. Der frueher eingetragene 18:40 war die Ankunft des
+  // 18:04, keine Abfahrt — so ein Fehler darf nicht zurueckkommen.
+  const a5 = t => TRIP[4].items.find(i => i.t === t);
+  ok('Asilah hin: 10:05',            !!a5('10:05') && /Zug nach Asilah/.test(a5('10:05').h));
+  ok('Asilah zurueck: letzter 21:23', !!a5('21:23') && /letzter Zug/.test(a5('21:23').h));
+  ok('kein Zug um 18:40',            !TRIP[4].items.some(i => i.t === '18:40'));
+  ok('Sonnenuntergang vor der Rueckfahrt',
+     TRIP[4].items.some(i => /Sonnenuntergang/.test(i.h) && i.t < '21:23'));
+  ok('Aufbruch zum letzten Zug mit Vorlauf', a5('21:23').fix.go === '20:45');
   ok('hoechstens 2 Restaurants pro Tag',
      TRIP.every(d => d.items.filter(i=>i.eat&&!i.snack).length<=2),
      TRIP.map(d=>d.items.filter(i=>i.eat&&!i.snack).length).join(','));
@@ -128,7 +137,7 @@ console.log('\nitem(): alle Felder werden durchgereicht');
   ok('hours durchgereicht', !!zus.hours);
 
 console.log('\nKarte');
-  const erwartet = [7,14,9,9,14,15,8,10,1];
+  const erwartet = [7,14,9,9,16,15,8,10,1];
   let mapOk = true;
   TRIP.forEach((d,i) => { drawn.markers.length=0; eval('active='+i+';renderDay();');
     const h = els['#p-tage'].innerHTML;
@@ -593,7 +602,7 @@ console.log('\nZeitzone, Standort, Fixpunkte');
   ok('ohne Standort keine Angabe', eval(`entfText({lat:35.79,lng:-5.82})`)==='');
 
   const fixe = TRIP.reduce((a,d)=>a+d.items.filter(i=>i.fix).length,0);
-  ok('sieben Fixpunkte markiert', fixe===7, `${fixe}`);
+  ok('acht Fixpunkte markiert', fixe===8, `${fixe}`);
   ok('jeder Fixpunkt hat eine Aufbruchszeit vor der Abfahrt',
      TRIP.every(d=>d.items.filter(i=>i.fix).every(i=>i.fix.go < i.t)));
   ok('Countdown nur am heutigen Tag', eval('naechsterFix(5)')===null);
