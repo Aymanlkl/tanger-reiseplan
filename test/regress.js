@@ -249,6 +249,26 @@ console.log('\nKartenansicht');
            return da})());
   eval('active=0;renderDay();');
 
+console.log('\nRabat: alles in seiner Oeffnungszeit');
+  const R = t => TRIP[5].items.find(i => i.h.indexOf(t) === 0);
+  // Belegt durch die Mehr-Agenten-Pruefung: Mausoleum bis 17:00, Mechouar
+  // 09:00-17:00, Chellah bis 18:00. Vorher lagen zwei Punkte danach.
+  ok('Mausoleum vor der Schliessung', R('Hassan-Turm').t < '17:00');
+  ok('Mechouar-Esplanade in ihrer Zeit',
+     R('Palais Royal').t >= '09:00' && R('Palais Royal').t < '17:00');
+  ok('Chellah beginnt spaetestens 17:00', R('Chellah').t <= '17:00');
+  ok('Museen vor 18 Uhr begonnen',
+     ["Mus\u00e9e d'Histoire","Oudayas \u00b7 Mus\u00e9e"].every(t => R(t).t < '18:00'));
+  ok('kein Punkt mehr nach dem Abendessen ausser Bahnhof und Zug',
+     TRIP[5].items.filter(i => i.t > '18:15')
+       .every(i => /Taxi|R\u00fcckzug|Ankunft Tanger/.test(i.h)));
+  ok('kein Punkt verloren', TRIP[5].items.length === 18);
+  ok('beide Zuege und beide Fixpunkte stehen',
+     TRIP[5].items.filter(i => i.tk).length === 2
+     && TRIP[5].items.filter(i => i.fix).length === 2);
+  ok('Abendessen bleibt vor der Rueckfahrt',
+     R('Fr\u00fches Abendessen').t < R('R\u00fcckzug').t);
+
 console.log('\nBus-Seite');
   eval('renderBus();');
   ok('naechste Abfahrt wird angezeigt', /\d\d:\d\d/.test(els['#busjetzt'].innerHTML));
