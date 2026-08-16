@@ -89,7 +89,7 @@ console.log('\nDatenintegritaet');
   let loc=0, coord=0, info=0, hours=0, rail=0, eat=0;
   TRIP.forEach(d => d.items.forEach(i => { if(i.loc){loc++; if(i.loc.lat){coord++; if(i.info)info++}}
     if(i.hours)hours++; if(i.rail)rail++; if(i.eat)eat++ }));
-  ok('94 Orte, 93 mit Koordinaten', loc===94 && coord===93, `${loc}/${coord}`);
+  ok('92 Orte, 91 mit Koordinaten', loc===92 && coord===91, `${loc}/${coord}`);
   ok('jeder Ort mit Koordinaten beschrieben',
      !TRIP.some(d=>d.items.some(i=>i.loc&&i.loc.lat&&!i.info)), `${info}`);
   ok('hours 8 · rail 4 · eat 26', hours===8&&rail===4&&eat===26, `${hours}/${rail}/${eat}`);
@@ -152,7 +152,7 @@ console.log('\nitem(): alle Felder werden durchgereicht');
   ok('hours durchgereicht', !!zus.hours);
 
 console.log('\nKarte');
-  const erwartet = [7,14,13,9,16,15,8,10,1];
+  const erwartet = [7,14,11,9,16,15,8,10,1];
   let mapOk = true;
   TRIP.forEach((d,i) => { drawn.markers.length=0; eval('active='+i+';renderDay();');
     const h = els['#p-tage'].innerHTML;
@@ -255,10 +255,26 @@ console.log('\nBuslinien');
   const t3 = TRIP[2].items;
   ok('erste Abfahrt um 11:00', t3.some(i => i.t === '11:00' && /Herkules-Linie/.test(i.h)));
   ok('keine Abfahrt um 10:00', !t3.some(i => i.t === '10:00'));
-  ok('Wartezeiten sind eigene Punkte',
-     t3.filter(i => /^Warten/.test(i.h)).length === 2);
-  ok('jede Wartezeit nennt die Haltestelle',
-     t3.filter(i => /^Warten/.test(i.h)).every(i => /Perdicaris|Cap Spartel/.test(i.h)));
+  // Zwei Zeilen je Halt: wann aussteigen, wann der naechste Bus mitnimmt.
+  ok('keine eigenen Warte-Punkte mehr', !t3.some(i => /^Warten/.test(i.h)));
+  ok('Halte tragen ihre Bus-Zeiten',
+     t3.filter(i => i.bus).length === 5, `${t3.filter(i => i.bus).length}`);
+  ok('Zwischenhalte nennen beide Zeiten',
+     ['Parc Perdicaris','Cap Spartel'].every(n => {
+       const i = t3.find(x => x.h.indexOf(n) === 0);
+       return i && i.bus && i.bus.aus && i.bus.ein }));
+  ok('Wartezeit ist genau eine Stunde',
+     ['Parc Perdicaris','Cap Spartel'].every(n => {
+       const b = t3.find(x => x.h.indexOf(n) === 0).bus;
+       const m = t => { const p = t.split(':'); return +p[0]*60 + +p[1] };
+       return m(b.ein) - m(b.aus) === 60 }));
+  ok('jeder Halt kennt seine Nummer',
+     t3.filter(i => i.bus).every(i => typeof i.bus.halt === 'number'));
+  ok('Aussteigen liegt nie nach dem Einsteigen',
+     TRIP.every(d => d.items.filter(i => i.bus && i.bus.aus && i.bus.ein)
+       .every(i => i.bus.aus < i.bus.ein)));
+  ok('Darstellung zeigt beide Zeilen',
+     /function busZeilen/.test(src) && /aussteigen/.test(src) && /wieder einsteigen/.test(src));
   ok('Ein- und Ausstieg stehen im Text',
      t3.filter(i => /Einsteigen|Aussteigen/.test(i.p||'')).length >= 4);
   ok('Achakkar als Fussweg, nicht als Haltestelle',
@@ -639,7 +655,7 @@ console.log('\nJetzt-Zeile');
   global.Date = class extends RD { constructor(...a){ super(...a.length?a:['2026-09-04T13:30:00Z']) } };
   global.Date.now = () => new RD('2026-09-04T13:30:00Z').getTime();
   eval('active=2;');
-  ok('laufender Punkt erkannt', eval('currentNowIdx()')===8,
+  ok('laufender Punkt erkannt', eval('currentNowIdx()')===6,
      `Index ${eval('currentNowIdx()')}, nowMin ${eval('nowMin()')}`);
   ok('nowMin rechnet in Marokko-Zeit', eval('nowMin()')===870, `${eval('nowMin()')}`);
   log.now.length=0; eval('wantNowScroll=true;renderDay();');
