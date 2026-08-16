@@ -1945,7 +1945,8 @@ requestAnimationFrame(function(){
   requestAnimationFrame(function(){$("#tabind").classList.add('ready');});
 });
 window.addEventListener('resize',moveInd);
-window.addEventListener('orientationchange',function(){setTimeout(moveInd,150);});
+window.addEventListener('orientationchange',function(){
+  setTimeout(function(){korrigiereSicherheitsabstand();moveInd();renderDiag();},150);});
 
 $("#tglFood").onclick=function(){withFood=!withFood;Store.set('food',withFood);renderCosts();};
 $("#tglHotel").onclick=function(){withHotel=!withHotel;Store.set('hotel',withHotel);renderCosts();};
@@ -2445,7 +2446,7 @@ function wireDocs(){
 
 function boot(){
   wantNowScroll=true;                     // beim Start zur laufenden Zeile
-  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();wireCheckAdd();renderTickets();renderGebiete();renderStorage();applyTheme();loadWx();setTimeout(renderDiag,300);
+  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();wireCheckAdd();korrigiereSicherheitsabstand();renderTickets();renderGebiete();renderStorage();applyTheme();loadWx();setTimeout(renderDiag,300);
   centerTile(false);
   checkReminders();syncReminders();registerSync();
 }
@@ -2507,6 +2508,23 @@ document.addEventListener('visibilitychange',function(){
 // Auf dem iPhone laedt eine installierte PWA beim Zurueckholen aus dem
 // App-Switcher nicht neu — sie zeigt einfach die alte Seite weiter. Deshalb
 // fragt die App selbst nach und bietet das Neuladen an.
+/* Manche iOS-Konfigurationen melden env(safe-area-inset-top), obwohl der
+   Viewport schon unterhalb der Statusleiste beginnt — dann zaehlt jedes
+   padding-top den Abstand doppelt. Gemessen: Bildschirm 956, Fenster 894,
+   Differenz 62 = genau der gemeldete obere Abstand. */
+function korrigiereSicherheitsabstand(){
+  if(!document.body||!window.getComputedStyle)return;
+  var probe=document.createElement('div');
+  probe.style.cssText='position:fixed;left:0;top:0;width:0;height:0;'+
+    'padding-top:env(safe-area-inset-top,0px);visibility:hidden';
+  document.body.appendChild(probe);
+  var oben=parseFloat(window.getComputedStyle(probe).paddingTop)||0;
+  document.body.removeChild(probe);
+  if(!oben)return;
+  var bereitsAbgezogen=(screen.height-window.innerHeight)>=oben-2;
+  document.documentElement.style.setProperty('--st',bereitsAbgezogen?'0px':oben+'px');
+}
+
 /* Misst, was das Geraet tatsaechlich meldet. Ohne diese Zahlen ist jede
    Aussage ueber die Leistenposition geraten. */
 function renderDiag(){
@@ -2526,7 +2544,8 @@ function renderDiag(){
    ['Dokumenthöhe',       document.documentElement.clientHeight+' px'],
    ['Sichtbarer Viewport',vv?Math.round(vv.height)+' px':'nicht verfügbar'],
    ['Bildschirm',         screen.height+' px · '+(window.devicePixelRatio||1)+'x'],
-   ['Systemzone oben',    sbTop],
+   ['Systemzone oben',    sbTop+(document.documentElement.style.getPropertyValue('--st')==='0px'
+                            ?' · schon abgezogen':'')],
    ['Systemzone unten',   sbBot],
    ['Leiste Unterkante',  r?Math.round(r.bottom)+' px':'—'],
    ['Abstand zum Rand',   r?Math.round(window.innerHeight-r.bottom)+' px':'—'],

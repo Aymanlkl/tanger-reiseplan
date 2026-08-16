@@ -32,7 +32,10 @@ global.document = { querySelector: get, querySelectorAll: s => {
       .map(x => { const e = El('ttl'); e.dataset.d = x.match(/data-d="(\d+)"/)[1]; return e });
     return [] }, createElement: El, addEventListener(){},
   documentElement: { _theme:null, setAttribute(k,v){ this._theme=v }, getAttribute(){ return this._theme },
-    clientHeight: 900 },
+    clientHeight: 900,
+    // Gemessen auf dem Geraet: Bildschirm 956, Fenster 894 — die 62px oben
+    // sind schon abgezogen, also muss --st auf 0 landen.
+    style: { _v:{}, setProperty(k,v){ this._v[k]=v }, getPropertyValue(k){ return this._v[k]||'' } } },
   body: { appendChild(){}, removeChild(){} } };
 // Kein echter Netzzugriff im Test
 global.fetch = () => Promise.reject(new Error('kein Netz im Test'));
@@ -501,6 +504,23 @@ console.log('\nJetzt-Zeile');
   global.Date = RD;
 
 console.log('\nViewport und Diagnose');
+  ok('erkennt doppelt gezaehlten oberen Abstand',
+     /function korrigiereSicherheitsabstand/.test(src)
+     && /screen\.height-window\.innerHeight\)>=oben-2/.test(src));
+  ok('setzt --st auf 0, wenn der Viewport schon darunter beginnt',
+     /setProperty\('--st',bereitsAbgezogen\?'0px'/.test(src));
+  ok('rechnet nach dem Drehen neu', /orientationchange[\s\S]{0,120}korrigiereSicherheitsabstand/.test(src));
+
+
+  // Verhalten, nicht nur Quelltext. Zahlen vom Geraet aus dem Info-Tab.
+  const stNach = h => { window.innerHeight = h;
+    document.documentElement.style._v = {};
+    korrigiereSicherheitsabstand();
+    return document.documentElement.style.getPropertyValue('--st') };
+  ok('Geraet 894/956: oberer Abstand wird auf 0 gesetzt', stNach(894) === '0px');
+  ok('echtes cover 956/956: 62px bleiben stehen',          stNach(956) === '62px');
+  ok('Grenzfall 895: gilt noch als abgezogen',             stNach(895) === '0px');
+  window.innerHeight = 956;
   ok('viewport-fit=cover ohne konkurrierende Angaben',
      /viewport-fit=cover/.test(src) && !/maximum-scale/.test(src) && !/user-scalable=no/.test(src));
   ok('Zoomsperre laeuft ueber touch-action', /touch-action:pan-y/.test(src));
