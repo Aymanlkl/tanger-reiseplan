@@ -419,6 +419,26 @@ console.log('\nJetzt-Zeile');
   ok('Tageswechsel springt nicht', log.now.length===0);
   global.Date = RD;
 
+console.log('\nApp-Huelle');
+  ok('Body scrollt nicht, die Huelle schon',
+     /html,body\{[^}]*overflow:hidden/.test(src) && /#shell\{position:fixed[^}]*overflow-y:auto/.test(src));
+  ok('Markup liegt in der Huelle',
+     /<body>\s*<div id="shell">/.test(src) && /<\/div><!-- \/shell -->/.test(src));
+  ok('Reiterleiste bleibt ausserhalb der Huelle',
+     src.indexOf('</div><!-- /shell -->') < src.indexOf('<nav class="tabs"'));
+  ok('kein Pinch-Zoom', /touch-action:pan-y/.test(src) && /user-scalable=no/.test(src));
+  ok('kein Gummiband', /overscroll-behavior:none/.test(src) && /overscroll-behavior-y:contain/.test(src));
+  ok('Eingabefelder koennen schrumpfen',
+     /input,textarea,select\{min-width:0;max-width:100%\}/.test(src));
+  ok('Flex-Zeilen mit Eingaben abgesichert',
+     ['.addex #exTxt','.ed-preis .ed-v','.maptools p','.editbar p','.srow span','.tagsum span']
+       .every(sel => src.indexOf(sel)!==-1));
+  ok('Medien laufen nicht ueber', /img,svg,iframe,video\{max-width:100%\}/.test(src));
+  ok('Tabwechsel scrollt die Huelle, nicht das Fenster',
+     /\$\("#shell"\)[\s\S]{0,80}scrollTo/.test(src) && !/window\.scrollTo\(\{top:0/.test(src));
+  ok('Sentinel wird gegen die Huelle beobachtet', /root:\$\("#shell"\)/.test(src));
+
+
 console.log('\nZeitzone, Standort, Fixpunkte');
   // Marokko liegt auf UTC+1 — 22:30 UTC ist dort noch derselbe Tag
   const t1 = eval(`tzTeile(new Date('2026-09-02T22:30:00Z'))`);

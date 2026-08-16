@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Tanger · 2.–10. September</title>
 <meta name="theme-color" content="#10222B">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -52,10 +52,24 @@
 :root[data-theme="dark"] table.cost td small{color:var(--faint)}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0}
+img,svg,iframe,video{max-width:100%}
+input,textarea,select{min-width:0;max-width:100%}
+/* Flex-Kinder duerfen unter ihre Inhaltsbreite schrumpfen — ohne min-width:0
+   sprengt ein langes Wort oder ein Eingabefeld die Zeile nach rechts auf. */
+.pplbar span,.tgl .lb,.chk .txt,.maptools p,.addex #exTxt,.ed-preis .ed-v,
+.wxrow .tx,.notif p,.chkown .chk,.srow span,.tagsum span,.editbar p,
+.exrow span,.verdict>div,.ph>div,.emg a{min-width:0}
+table.cost td{word-break:break-word}
+html,body{margin:0;padding:0;height:100%;overflow:hidden;overscroll-behavior:none}
+
+/* Feste Huelle wie bei einer nativen App: der Body bewegt sich nie, gescrollt
+   wird nur innen. Damit gibt es kein Gummiband und keinen Seitenversatz. */
+#shell{position:fixed;top:0;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
 body{background:var(--paper);color:var(--text);font-family:var(--f);font-size:15px;line-height:1.5;
-  -webkit-font-smoothing:antialiased;padding-bottom:calc(74px + var(--sb));
-  overflow-x:clip}  /* clip statt hidden: hidden macht body zum Scrollcontainer und killt position:sticky */
+  -webkit-font-smoothing:antialiased;
+  touch-action:pan-y}   /* nur vertikal wischen: kein Pinch-Zoom, kein Querschieben */
+#shell{padding-bottom:calc(78px + var(--sb))}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0;
   -webkit-appearance:none;appearance:none}
 h1,h2,h3,h4{margin:0;font-weight:700;letter-spacing:-.022em;line-height:1.15}
@@ -523,6 +537,7 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
 </style>
 </head>
 <body>
+<div id="shell">
 
 <header class="hd">
   <button class="bell" id="bell" hidden></button>
@@ -712,6 +727,8 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
     <div class="foot">Reiseplan Tanger · Rabat · Asilah<br>Preise sind Richtwerte für 2026 und können sich vor Ort ändern.</div>
   </section>
 </main>
+
+</div><!-- /shell -->
 
 <nav class="tabs" id="tabs">
   <button data-p="tage" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg><span>Tage</span></button>
@@ -1766,7 +1783,8 @@ $$("#tabs button").forEach(function(b){b.onclick=function(){
   moveInd();
   // Leaflet misst im display:none-Panel 0x0 — nach dem Einblenden neu vermessen.
   if(b.dataset.p==='tage'&&mapObj)setTimeout(function(){mapObj.invalidateSize();},60);
-  window.scrollTo({top:0,behavior:'smooth'});};});
+  var sh=$("#shell");
+  if(sh)sh.scrollTo({top:0,behavior:smoothOk()?'smooth':'auto'});};});
 
 /* Erst positionieren, dann Transition scharfschalten — sonst gleitet der
    Unterstrich beim Laden sichtbar von links herein. */
@@ -2226,7 +2244,7 @@ document.addEventListener('visibilitychange',function(){
   if('IntersectionObserver' in window){
     new IntersectionObserver(function(es){
       bar.classList.toggle('stuck',!es[0].isIntersecting);
-    },{threshold:0}).observe(sen);
+    },{root:$("#shell"),threshold:0}).observe(sen);
   }else{
     var f=function(){bar.classList.toggle('stuck',sen.getBoundingClientRect().bottom<=0);};
     window.addEventListener('scroll',f,{passive:true});f();
