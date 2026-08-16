@@ -89,7 +89,7 @@ console.log('\nDatenintegritaet');
   let loc=0, coord=0, info=0, hours=0, rail=0, eat=0;
   TRIP.forEach(d => d.items.forEach(i => { if(i.loc){loc++; if(i.loc.lat){coord++; if(i.info)info++}}
     if(i.hours)hours++; if(i.rail)rail++; if(i.eat)eat++ }));
-  ok('92 Orte, 91 mit Koordinaten', loc===92 && coord===91, `${loc}/${coord}`);
+  ok('91 Orte, 90 mit Koordinaten', loc===91 && coord===90, `${loc}/${coord}`);
   ok('jeder Ort mit Koordinaten beschrieben',
      !TRIP.some(d=>d.items.some(i=>i.loc&&i.loc.lat&&!i.info)), `${info}`);
   ok('hours 8 · rail 4 · eat 26', hours===8&&rail===4&&eat===26, `${hours}/${rail}/${eat}`);
@@ -152,7 +152,7 @@ console.log('\nitem(): alle Felder werden durchgereicht');
   ok('hours durchgereicht', !!zus.hours);
 
 console.log('\nKarte');
-  const erwartet = [7,14,11,9,16,15,8,10,1];
+  const erwartet = [7,14,11,8,16,15,8,10,1];
   let mapOk = true;
   TRIP.forEach((d,i) => { drawn.markers.length=0; eval('active='+i+';renderDay();');
     const h = els['#p-tage'].innerHTML;
@@ -248,6 +248,23 @@ console.log('\nKartenansicht');
            eval("closeMapView();POS=null;posAufKarte(mapObj,'tag');");
            return da})());
   eval('active=0;renderDay();');
+
+console.log('\nOeffnungszeiten aus der Pruefung');
+  const P = (d, t) => TRIP[d].items.find(i => i.h.indexOf(t) === 0);
+  // Belegt durch die Mehr-Agenten-Pruefung vom 16.08.2026, jeweils gegengeprueft.
+  ok('Borj Dar El Baroud nicht vor 10 Uhr', P(1,'Borj Dar El Baroud').t >= '10:00');
+  ok('Borj Dar El Baroud kostet Eintritt',
+     !P(1,'Borj Dar El Baroud').f && P(1,'Borj Dar El Baroud').v === 20);
+  ok('Fondation Lorin nicht vor 11 Uhr', P(7,'Fondation Lorin').t >= '11:00');
+  ok('Saint-Andre nicht in der Mittagspause',
+     P(7,'\u00c9glise Saint-Andr\u00e9').t >= '15:00');
+  ok('Place Faro nicht doppelt besucht',
+     TRIP.reduce((a,d)=>a+d.items.filter(i=>/Place Faro|Terrasse des Paresseux/.test(i.h)).length,0) === 1);
+  ok('Mietwagenuebergabe nicht in der autofreien Medina',
+     /Grand Socco/.test(P(6,'Mietwagen holen').h)
+     && Math.abs(P(6,'Mietwagen holen').loc.lat - 35.7843) < 0.001);
+  ok('Museum traegt seinen heutigen Namen',
+     TRIP[5].items.some(i => /Mus\u00e9e national de la parure/.test(i.h)));
 
 console.log('\nBuslinien');
   // Zahlen vom Betreiber, geprueft am 16.08.2026: Sommer sieben Abfahrten ab
