@@ -34,6 +34,7 @@ global.document = { querySelector: get, querySelectorAll: s => {
   documentElement: { _theme:null, setAttribute(k,v){ this._theme=v }, getAttribute(){ return this._theme } } };
 // Kein echter Netzzugriff im Test
 global.fetch = () => Promise.reject(new Error('kein Netz im Test'));
+global.navigator.geolocation = { watchPosition(){ return 1 }, clearWatch(){} };
 global.window = { addEventListener(){}, scrollTo(){}, matchMedia:()=>({matches:false}), location:{origin:'x'} };
 global.window.Notification = global.Notification = { permission:'default', requestPermission:()=>Promise.resolve('granted') };
 global.navigator = { userAgent:'node' };
@@ -131,12 +132,23 @@ console.log('\nFotos und Stadtkarte');
   ok('Fotoblock in der Tageskarte', /id="fgrid"/.test(els['#p-tage'].innerHTML)
      && /id="fotofile"/.test(els['#p-tage'].innerHTML));
   ok('Fotopfad je Tag getrennt', eval('fotoPath(2,"IMG 1.jpg")')==='fotos/2/IMG%201.jpg');
-  const stadt = eval('tileUrls(CITY)');
-  ok('Stadtkarte liefert Kacheln unter dem Deckel',
-     stadt.length>50 && stadt.length<=eval('CITY.max'), `${stadt.length}`);
-  ok('Stadtkacheln beginnen beim Stadtzoom',
-     stadt[0].indexOf('/'+eval('CITY.z1')+'/')!==-1, stadt[0]);
-  ok('beide Knoepfe im Markup', /id="dlcity"/.test(els['#p-tage'].innerHTML)
+  const pakete = eval('GEBIETE');
+  ok('fuenf Gebietspakete statt einer Box', pakete.length===5,
+     pakete.map(g=>g.k).join(','));
+  ok('jedes Gebiet liefert Kacheln',
+     pakete.every(g=>{const u=eval('tileUrls('+JSON.stringify(g)+')');
+                      return u.length>50 && u.length<1200;}),
+     pakete.map(g=>g.k+':'+eval('tileUrls('+JSON.stringify(g)+')').length).join(' '));
+  ok('alle 87 Orte liegen in mindestens einem Gebiet',
+     (()=>{let drin=0,ges=0;
+       TRIP.forEach(d=>d.items.forEach(i=>{ if(!i.loc||!i.loc.lat)return; ges++;
+         if(pakete.some(g=>i.loc.lng>=g.w&&i.loc.lng<=g.e&&i.loc.lat>=g.s&&i.loc.lat<=g.n2))drin++;}));
+       return drin===ges;})(),
+     (()=>{let fehlt=[];
+       TRIP.forEach(d=>d.items.forEach(i=>{ if(!i.loc||!i.loc.lat)return;
+         if(!pakete.some(g=>i.loc.lng>=g.w&&i.loc.lng<=g.e&&i.loc.lat>=g.s&&i.loc.lat<=g.n2))fehlt.push(d.n+':'+i.h);}));
+       return fehlt.join(' | ');})());
+  ok('Standortknopf an der Karte', /id="dlpos"/.test(els['#p-tage'].innerHTML)
      && /id="dltiles"/.test(els['#p-tage'].innerHTML));
 
 console.log('\nDokumentenablage');
@@ -394,16 +406,46 @@ console.log('\nTageskachel-Autoscroll');
 console.log('\nJetzt-Zeile');
   eval(`today=function(){return "2026-09-04"};`);
   const RD = Date;
-  global.Date = class extends RD { constructor(...a){ super(...a.length?a:['2026-09-04T14:30:00']) } };
-  global.Date.now = () => new RD('2026-09-04T14:30:00').getTime();
+  // 14:30 marokkanischer Zeit = 13:30 UTC
+  global.Date = class extends RD { constructor(...a){ super(...a.length?a:['2026-09-04T13:30:00Z']) } };
+  global.Date.now = () => new RD('2026-09-04T13:30:00Z').getTime();
   eval('active=2;');
-  ok('laufender Punkt erkannt', eval('currentNowIdx()')===7, `${eval('currentNowIdx()')}`);
+  ok('laufender Punkt erkannt', eval('currentNowIdx()')===7,
+     `Index ${eval('currentNowIdx()')}, nowMin ${eval('nowMin()')}`);
+  ok('nowMin rechnet in Marokko-Zeit', eval('nowMin()')===870, `${eval('nowMin()')}`);
   log.now.length=0; eval('wantNowScroll=true;renderDay();');
   ok('springt zur Jetzt-Zeile', log.now.length===1);
   log.now.length=0; eval('goDay(3);goDay(2);');
   ok('Tageswechsel springt nicht', log.now.length===0);
   global.Date = RD;
 
+console.log('\nZeitzone, Standort, Fixpunkte');
+  // Marokko liegt auf UTC+1 — 22:30 UTC ist dort noch derselbe Tag
+  const t1 = eval(`tzTeile(new Date('2026-09-02T22:30:00Z'))`);
+  ok('Marokko-Zeit statt Geraetezeit', t1.year+'-'+t1.month+'-'+t1.day==='2026-09-02' && t1.hour==='23',
+     `${t1.year}-${t1.month}-${t1.day} ${t1.hour}:${t1.minute}`);
+  const t2 = eval(`tzTeile(new Date('2026-09-02T23:30:00Z'))`);
+  ok('Tageswechsel erst um Mitternacht in Marokko', t2.day==='03' && t2.hour==='00');
+  ok('Erinnerung um 20 Uhr marokkanischer Zeit',
+     new Date(eval(`maZeit('2026-09-07',20,0)`)).toISOString()==='2026-09-07T19:00:00.000Z');
+  ok('keine Gerätezeit mehr in den Zeitrechnungen',
+     !/new Date\(\),cur=n\.getHours/.test(src));
+
+  ok('Entfernung und Himmelsrichtung',
+     (()=>{eval('POS={lat:35.7855,lng:-5.8097,acc:20};');
+           const t=eval(`entfText({lat:35.7914,lng:-5.8220})`);
+           eval('POS=null;');
+           return /^1\.?\d? km|^\d{3,4} m/.test(t) && /[↑↗→↘↓↙←↖]/.test(t);})(),
+     (()=>{eval('POS={lat:35.7855,lng:-5.8097,acc:20};');const t=eval(`entfText({lat:35.7914,lng:-5.8220})`);eval('POS=null;');return t;})());
+  ok('ohne Standort keine Angabe', eval(`entfText({lat:35.79,lng:-5.82})`)==='');
+
+  const fixe = TRIP.reduce((a,d)=>a+d.items.filter(i=>i.fix).length,0);
+  ok('sieben Fixpunkte markiert', fixe===7, `${fixe}`);
+  ok('jeder Fixpunkt hat eine Aufbruchszeit vor der Abfahrt',
+     TRIP.every(d=>d.items.filter(i=>i.fix).every(i=>i.fix.go < i.t)));
+  ok('Countdown nur am heutigen Tag', eval('naechsterFix(5)')===null);
+
+console.log('\nDarstellung und Wetter');
 console.log('\nDarstellung und Wetter');
   eval("DARK=false;applyTheme();");
   ok('hell ist Voreinstellung', document.documentElement.getAttribute()==='light');
