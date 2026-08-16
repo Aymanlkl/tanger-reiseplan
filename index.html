@@ -69,7 +69,7 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;overscroll-behavior:non
 body{background:var(--paper);color:var(--text);font-family:var(--f);font-size:15px;line-height:1.5;
   -webkit-font-smoothing:antialiased;
   touch-action:pan-y}   /* nur vertikal wischen: kein Pinch-Zoom, kein Querschieben */
-#shell{padding-bottom:calc(78px + var(--sb))}
+#shell{padding-bottom:calc(62px + max(6px,var(--sb)))}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0;
   -webkit-appearance:none;appearance:none}
 h1,h2,h3,h4{margin:0;font-weight:700;letter-spacing:-.022em;line-height:1.15}
@@ -299,8 +299,9 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(250,248,244,.94);
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line);
-  display:flex;padding:7px 6px calc(7px + var(--sb))}
-.tabind{position:absolute;bottom:calc(3px + var(--sb));left:0;width:0;height:2.5px;border-radius:2px;
+  box-shadow:0 -1px 0 var(--line);
+  display:flex;padding:5px 6px max(6px,var(--sb))}
+.tabind{position:absolute;bottom:max(3px,calc(var(--sb) - 6px));left:0;width:0;height:2.5px;border-radius:2px;
   background:var(--saffron-deep);pointer-events:none}
 .tabind.ready{transition:left .3s var(--ease),width .3s var(--ease)}
 .tabs button{flex:1;padding:5px 2px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;border-radius:9px;color:var(--faint);

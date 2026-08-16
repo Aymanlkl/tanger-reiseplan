@@ -454,6 +454,11 @@ console.log('\nJetzt-Zeile');
   global.Date = RD;
 
 console.log('\nApp-Huelle');
+  ok('Systemzone unten wird nicht doppelt gerechnet',
+     /padding:5px 6px max\(6px,var\(--sb\)\)/.test(src) && !/calc\(7px \+ var\(--sb\)\)/.test(src));
+  ok('Huelle laesst genau die Leistenhoehe frei',
+     /#shell\{padding-bottom:calc\(62px \+ max\(6px,var\(--sb\)\)\)\}/.test(src));
+
   ok('Body scrollt nicht, die Huelle schon',
      /html,body\{[^}]*overflow:hidden/.test(src) && /#shell\{position:fixed[^}]*overflow-y:auto/.test(src));
   ok('Markup liegt in der Huelle',
