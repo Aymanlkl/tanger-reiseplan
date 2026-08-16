@@ -544,7 +544,14 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 .qrview[hidden]{display:none}
 .qrview img{width:min(86vw,86vh);max-width:420px;object-fit:contain;image-rendering:crisp-edges}
 .qrview p{margin:0;text-align:center;font-family:var(--m);font-size:13px;line-height:1.6;color:#17262E}
+.qrbtns{display:flex;gap:9px;flex-wrap:wrap;justify-content:center}
 .qrview button{padding:12px 22px;border-radius:10px;background:#17262E;color:#fff;font-size:14px;font-weight:600}
+.qrview button[hidden]{display:none}
+.qrview #qrnext{background:#E8A317;color:#1A1200}
+.qrview img[hidden]{display:none}
+.tkl{display:inline-flex;align-items:center;gap:5px;padding:4px 9px 4px 7px;border-radius:6px;
+  background:var(--ink);color:#fff;font-size:12px;font-weight:600}
+.tkl svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .tkrow{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line-2)}
 .tkrow:first-child{border-top:0}
 .tkrow>div{flex:1;min-width:0}
@@ -791,7 +798,7 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
 <div class="qrview" id="qrview" hidden>
   <img id="qrimg" alt="Fahrkarte">
   <p id="qrcap"></p>
-  <button id="qrclose">Schließen</button>
+  <div class="qrbtns"><button id="qrnext" hidden></button><button id="qrclose">Schließen</button></div>
 </div>
 
 <div class="sheet-bg" id="sheetbg" hidden></div>
@@ -881,7 +888,7 @@ notes:[{k:"tip",t:"Zugzeiten am Vortag am Bahnhof oder auf oncf-voyages.ma prüf
 {n:6,date:"2026-09-07",wd:"Mo",dd:"07",tag:"Rabat",title:"Die Hauptstadt mit dem Al Boraq",sub:"Der einzige Tag, der früh startet. Montag bewusst gewählt: dienstags sind Rabats Museen geschlossen.",
 items:[
 {t:"07:20",h:"Taxi zum Bahnhof",p:"",v:15,loc:{q:"Gare de Tanger Ville",lat:35.77153,lng:-5.78622},info:"Früher Start zum Hauptbahnhof. Um diese Zeit ist die Medina noch leer, deshalb das Taxi am Vorabend an der Rezeption bestellen."},
-{t:"08:00",h:"Al Boraq nach Rabat",p:"Zug 2009, Wagen 6, Plätze 22 und 24. Ankunft 09:22.",v:219,pp:1,cn:"gebucht, Dossier KVDYJH",rail:{a:"Tanger Ville",b:"Rabat Agdal"},info:"Afrikas einziger Hochgeschwindigkeitszug, 320 km/h, eine Stunde 22 Minuten für 250 Kilometer. Gebucht auf Dossier KVDYJH: Zug 2009, Wagen 6, Plätze 22 und 24. Bei der Kontrolle wird neben dem QR-Code ein gültiger Ausweis verlangt — Pass einstecken. Wenn ihr die Tickets ausdruckt: den QR-Code nicht knicken, auf dem Handy reicht das PDF.",fix:{go:"07:20",was:"Taxi zum Bahnhof"}},
+{t:"08:00",h:"Al Boraq nach Rabat",p:"Zug 2009, Wagen 6, Plätze 22 und 24. Ankunft 09:22.",v:219,pp:1,cn:"gebucht, Dossier KVDYJH",rail:{a:"Tanger Ville",b:"Rabat Agdal"},info:"Afrikas einziger Hochgeschwindigkeitszug, 320 km/h, eine Stunde 22 Minuten für 250 Kilometer. Gebucht auf Dossier KVDYJH: Zug 2009, Wagen 6, Plätze 22 und 24. Bei der Kontrolle wird neben dem QR-Code ein gültiger Ausweis verlangt — Pass einstecken. Wenn ihr die Tickets ausdruckt: den QR-Code nicht knicken, auf dem Handy reicht das PDF.",fix:{go:"07:20",was:"Taxi zum Bahnhof"},tk:"hin"},
 {t:"09:22",h:"Ankunft Rabat Agdal",p:"Tram oder Taxi in die Altstadt.",v:6,pp:1,cn:"Tram",loc:{q:"Gare Rabat Agdal",lat:34.0011,lng:-6.85744},info:"Moderner Bahnhof im Viertel Agdal, Endpunkt des Al Boraq. Von hier bringen dich Tram oder Taxi in rund einer Viertelstunde in die Altstadt."},
 {t:"09:50",h:"Kasbah des Oudayas",p:"Blau-weiße Gassen hinter dem großen Almohadentor Bab Oudaïa.",f:1,loc:{q:"Kasbah des Oudayas, Rabat",lat:34.03166,lng:-6.83585},info:"Eine Festungsanlage aus dem 12. Jahrhundert an der Mündung des Bouregreg. Innen ein Viertel aus blau-weiß gestrichenen Gassen, dazu ein andalusischer Garten und das Café Maure auf der Terrasse mit Blick auf Salé. Der Eintritt ist frei, man geht durch das große Tor einfach hinein."},
 {t:"10:30",h:"Jardin Andalou & Café Maure",p:"Im Kasbah-Gelände, gleich hinter dem Tor.",v:20,pp:1,eat:1,snack:1,loc:{q:"Café Maure, Kasbah des Oudayas, Rabat",lat:34.03118,lng:-6.83486},info:"Der andalusische Garten wurde in den 1920er Jahren innerhalb der Kasbah-Mauern angelegt — Orangenbäume, Zypressen, Bougainvillea und sehr viele Katzen. Am unteren Ende führt eine Treppe zum Café Maure, dessen Terrassen über dem Bouregreg liegen, gegenüber die weiße Medina von Salé. Es gibt Minztee und Mandelgebäck, sonst nichts."},
@@ -896,7 +903,7 @@ items:[
 {t:"19:20",h:"Bab Rouah",p:"Das Tor der Winde, 900 m vom Palast.",f:1,loc:{q:"Bab Rouah, Rabat",lat:34.01281,lng:-6.83757},info:"Um 1197 unter Yacoub al-Mansour gebaut, eines der großen Almohadentore des Maghreb. Über dem Bogen liegen Muschelnischen und geometrischer Steinschnitt, der Durchgang knickt mehrfach ab — gebaut, um einen Angriff zu bremsen. Innen ist heute ein Ausstellungsraum; von außen ist es das eindrucksvollere Stück."},
 {t:"19:45",h:"Hassan-Turm & Mausoleum",p:"Nach Sonnenuntergang, die Anlage ist beleuchtet.",f:1,loc:{q:"Tour Hassan, Rabat",lat:34.02415,lng:-6.8228},info:"Das Minarett einer Moschee, die 1195 unvollendet blieb, davor ein Feld aus über 200 abgebrochenen Säulen. Gegenüber liegt das Mausoleum Mohammed V. mit Wachen in traditioneller Tracht; der Innenraum mit dem Zedernholzdach ist frei zugänglich."},
 {t:"20:20",h:"Taxi zum Bahnhof Rabat Agdal",p:"Rund 4 km vom Hassan-Turm, gut eine Viertelstunde.",loc:{q:"Gare Rabat Agdal",lat:34.0011,lng:-6.85744},info:"Puffer mit Absicht: Vom Hassan-Turm sind es gut vier Kilometer quer durch die Stadt, und die Rückfahrkarten sind nicht umtauschbar. Abends ist die Avenue Mohammed V frei, aber rechnet lieber mit zwanzig Minuten als mit zehn."},
-{t:"20:56",h:"Rückzug ab Rabat Agdal",p:"Zug 1057, Wagen 5, Plätze 21 und 23. Ankunft Tanger 22:17.",cn:"im Hinfahrpreis",loc:{q:"Gare Rabat Agdal",lat:34.0011,lng:-6.85744},rail:{a:"Rabat Agdal",b:"Tanger Ville"},info:"Abfahrt 20:56 ab Rabat Agdal, Ankunft Tanger Ville 22:17. Wichtig: Beide Rückfahrkarten sind NON FLEX — weder umtauschbar noch erstattungsfähig. Wer diesen Zug verpasst, hat kein Ticket mehr, sondern kauft ein neues zum Tagespreis. Deshalb steht das Taxi schon um 20:20 im Plan.",k:"wichtig",fix:{go:"20:20",was:"Taxi zum Bahnhof Agdal"}},
+{t:"20:56",h:"Rückzug ab Rabat Agdal",p:"Zug 1057, Wagen 5, Plätze 21 und 23. Ankunft Tanger 22:17.",cn:"im Hinfahrpreis",loc:{q:"Gare Rabat Agdal",lat:34.0011,lng:-6.85744},rail:{a:"Rabat Agdal",b:"Tanger Ville"},info:"Abfahrt 20:56 ab Rabat Agdal, Ankunft Tanger Ville 22:17. Wichtig: Beide Rückfahrkarten sind NON FLEX — weder umtauschbar noch erstattungsfähig. Wer diesen Zug verpasst, hat kein Ticket mehr, sondern kauft ein neues zum Tagespreis. Deshalb steht das Taxi schon um 20:20 im Plan.",k:"wichtig",fix:{go:"20:20",was:"Taxi zum Bahnhof Agdal"},tk:"rueck"},
 {t:"22:17",h:"Ankunft Tanger",p:"Taxi in die Medina. Heute wurde in Rabat gegessen."}],
 notes:[{k:"warn",t:"<b>Die Rückfahrt ist nicht umtauschbar.</b> Beide Tickets für den 20:56-Zug sind NON FLEX — verpasst heißt verfallen. Am Hassan-Turm spätestens um 20:20 ins Taxi. Dossier <b>KVDYJH</b>: hin Zug 2009, Wagen 6, Plätze 22 und 24 · zurück Zug 1057, Wagen 5, Plätze 21 und 23. Bei der Kontrolle wird ein gültiger Ausweis verlangt."}]},
 
@@ -1050,6 +1057,7 @@ var ICO_OK='<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></svg>';
 var ICO_NOTE='<svg viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9L14.5 20h-9A1.5 1.5 0 0 1 4 18.5Z"/><path d="M20 14.5h-5.5V20"/></svg>';
 var ICO_EDIT='<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.5 2.5 0 0 0-3.5-3.5L4.5 16.5Z"/><path d="M14.5 6.5 17.5 9.5"/></svg>';
 var ICO_BELL='<svg viewBox="0 0 24 24"><path d="M18 8.5a6 6 0 1 0-12 0c0 5-2 6.5-2 6.5h16s-2-1.5-2-6.5Z"/><path d="M13.7 19a2 2 0 0 1-3.4 0"/></svg>';
+var ICO_QR='<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v3M14 20h7"/></svg>';
 var ICO_PLUS='<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
 var ICO_HIER='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="8"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/></svg>';
 var ICO_CAM='<svg viewBox="0 0 24 24"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3.4"/></svg>';
@@ -1401,6 +1409,7 @@ function renderDay(){
     var acts='';
     if(it.loc)acts+='<a class="mapl" href="'+mapHref(it.loc)+
       '" target="_blank" rel="noopener">'+PIN+'Auf Karte öffnen</a>';
+    if(it.tk)acts+='<button class="tkl" data-tk="'+it.tk+'">'+ICO_QR+'Fahrkarte zeigen</button>';
     if(it.loc&&it.loc.lat)acts+='<span class="entf" data-i="'+kk+'"'+(entfText(it.loc)?'':' hidden')+'>'+
       esc(entfText(it.loc))+'</span>';
     acts+='<button class="notebtn'+(hasNote(active,kk)?' has':'')+'" data-i="'+kk+'">'+ICO_NOTE+
@@ -1523,6 +1532,7 @@ function wireEdit(){
 }
 
 function wireNotes(){
+  $$("#p-tage .tkl").forEach(function(b){b.onclick=function(){zeigeTicketFuer(b.dataset.tk);};});
   $$("#p-tage .notebtn").forEach(function(b){b.onclick=function(){
     var p=$("#rn"+b.dataset.i);if(p)p.hidden=!p.hidden;};});
   $$("#p-tage .ttl").forEach(function(b){b.onclick=function(){openSheet(active,b.dataset.d);};});
@@ -1612,6 +1622,7 @@ function openSheet(di,ii){
     (it.loc?'<a class="sbtn prim" href="'+mapHref(it.loc)+
       '" target="_blank" rel="noopener">'+PIN+'In Google Maps öffnen</a>':'')+
     (onMap?'<button class="sbtn" id="sheetzoom">'+ICO_TARGET+'Auf der Karte zeigen</button>':'')+
+    (it.tk?'<button class="sbtn" id="sheettk">'+ICO_QR+'Fahrkarte zeigen</button>':'')+
     '</div></div>';
 
   bg.hidden=false;sh.hidden=false;
@@ -1626,6 +1637,8 @@ function openSheet(di,ii){
   };
   $("#sheetx").onclick=closeSheet;
   bg.onclick=closeSheet;
+  var stk=$("#sheettk");
+  if(stk)stk.onclick=function(){closeSheet();zeigeTicketFuer(it.tk);};
   var z=$("#sheetzoom");
   if(z)z.onclick=function(){
     closeSheet();
@@ -1939,6 +1952,8 @@ $("#tglHotel").onclick=function(){withHotel=!withHotel;Store.set('hotel',withHot
 $("#tglFlug").onclick=function(){withFlug=!withFlug;Store.set('flug',withFlug);renderCosts();};
 var qc=$("#qrclose");
 if(qc)qc.onclick=schliesseTicket;
+var qn=$("#qrnext");
+if(qn)qn.onclick=function(){zeigeListe(qrListe,(qrIdx+1)%qrListe.length);};
 var qv=$("#qrview");
 if(qv)qv.onclick=function(e){if(e.target===qv)schliesseTicket();};
 
@@ -2322,11 +2337,36 @@ function renderTickets(){
   }).catch(function(){});
 }
 
-function zeigeTicket(t){
-  var v=$("#qrview"),img=$("#qrimg"),cap=$("#qrcap");
-  if(!v||!t)return;
+var qrListe=[],qrIdx=0;
+
+function zeigeTicket(t){zeigeListe([t],0);}
+
+/* Der Schaffner prueft beide Fahrgaeste — deshalb blaettert die Ansicht
+   zwischen den Karten derselben Fahrt, statt sie einzeln zu oeffnen. */
+function zeigeTicketFuer(ri){
+  var pre=(ri==='hin')?'hin-':'rueck-';
+  var l=TICKETS.filter(function(t){return t.k.indexOf(pre)===0;});
+  if(l.length)zeigeListe(l,0);
+}
+function zeigeListe(l,i){
+  var v=$("#qrview"),img=$("#qrimg"),cap=$("#qrcap"),nx=$("#qrnext");
+  if(!v||!l.length)return;
+  qrListe=l;qrIdx=i||0;
+  var t=qrListe[qrIdx];
+  img.hidden=false;
+  img.onerror=function(){
+    img.hidden=true;
+    cap.innerHTML='<b>Noch nicht abgelegt.</b><br>Den QR-Code im Info-Tab unter '+
+      '„Zugtickets zeigen“ hinterlegen.<br><br>'+esc(t.wer)+' · '+esc(t.ri)+'<br>'+esc(t.d);
+  };
+  img.onload=function(){
+    cap.innerHTML=esc(t.wer)+' · '+esc(t.ri)+'<br>'+esc(t.d)+'<br>Dossier KVDYJH';
+  };
   img.src=tkPath(t.k);
-  cap.innerHTML=esc(t.wer)+' · '+esc(t.ri)+'<br>'+esc(t.d)+'<br>Dossier KVDYJH';
+  if(nx){
+    nx.hidden=qrListe.length<2;
+    nx.textContent=qrListe.length<2?'':'Weiter zu '+qrListe[(qrIdx+1)%qrListe.length].wer;
+  }
   v.hidden=false;
 }
 function schliesseTicket(){var v=$("#qrview");if(v)v.hidden=true;}

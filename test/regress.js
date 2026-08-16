@@ -160,6 +160,24 @@ console.log('\nFotos und Stadtkarte');
      && /id="dltiles"/.test(els['#p-tage'].innerHTML));
 
 console.log('\nFahrkarten');
+  ok('beide Zugpunkte fuehren zur Fahrkarte',
+     (()=>{const t=TRIP[5].items.filter(i=>i.tk);
+           return t.length===2 && t[0].tk==='hin' && t[1].tk==='rueck';})());
+  ok('Knopf steht im Tagesplan',
+     (()=>{eval('active=5;EDIT=false;renderDay();');
+           return (els['#p-tage'].innerHTML.match(/class="tkl"/g)||[]).length===2;})());
+  ok('Hinfahrt zeigt beide Fahrgaeste',
+     (()=>{eval("zeigeTicketFuer('hin');");
+           return eval('qrListe.length')===2
+             && eval('qrListe.map(function(t){return t.wer;}).join(",")')==='Aymane,Oksana';})());
+  ok('Rueckfahrt zeigt die Rueckfahrkarten',
+     (()=>{eval("zeigeTicketFuer('rueck');");
+           return eval('qrListe.every(function(t){return t.ri===\'Rückfahrt\';})');})());
+  ok('Blaettern wechselt den Fahrgast',
+     (()=>{eval("zeigeTicketFuer('hin');zeigeListe(qrListe,1);");
+           return eval('qrIdx')===1;})());
+  eval('schliesseTicket();');
+
   ok('vier Slots, beide Personen, beide Richtungen',
      eval('TICKETS.length')===4
      && eval("TICKETS.filter(function(t){return t.wer==='Aymane';}).length")===2
