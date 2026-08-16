@@ -59,6 +59,7 @@ let mapClick = null;   // Klick-Handler, den buildMap registriert
 global.L = { map: () => ({ remove(){}, fitBounds(){}, setView(){},
     on(ev, fn){ if (ev === 'click') mapClick = fn; },
     panTo:(ll)=>{ drawn.pan = ll },
+  removeLayer(){ drawn.entfernt = (drawn.entfernt||0)+1 },
   remove(){ drawn.removed = (drawn.removed||0)+1 },
   getBounds:()=>({getWest:()=>-5.94,getEast:()=>-5.76,getNorth:()=>35.80,getSouth:()=>35.75}),
     getZoom:()=>13, invalidateSize(){} }),
@@ -67,8 +68,9 @@ global.L = { map: () => ({ remove(){}, fitBounds(){}, setView(){},
   marker: ll => { drawn.markers.push(ll);
     const el = { classList:{ _s:new Set(),
       toggle(c,an){ an ? this._s.add(c) : this._s.delete(c) }, contains(c){ return this._s.has(c) } } };
-    const m = { getElement:()=>el, on(){ return m }, addTo(){ return m } };
+    const m = { getElement:()=>el, on(){ return m }, addTo(){ return m }, setLatLng(ll){ m.ll=ll } };
     return m },
+  circle: () => { const c = { addTo(){ return c }, setLatLng(){}, setRadius(){} }; return c },
   divIcon: o=>o, latLngBounds: l=>({pad:()=>l}) };
 
 try { eval(code); } catch (e) { console.log('LAUFZEITFEHLER:', e.message); process.exit(1) }
@@ -212,11 +214,34 @@ console.log('\nKartenansicht');
   ok('ausserhalb des Bereichs passiert nichts',
      (()=>{eval('mvZuIndex(99,false);');return eval('mvIdx')===4})());
 
+  // Standort: eigene Ebenen je Karte, Entfernung auf jeder Karussellkarte.
+  ok('Standortknopf in der grossen Karte', !!els['#mvPos']);
+  eval("POS={lat:35.7595,lng:-5.9089,acc:20};mvZuIndex(0,false);updateEntfernungen();");
+  ok('Entfernung steht auf den Karten',
+     /\d+\s*(m|km)/.test(els['#mvCards'].innerHTML), els['#mvCards'].innerHTML.slice(0,80));
+  ok('beide Karten bekommen eigene Standortebenen',
+     (()=>{eval("posAufKarte(mapObj,'tag');posAufKarte(mvMap,'gross');");
+           return eval("Object.keys(posEbenen).sort().join(',')")==='gross,tag'})());
+  ok('ohne Ortung verschwinden die Ebenen wieder',
+     (()=>{eval("POS=null;posAufKarte(mapObj,'tag');posAufKarte(mvMap,'gross');");
+           return eval("Object.keys(posEbenen).length")===0})());
+  ok('ohne Ortung keine Entfernung',
+     (()=>{eval('updateEntfernungen();');
+           return !/\d+\s*(m|km)\s*[\u2190-\u2199]/.test(els['#mvCards'].innerHTML)})());
+
   eval('active=8;renderDay();mvBaue();');
   ok('Tageswechsel baut neu auf', eval('mvPts.length')===1 && eval('mvIdx')===0);
   eval('closeMapView();');
   ok('schliesst und raeumt auf',
      els['#mapview'].hidden===true && eval('mvMap')===null && eval('mvMarker.length')===0);
+  // Mit der Karte sterben ihre Ebenen — ein ueberlebender Verweis zeigt ins Leere.
+  ok('Standortebene der grossen Karte wird mit abgeraeumt',
+     eval("posEbenen.gross")===undefined);
+  ok('Tageskarte behaelt ihre eigene Ebene',
+     (()=>{eval("POS={lat:35.76,lng:-5.91,acc:20};posAufKarte(mapObj,'tag');openMapView();mvBaue();");
+           const da = eval("!!posEbenen.tag");
+           eval("closeMapView();POS=null;posAufKarte(mapObj,'tag');");
+           return da})());
   eval('active=0;renderDay();');
 
 console.log('\nFahrkarten');

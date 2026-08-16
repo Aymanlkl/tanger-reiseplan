@@ -574,6 +574,16 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
   transition:background .18s,color .18s}
 .mv-days button.an{background:var(--saffron);color:var(--ink)}
 #bigmap{flex:1 1 auto;min-height:0}
+#mvPos{position:absolute;right:14px;z-index:900;width:42px;height:42px;border-radius:50%;
+  bottom:calc(56px + max(6px,var(--sb)) + 172px);
+  background:var(--card);color:var(--muted);display:grid;place-items:center;
+  box-shadow:var(--shadow);transition:background .2s var(--ease),color .2s var(--ease)}
+#mvPos svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round}
+#mvPos.done{background:var(--sea);color:#fff}
+.mv-card .mvd{display:inline-block;margin-top:7px;margin-right:6px;font-family:var(--m);
+  font-size:10.5px;font-weight:600;background:var(--sea-wash);color:var(--sea);
+  padding:3px 7px;border-radius:5px}
+.mv-card .mvd[hidden]{display:none}
 .mv-cards{position:absolute;left:0;right:0;bottom:calc(56px + max(6px,var(--sb)));z-index:900;
   display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;
   padding:0 calc(50% - 125px) 12px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -853,6 +863,9 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
     <div class="mv-days" id="mvDays"></div>
   </div>
   <div id="bigmap"></div>
+  <button id="mvPos" aria-label="Standort anzeigen">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.4"/><circle cx="12" cy="12" r="8"/>
+    <path d="M12 1.6v2.6M12 19.8v2.6M22.4 12h-2.6M4.2 12H1.6"/></svg></button>
   <div class="mv-cards" id="mvCards"></div>
 </div>
 
@@ -1793,7 +1806,7 @@ function buildMap(d,pts){
   }).catch(function(){});
   btn.onclick=function(){saveTiles(btn,d.n);};
   var pb=$("#dlpos");
-  if(pb)pb.onclick=function(){startPos(pb);};
+  if(pb)pb.onclick=function(){startPos();};
   var mo=$("#mvopen");
   if(mo)mo.onclick=function(){openMapView();};
   updateEntfernungen();
@@ -1823,6 +1836,7 @@ function closeMapView(){
   v.hidden=true;
   document.body.classList.remove('mvoffen');
   if(mvMap){mvMap.remove();mvMap=null;}
+  delete posEbenen.gross;
   mvMarker=[];mvPts=[];
 }
 
@@ -1848,6 +1862,7 @@ function mvBaue(){
       '<div class="z"><span class="nr">'+(n+1)+'</span><span class="zt">'+esc(p.it.t)+'</span></div>'+
       '<b>'+esc(p.it.h)+'</b>'+
       (p.it.p?'<p>'+esc(p.it.p)+'</p>':'')+
+      '<span class="mvd" data-n="'+n+'" hidden></span>'+
       (pr?'<span class="pr">'+Math.round(pr).toLocaleString('de-DE')+' MAD'+(p.it.pp?' p. P.':'')+'</span>':'')+
       '</div>';
   }).join('');
@@ -1860,10 +1875,13 @@ function mvBaue(){
   };
 
   mvKarte();
+  var pb=$("#mvPos");
+  if(pb)pb.onclick=function(){mvStandort();};
+  updateEntfernungen();
 }
 
 function mvKarte(){
-  if(mvMap){mvMap.remove();mvMap=null;}
+  if(mvMap){mvMap.remove();mvMap=null;delete posEbenen.gross;}
   if(typeof L==='undefined'||!mvPts.length)return;
   var ll=mvPts.map(function(p){return [p.it.loc.lat,p.it.loc.lng];});
   mvMap=L.map($("#bigmap"),{scrollWheelZoom:false,zoomControl:false});
@@ -2216,6 +2234,39 @@ function entfText(loc){
   return txt+' '+pfeil(POS.lat,POS.lng,loc.lat,loc.lng);
 }
 
+/* Eine Leaflet-Ebene gehoert immer genau einer Karte. Fuer Tageskarte und
+   grosse Karte braucht es deshalb je ein eigenes Paar aus Punkt und Kreis. */
+var posEbenen={};
+function posAufKarte(map,key){
+  if(!map||typeof L==='undefined')return;
+  var e=posEbenen[key];
+  if(!POS){
+    if(e){map.removeLayer(e.m);map.removeLayer(e.k);delete posEbenen[key];}
+    return;
+  }
+  if(!e){
+    posEbenen[key]={
+      k:L.circle([POS.lat,POS.lng],{radius:POS.acc||30,color:'#2E7D6E',weight:1,
+        fillColor:'#2E7D6E',fillOpacity:.12}).addTo(map),
+      m:L.marker([POS.lat,POS.lng],{icon:L.divIcon({className:'hier',html:'<b></b>',
+        iconSize:[18,18],iconAnchor:[9,9]}),zIndexOffset:1000}).addTo(map)
+    };
+  }else{
+    e.m.setLatLng([POS.lat,POS.lng]);
+    e.k.setLatLng([POS.lat,POS.lng]);e.k.setRadius(POS.acc||30);
+  }
+}
+
+/* Beide Standortknoepfe zeigen denselben Zustand — es gibt nur eine Ortung. */
+function renderPosBtns(){
+  var an=watchId!==null&&!!POS;
+  [$("#dlpos"),$("#mvPos")].forEach(function(b){
+    if(!b)return;
+    b.classList.toggle('done',an);
+    if(b.id==='dlpos')b.innerHTML=ICO_HIER+(an?'Standort an':(watchId!==null?'Suche …':'Standort'));
+  });
+}
+
 /* Nur die Entfernungen nachziehen, nicht den ganzen Tag neu bauen —
    sonst flackert die Seite bei jeder GPS-Meldung. */
 function updateEntfernungen(){
@@ -2226,34 +2277,44 @@ function updateEntfernungen(){
     el.textContent=t;
     el.hidden=!t;
   });
-  if(mapObj&&POS){
-    if(!posMarker){
-      posKreis=L.circle([POS.lat,POS.lng],{radius:POS.acc||30,color:'#2E7D6E',weight:1,
-        fillColor:'#2E7D6E',fillOpacity:.12}).addTo(mapObj);
-      posMarker=L.marker([POS.lat,POS.lng],{icon:L.divIcon({className:'hier',html:'<b></b>',
-        iconSize:[18,18],iconAnchor:[9,9]}),zIndexOffset:1000}).addTo(mapObj);
-    }else{
-      posMarker.setLatLng([POS.lat,POS.lng]);
-      posKreis.setLatLng([POS.lat,POS.lng]);posKreis.setRadius(POS.acc||30);
-    }
-  }
+  // In der grossen Karte steht die Entfernung auf jeder Karussellkarte —
+  // damit unterwegs sichtbar ist, ob man am richtigen Ort steht.
+  $$("#mvCards .mvd").forEach(function(el){
+    var p=mvPts[+el.dataset.n];
+    var t=p?entfText(p.it.loc):'';
+    el.textContent=t;
+    el.hidden=!t;
+  });
+  posAufKarte(mapObj,'tag');
+  posAufKarte(mvMap,'gross');
+  renderPosBtns();
 }
 
-function startPos(btn){
-  if(!navigator.geolocation){if(btn)btn.textContent='Kein GPS';return;}
-  if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;POS=null;
-    if(btn){btn.classList.remove('done');btn.innerHTML=ICO_HIER+'Standort';}
-    if(posMarker&&mapObj){mapObj.removeLayer(posMarker);mapObj.removeLayer(posKreis);posMarker=null;}
-    updateEntfernungen();return;}
-  if(btn)btn.textContent='Suche …';
+function startPos(){
+  if(!navigator.geolocation){
+    var b=$("#dlpos");if(b)b.innerHTML=ICO_HIER+'Kein GPS';
+    return;
+  }
+  if(watchId!==null){
+    navigator.geolocation.clearWatch(watchId);watchId=null;POS=null;
+    posAufKarte(mapObj,'tag');posAufKarte(mvMap,'gross');
+    updateEntfernungen();return;
+  }
+  watchId=-1;renderPosBtns();
   watchId=navigator.geolocation.watchPosition(function(p){
     POS={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy};
-    if(btn){btn.classList.add('done');btn.innerHTML=ICO_HIER+'Standort an';}
     updateEntfernungen();
   },function(){
-    if(btn){btn.classList.remove('done');btn.innerHTML=ICO_HIER+'Nicht verfügbar';}
-    watchId=null;
+    watchId=null;POS=null;
+    var b=$("#dlpos");if(b)b.innerHTML=ICO_HIER+'Nicht verfügbar';
+    renderPosBtns();
   },{enableHighAccuracy:true,maximumAge:15000,timeout:20000});
+}
+
+/* Zweiter Tipp bei laufender Ortung zentriert die grosse Karte auf einen selbst. */
+function mvStandort(){
+  if(watchId!==null&&POS&&mvMap){mvMap.panTo([POS.lat,POS.lng],{animate:true,duration:.4});return;}
+  startPos();
 }
 
 /* ---------- Kachelpakete je Gebiet ---------- */
