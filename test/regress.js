@@ -271,6 +271,15 @@ console.log('\nBuslinien');
   ok('Tag 4 folgt der Fahrtrichtung der Linie',
      folge.every((v, i) => i === 0 || v > folge[i-1]), folge.join(','));
 
+  // Die Stadtlinie faehrt ab 9 Uhr — der Plan stand auf 10 und verschenkte eine Stunde.
+  ok('Tag 4 nutzt die erste Runde um 9 Uhr',
+     TRIP[3].items.some(i => i.t === '09:00' && /Tanger Ville/.test(i.h)));
+  ok('Tag 4 beginnt nicht erst um 10',
+     !TRIP[3].items.some(i => i.t === '10:00'));
+  ok('jeder Halt liegt in der Betriebszeit der Linie',
+     TRIP[3].items.filter(i => /Haltestelle/.test(i.p || ''))
+       .every(i => i.t >= '09:00' && i.t <= '18:00'),
+     TRIP[3].items.filter(i => /Haltestelle/.test(i.p || '')).map(i => i.t).join(','));
   ok('Bus-Tab nennt die stuendlichen Abfahrten',
      /11, 12, 13, 14, 15, 16 und 17 Uhr/.test(src));
   ok('Bus-Tab nennt die Einstellung mit Pruefdatum',
