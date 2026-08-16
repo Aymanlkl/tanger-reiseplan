@@ -300,7 +300,7 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 .verdict div p{margin:3px 0 0;font-size:13px;color:var(--muted);line-height:1.45}
 .verdict div strong{font-size:14px}
 
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(250,248,244,.94);
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:70;background:rgba(250,248,244,.94);
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line);
   box-shadow:0 -1px 0 var(--line);
   display:flex;padding:5px 6px max(6px,var(--sb))}
@@ -552,6 +552,45 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 .tkl{display:inline-flex;align-items:center;gap:5px;padding:4px 9px 4px 7px;border-radius:6px;
   background:var(--ink);color:#fff;font-size:12px;font-weight:600}
 .tkl svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mapview{position:fixed;inset:0;z-index:60;background:var(--paper);display:flex;flex-direction:column}
+.mapview[hidden]{display:none}
+.mv-top{position:relative;z-index:2;padding:calc(var(--st) + 10px) 12px 10px;
+  background:var(--ink);color:#fff;flex:0 0 auto}
+.mv-head{position:relative;padding-right:40px}
+.mv-head .meta{font-family:var(--m);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--saffron);margin-bottom:3px}
+.mv-head h3{font-size:17px;font-weight:600;line-height:1.25}
+#mvClose{position:absolute;right:0;top:2px;width:32px;height:32px;border-radius:50%;
+  background:rgba(255,255,255,.12);color:#fff;display:grid;place-items:center}
+#mvClose svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
+.mv-days{display:flex;gap:6px;overflow-x:auto;margin-top:10px;padding-bottom:2px;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.mv-days::-webkit-scrollbar{display:none}
+.mv-days button{flex:0 0 auto;padding:6px 13px;border-radius:999px;background:var(--ink-2);
+  color:#C9D4D8;font-family:var(--m);font-size:12px;font-weight:600;white-space:nowrap;
+  transition:background .18s,color .18s}
+.mv-days button.an{background:var(--saffron);color:var(--ink)}
+#bigmap{flex:1 1 auto;min-height:0}
+.mv-cards{position:absolute;left:0;right:0;bottom:calc(56px + max(6px,var(--sb)));z-index:2;
+  display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;
+  padding:0 calc(50% - 125px) 12px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.mv-cards::-webkit-scrollbar{display:none}
+.mv-card{flex:0 0 250px;scroll-snap-align:center;background:var(--card);border-radius:var(--r);
+  padding:13px 14px;box-shadow:var(--shadow);cursor:pointer;
+  transition:transform .22s var(--ease),opacity .22s var(--ease)}
+.mv-card:not(.an){transform:scale(.94);opacity:.72}
+.mv-card .z{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.mv-card .nr{flex:0 0 22px;height:22px;border-radius:50%;background:var(--saffron);color:var(--ink);
+  display:grid;place-items:center;font-family:var(--m);font-size:11px;font-weight:700}
+.mv-card .zt{font-family:var(--m);font-size:12.5px;font-weight:600;color:var(--muted)}
+.mv-card b{display:block;font-size:14.5px;line-height:1.3;margin-bottom:4px}
+.mv-card p{font-size:12.5px;line-height:1.45;color:var(--muted);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mv-card .pr{display:inline-block;margin-top:7px;font-family:var(--m);font-size:10.5px;font-weight:600;
+  background:var(--saffron-wash);color:var(--saffron-deep);padding:3px 7px;border-radius:5px}
+.pin.an{z-index:400!important}
+.pin.an b{background:var(--ink);transform:scale(1.25)}
+.mvopen{flex:0 0 auto}
 .tkseg{display:flex;gap:6px;margin-bottom:4px}
 .tkseg button{flex:1;padding:8px 6px;border-radius:8px;background:var(--line-2);color:var(--muted);
   font-size:13px;font-weight:600;cursor:pointer;transition:background .18s,color .18s}
@@ -800,6 +839,19 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
   <button data-p="info"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5h.01"/></svg><span>Info</span></button>
   <i class="tabind" id="tabind"></i>
 </nav>
+
+<div class="mapview" id="mapview" hidden>
+  <div class="mv-top">
+    <div class="mv-head">
+      <div class="meta" id="mvMeta"></div>
+      <h3 id="mvTitle"></h3>
+      <button id="mvClose" aria-label="Karte schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="mv-days" id="mvDays"></div>
+  </div>
+  <div id="bigmap"></div>
+  <div class="mv-cards" id="mvCards"></div>
+</div>
 
 <div class="qrview" id="qrview" hidden>
   <img id="qrimg" alt="Fahrkarte">
@@ -1452,7 +1504,8 @@ function renderDay(){
     '<p id="maphint">'+pts.length+' Orte auf der Route · Kartendaten © OpenStreetMap</p>'+
     '<button class="dlbtn'+(watchId!==null?' done':'')+'" id="dlpos">'+ICO_HIER+
     (watchId!==null?'Standort an':'Standort')+'</button>'+
-    '<button class="dlbtn" id="dltiles">'+ICO_DL+'Ausschnitt</button></div>':'';
+    '<button class="dlbtn" id="dltiles">'+ICO_DL+'Ausschnitt</button>'+
+    '<button class="dlbtn mvopen" id="mvopen">'+ICO_TARGET+'Große Karte</button></div>':'';
 
   var tagSum=tagKosten(active);
   var summenZeile='<div class="tagsum"><span>Kosten für diesen Tag</span><b>'+
@@ -1738,8 +1791,120 @@ function buildMap(d,pts){
   btn.onclick=function(){saveTiles(btn,d.n);};
   var pb=$("#dlpos");
   if(pb)pb.onclick=function(){startPos(pb);};
+  var mo=$("#mvopen");
+  if(mo)mo.onclick=function(){openMapView();};
   updateEntfernungen();
 
+}
+
+/* ---------- Kartenansicht: Vollbild mit Karussell ----------
+   Karte und Karten unten sind gekoppelt: Wischen schwenkt die Karte,
+   ein Tipp auf einen Marker rollt das Karussell an die passende Stelle. */
+var mvMap=null,mvMarker=[],mvPts=[],mvIdx=0,mvStumm=false,mvTimer=null;
+
+function mvPunkte(di){
+  var out=[];
+  dayItems(di).forEach(function(it,i){if(it.loc&&it.loc.lat)out.push({it:it,i:i});});
+  return out;
+}
+
+function openMapView(){
+  var v=$("#mapview");if(!v)return;
+  v.hidden=false;
+  document.body.classList.add('mvoffen');
+  mvBaue();
+}
+
+function closeMapView(){
+  var v=$("#mapview");if(!v)return;
+  v.hidden=true;
+  document.body.classList.remove('mvoffen');
+  if(mvMap){mvMap.remove();mvMap=null;}
+  mvMarker=[];mvPts=[];
+}
+
+function mvBaue(){
+  var d=TRIP[active];
+  $("#mvMeta").textContent='Tag '+d.n+' · '+d.wd+' '+d.dd+'.09. · '+d.tag;
+  $("#mvTitle").textContent=d.title;
+
+  $("#mvDays").innerHTML=TRIP.map(function(t,i){
+    return '<button data-d="'+i+'"'+(i===active?' class="an"':'')+'>'+t.wd+' '+t.dd+'</button>';
+  }).join('');
+  $$("#mvDays button").forEach(function(b){b.onclick=function(){
+    active=+b.dataset.d;renderStrip();renderDay();mvBaue();};});
+  var an=$("#mvDays .an");
+  if(an&&an.scrollIntoView)an.scrollIntoView({block:'nearest',inline:'center'});
+
+  mvPts=mvPunkte(active);
+  mvIdx=0;
+
+  $("#mvCards").innerHTML=mvPts.map(function(p,n){
+    var pr=itemKosten(p.it);
+    return '<div class="mv-card'+(n===0?' an':'')+'" data-n="'+n+'">'+
+      '<div class="z"><span class="nr">'+(n+1)+'</span><span class="zt">'+esc(p.it.t)+'</span></div>'+
+      '<b>'+esc(p.it.h)+'</b>'+
+      (p.it.p?'<p>'+esc(p.it.p)+'</p>':'')+
+      (pr?'<span class="pr">'+Math.round(pr).toLocaleString('de-DE')+' MAD'+(p.it.pp?' p. P.':'')+'</span>':'')+
+      '</div>';
+  }).join('');
+  $$("#mvCards .mv-card").forEach(function(c){c.onclick=function(){
+    openSheet(active,mvPts[+c.dataset.n].i);};});
+  $("#mvCards").onscroll=function(){
+    if(mvStumm)return;
+    clearTimeout(mvTimer);
+    mvTimer=setTimeout(mvAusScroll,90);
+  };
+
+  mvKarte();
+}
+
+function mvKarte(){
+  if(mvMap){mvMap.remove();mvMap=null;}
+  if(typeof L==='undefined'||!mvPts.length)return;
+  var ll=mvPts.map(function(p){return [p.it.loc.lat,p.it.loc.lng];});
+  mvMap=L.map($("#bigmap"),{scrollWheelZoom:false,zoomControl:false});
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {maxZoom:18,attribution:'&copy; OpenStreetMap'}).addTo(mvMap);
+  L.polyline(ll,{color:'#10222B',weight:2,opacity:.45,dashArray:'5 6'}).addTo(mvMap);
+  mvMarker=mvPts.map(function(p,n){
+    return L.marker(ll[n],{icon:L.divIcon({className:'pin'+(n===0?' an':''),html:'<b>'+(n+1)+'</b>',
+      iconSize:[24,24],iconAnchor:[12,12]}),title:p.it.h})
+     .addTo(mvMap).on('click',function(){mvZuIndex(n,true);});
+  });
+  mvMap.fitBounds(L.latLngBounds(ll).pad(.18));
+}
+
+/* Welche Karte steht in der Mitte? */
+function mvAusScroll(){
+  var box=$("#mvCards");if(!box)return;
+  var mitte=box.scrollLeft+box.clientWidth/2,best=0,bd=Infinity;
+  $$("#mvCards .mv-card").forEach(function(c,n){
+    var m=c.offsetLeft+c.offsetWidth/2,dd=Math.abs(m-mitte);
+    if(dd<bd){bd=dd;best=n;}
+  });
+  if(best!==mvIdx)mvZuIndex(best,false);
+}
+
+function mvZuIndex(n,rollen){
+  if(n<0||n>=mvPts.length)return;
+  mvIdx=n;
+  $$("#mvCards .mv-card").forEach(function(c,i){c.className='mv-card'+(i===n?' an':'');});
+  // Nur die eigene Klasse anfassen — Leaflet verwaltet die uebrigen selbst.
+  mvMarker.forEach(function(m,i){
+    var el=m.getElement&&m.getElement();
+    if(el&&el.classList)el.classList.toggle('an',i===n);
+  });
+  var p=mvPts[n];
+  if(mvMap&&p)mvMap.panTo([p.it.loc.lat,p.it.loc.lng],{animate:true,duration:.4});
+  if(rollen){
+    var c=$$("#mvCards .mv-card")[n],box=$("#mvCards");
+    if(c&&box){
+      mvStumm=true;
+      box.scrollTo({left:c.offsetLeft-(box.clientWidth-c.offsetWidth)/2,behavior:'smooth'});
+      setTimeout(function(){mvStumm=false;},420);
+    }
+  }
 }
 
 /* ---------- Offline-Kartenausschnitt ---------- */
@@ -1938,6 +2103,7 @@ function moveInd(){
 }
 
 $$("#tabs button").forEach(function(b){b.onclick=function(){
+  closeMapView();
   $$("#tabs button").forEach(function(x){x.classList.toggle('on',x===b);});
   $$(".panel").forEach(function(p){p.classList.toggle('on',p.id==='p-'+b.dataset.p);});
   moveInd();
@@ -1945,6 +2111,14 @@ $$("#tabs button").forEach(function(b){b.onclick=function(){
   if(b.dataset.p==='tage'&&mapObj)setTimeout(function(){mapObj.invalidateSize();},60);
   var sh=$("#shell");
   if(sh)sh.scrollTo({top:0,behavior:smoothOk()?'smooth':'auto'});};});
+
+(function(){
+  var c=$("#mvClose");
+  if(c)c.onclick=function(){closeMapView();};
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&!$("#mapview").hidden)closeMapView();
+  });
+})();
 
 /* Erst positionieren, dann Transition scharfschalten — sonst gleitet der
    Unterstrich beim Laden sichtbar von links herein. */

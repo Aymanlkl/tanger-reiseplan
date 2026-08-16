@@ -36,7 +36,9 @@ global.document = { querySelector: get, querySelectorAll: s => {
     // Gemessen auf dem Geraet: Bildschirm 956, Fenster 894 — die 62px oben
     // sind schon abgezogen, also muss --st auf 0 landen.
     style: { _v:{}, setProperty(k,v){ this._v[k]=v }, getPropertyValue(k){ return this._v[k]||'' } } },
-  body: { appendChild(){}, removeChild(){} } };
+  body: { appendChild(){}, removeChild(){},
+    classList:{ _s:new Set(), add(c){this._s.add(c)}, remove(c){this._s.delete(c)},
+                contains(c){return this._s.has(c)} } } };
 // Kein echter Netzzugriff im Test
 global.fetch = () => Promise.reject(new Error('kein Netz im Test'));
 global.navigator.geolocation = { watchPosition(){ return 1 }, clearWatch(){} };
@@ -56,11 +58,17 @@ const drawn = { markers: [], tiles: null, polyline: null };
 let mapClick = null;   // Klick-Handler, den buildMap registriert
 global.L = { map: () => ({ remove(){}, fitBounds(){}, setView(){},
     on(ev, fn){ if (ev === 'click') mapClick = fn; },
-    getBounds:()=>({getWest:()=>-5.94,getEast:()=>-5.76,getNorth:()=>35.80,getSouth:()=>35.75}),
+    panTo:(ll)=>{ drawn.pan = ll },
+  remove(){ drawn.removed = (drawn.removed||0)+1 },
+  getBounds:()=>({getWest:()=>-5.94,getEast:()=>-5.76,getNorth:()=>35.80,getSouth:()=>35.75}),
     getZoom:()=>13, invalidateSize(){} }),
   tileLayer: u => { drawn.tiles = u; return {addTo(){}} },
   polyline: ll => { drawn.polyline = ll; return {addTo(){}} },
-  marker: ll => { drawn.markers.push(ll); return {addTo(){return {on(){}}}} },
+  marker: ll => { drawn.markers.push(ll);
+    const el = { classList:{ _s:new Set(),
+      toggle(c,an){ an ? this._s.add(c) : this._s.delete(c) }, contains(c){ return this._s.has(c) } } };
+    const m = { getElement:()=>el, on(){ return m }, addTo(){ return m } };
+    return m },
   divIcon: o=>o, latLngBounds: l=>({pad:()=>l}) };
 
 try { eval(code); } catch (e) { console.log('LAUFZEITFEHLER:', e.message); process.exit(1) }
@@ -170,6 +178,38 @@ console.log('\nFotos und Stadtkarte');
        return fehlt.join(' | ');})());
   ok('Standortknopf an der Karte', /id="dlpos"/.test(els['#p-tage'].innerHTML)
      && /id="dltiles"/.test(els['#p-tage'].innerHTML));
+
+console.log('\nKartenansicht');
+  eval('active=1;renderDay();openMapView();');
+  ok('oeffnet und ist sichtbar', els['#mapview'].hidden===false);
+  ok('eine Karte je Ort', eval('mvPts.length')===14
+     && (els['#mvCards'].innerHTML.match(/class="mv-card/g)||[]).length===14,
+     `${eval('mvPts.length')}`);
+  ok('erste Karte ist aktiv',   /class="mv-card an"/.test(els['#mvCards'].innerHTML));
+  ok('Marker je Ort gesetzt',   eval('mvMarker.length')===14);
+  ok('Nummern beginnen bei 1',  />1</.test(els['#mvCards'].innerHTML));
+  ok('Tagesreiter fuer alle 9 Tage',
+     (els['#mvDays'].innerHTML.match(/<button/g)||[]).length===9);
+
+  // Marker antippen muss das Karussell mitziehen, nicht nur die Karte schwenken.
+  eval('mvZuIndex(4,true);');
+  ok('Marker waehlt die passende Karte', eval('mvIdx')===4
+     && /data-n="4"/.test(els['#mvCards'].innerHTML));
+  ok('genau eine Karte aktiv',
+     (els['#mvCards'].innerHTML.match(/mv-card an/g)||[]).length===1);
+  ok('genau ein Marker hervorgehoben',
+     eval("mvMarker.filter(function(m){return m.getElement().classList.contains('an');}).length")===1);
+  ok('Karte schwenkt zum Punkt',
+     Math.abs(drawn.pan[0]-TRIP[1].items.filter(i=>i.loc&&i.loc.lat)[4].loc.lat)<.0001);
+  ok('ausserhalb des Bereichs passiert nichts',
+     (()=>{eval('mvZuIndex(99,false);');return eval('mvIdx')===4})());
+
+  eval('active=8;renderDay();mvBaue();');
+  ok('Tageswechsel baut neu auf', eval('mvPts.length')===1 && eval('mvIdx')===0);
+  eval('closeMapView();');
+  ok('schliesst und raeumt auf',
+     els['#mapview'].hidden===true && eval('mvMap')===null && eval('mvMarker.length')===0);
+  eval('active=0;renderDay();');
 
 console.log('\nFahrkarten');
   ok('Rabat: beide Zugpunkte fuehren zur Fahrkarte',
