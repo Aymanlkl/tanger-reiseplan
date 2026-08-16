@@ -270,6 +270,20 @@ console.log('\nTagespreise bearbeitbar');
   ok('Kostenseite listet alle neun Tage',
      (els['#tblTage'].innerHTML.match(/class="taglink"/g)||[]).length===9,
      `${(els['#tblTage'].innerHTML.match(/class="taglink"/g)||[]).length}`);
+  ok('Tagessumme enthaelt keine Festkosten',
+     (()=>{eval('withHotel=true;withFlug=true;withPark=true;renderCosts();');
+           const mit=eval('tagKosten(0)');
+           eval('withHotel=false;withFlug=false;withPark=false;renderCosts();');
+           return mit===eval('tagKosten(0)');})());
+  ok('Festkosten stehen als eigener Block auf der Kostenseite',
+     (()=>{eval('withHotel=true;withFlug=true;withPark=true;renderCosts();');
+           const h=els['#tblTage'].innerHTML;
+           const ok2=/Vorab bezahlt/.test(h)&&/Hotel Mamora/.test(h)&&/Summe vor Ort/.test(h)&&/Summe gesamt/.test(h);
+           eval('withHotel=false;withFlug=false;withPark=false;renderCosts();');
+           return ok2;})());
+  ok('Tageskarte weist aus, dass Festkosten fehlen',
+     (()=>{eval('active=0;renderDay();');
+           return /ohne Hotel, Flug und Parken/.test(els['#p-tage'].innerHTML);})());
 
 console.log('\nAbrechnung');
   eval("SPENT={};EXTRA=[];people=2;withFood=false;withHotel=false;withFlug=false;withPark=false;renderCosts();");

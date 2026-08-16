@@ -385,6 +385,8 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 .cmprow.under td:last-child{color:var(--sea)}
 .cmprow.over td:last-child{color:var(--alert)}
 .cmprow td small{font-weight:400}
+.festkopf td{font-family:var(--m);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--faint);font-weight:600;padding-top:14px!important;border-top:1px solid var(--line)!important}
 .taglink{font-weight:600;font-size:13.5px;color:var(--ink);text-align:left;
   border-bottom:1.5px dotted var(--line);padding-bottom:1px}
 .taglink:active{color:var(--saffron-deep)}
@@ -1245,8 +1247,8 @@ function renderDay(){
 
   var tagSum=tagKosten(active);
   var summenZeile='<div class="tagsum"><span>Kosten für diesen Tag</span><b>'+
-    tagSum.toLocaleString('de-DE')+' MAD</b><small>'+people+(people===1?' Person':' Personen')+
-    (withFood?', mit Essen':', ohne Essen')+'</small></div>';
+    Math.round(tagSum).toLocaleString('de-DE')+' MAD</b><small>'+people+(people===1?' Person':' Personen')+
+    (withFood?', mit Essen':', ohne Essen')+' · ohne Hotel, Flug und Parken</small></div>';
 
   var fotoBlock='<div class="fotos"><h4>Fotos vom Tag</h4><div class="fgrid" id="fgrid"></div>'+
     '<div class="faddwrap"><label class="fadd" for="fotofile">'+ICO_CAM+'Foto hinzufügen</label>'+
@@ -1297,7 +1299,7 @@ function wireEdit(){
       setOv(active,+el.dataset.i,'v',(el.value===''||isNaN(v))?0:Math.round(v));
       renderCosts();                       // Kostenseite sofort mitziehen
       var t=$(".tagsum b");
-      if(t)t.textContent=tagKosten(active).toLocaleString('de-DE')+' MAD';
+      if(t)t.textContent=Math.round(tagKosten(active)).toLocaleString('de-DE')+' MAD';
     };});
   $$("#p-tage .ed-pp").forEach(function(b){b.onclick=function(){
     var i=+b.dataset.i,neu=item(active,i).pp?0:1;
@@ -1570,10 +1572,10 @@ function renderCosts(){
 
   var est={},zeilen='',gesTage=0;
   TRIP.forEach(function(d,di){
-    var v=tagKosten(di);gesTage+=v;est['d'+d.n]=v;
+    var v=tagKosten(di);gesTage+=v;est['d'+d.n]=Math.round(v);
     zeilen+='<tr><td><button class="taglink" data-i="'+di+'">Tag '+d.n+' · '+esc(d.tag)+'</button>'+
       '<small>'+d.wd+' '+d.dd+'.09. · '+esc(d.title)+'</small></td><td>'+
-      v.toLocaleString('de-DE')+spendInput('d'+d.n)+'</td></tr>';
+      Math.round(v).toLocaleString('de-DE')+spendInput('d'+d.n)+'</td></tr>';
   });
   var ueber=uebergreifend();
   if(ueber){
@@ -1582,8 +1584,21 @@ function renderCosts(){
       .map(function(c){return esc(c.n);}).join(' · ')+'</small></td><td>'+
       ueber.toLocaleString('de-DE')+spendInput('x')+'</td></tr>';
   }
+  var vorOrt=Math.round(gesTage);
+  var fest='', festSum=0;
+  [[withHotel,'Hotel Mamora','acht Nächte für beide',HOTEL_EUR],
+   [withFlug,'Flug Weeze – Tanger','hin und zurück für beide',FLUG_EUR],
+   [withPark,'Parken in Weeze','Flughafen, acht Tage',PARK_EUR]].forEach(function(f){
+    if(!f[0])return;
+    var mad=Math.round(f[3]*EURMAD);festSum+=mad;
+    fest+='<tr><td>'+f[1]+'<small>'+f[2]+' · '+f[3].toLocaleString('de-DE',{minimumFractionDigits:2})+' €</small></td><td>'+
+      mad.toLocaleString('de-DE')+'</td></tr>';
+  });
   $("#tblTage").innerHTML=zeilen+
-    '<tr class="sumrow"><td>Summe vor Ort</td><td>'+gesTage.toLocaleString('de-DE')+' MAD</td></tr>'+
+    '<tr class="sumrow"><td>Summe vor Ort<small>alles, was an den Tagen anfällt</small></td><td>'+
+      vorOrt.toLocaleString('de-DE')+' MAD</td></tr>'+
+    (fest?'<tr class="festkopf"><td colspan="2">Vorab bezahlt</td></tr>'+fest+
+      '<tr class="sumrow"><td>Summe gesamt</td><td>'+(vorOrt+festSum).toLocaleString('de-DE')+' MAD</td></tr>':'')+
     '<tr class="cmprow" id="cmpT"></tr>';
   EST={t:est,e:{}};
   updateCmp();
@@ -1598,7 +1613,7 @@ function renderCosts(){
       parkMAD=Math.round(PARK_EUR*EURMAD);
   var fpp=foodPerPerson();
   var foodMAD=fpp.sum*people;
-  var sum=gesTage+(withHotel?hotelMAD:0)+(withFlug?flugMAD:0)+(withPark?parkMAD:0);
+  var sum=vorOrt+festSum;
   $("#tot").innerHTML=sum.toLocaleString('de-DE')+'<span>MAD</span>';
 
   // Untertitel benennt, was gerade drinsteckt — sonst raet man beim Ablesen
@@ -1614,10 +1629,13 @@ function renderCosts(){
   if(lfo)lfo.textContent=fpp.sum.toLocaleString('de-DE')+' MAD pro Person aus den geplanten Lokalen'+
     (fpp.ohne?' · '+fpp.ohne+' Posten ohne Preisangabe':'');
   var lh=$("#lbHotel"),lf=$("#lbFlug");
-  if(lh)lh.textContent=HOTEL_EUR.toLocaleString('de-DE',{minimumFractionDigits:2})+' € für beide, acht Nächte — '+hotelMAD.toLocaleString('de-DE')+' MAD';
-  if(lf)lf.textContent=FLUG_EUR.toLocaleString('de-DE')+' € — '+flugMAD.toLocaleString('de-DE')+' MAD';
+  if(lh)lh.textContent=HOTEL_EUR.toLocaleString('de-DE',{minimumFractionDigits:2})+' € für beide — '+
+    hotelMAD.toLocaleString('de-DE')+' MAD · erscheint nur hier, nicht in den Tagen';
+  if(lf)lf.textContent=FLUG_EUR.toLocaleString('de-DE')+' € — '+flugMAD.toLocaleString('de-DE')+
+    ' MAD · erscheint nur hier, nicht in den Tagen';
   var lp=$("#lbPark");
-  if(lp)lp.textContent=PARK_EUR.toLocaleString('de-DE')+' € für acht Tage am Flughafen — '+parkMAD.toLocaleString('de-DE')+' MAD';
+  if(lp)lp.textContent=PARK_EUR.toLocaleString('de-DE')+' € — '+parkMAD.toLocaleString('de-DE')+
+    ' MAD · erscheint nur hier, nicht in den Tagen';
   $("#tglHotel").className='tgl'+(withHotel?' on':'');
   $("#tglFlug").className='tgl'+(withFlug?' on':'');
   $("#tglPark").className='tgl'+(withPark?' on':'');
