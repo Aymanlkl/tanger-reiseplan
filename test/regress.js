@@ -468,18 +468,19 @@ console.log('\nVersion und Update');
 
 
 console.log('\nApp-Huelle');
-  ok('Body ist eine Spalte, die Huelle scrollt darin',
-     /body\{[^}]*display:flex;flex-direction:column/.test(src)
-     && /#shell\{flex:1 1 auto;min-height:0;overflow-y:auto/.test(src));
-  ok('Leiste steht im Fluss, nicht mehr position:fixed',
-     /\.tabs\{position:relative;flex:0 0 auto/.test(src) && !/\.tabs\{position:fixed/.test(src));
-  ok('Hoehe folgt dem sichtbaren Viewport', /height:100vh;height:100dvh/.test(src));
+  ok('Huelle und Leiste sind fest am Viewport verankert',
+     /#shell\{position:fixed;top:0;left:0;right:0;bottom:0/.test(src)
+     && /\.tabs\{position:fixed;left:0;right:0;bottom:0/.test(src));
+  ok('kein 100dvh mehr — schliesst die Systemzonen im Standalone nicht ein',
+     !/height:100dvh/.test(src));
+  ok('Bodenfreiheit deckt genau die Leistenhoehe',
+     /#shell\{padding-bottom:calc\(56px \+ max\(6px,var\(--sb\)\)\)\}/.test(src));
   ok('Systemzone unten wird nicht doppelt gerechnet',
      /padding:5px 6px max\(6px,var\(--sb\)\)/.test(src) && !/calc\(7px \+ var\(--sb\)\)/.test(src));
   ok('Summenbox darf umbrechen', /\.tagsum\{display:flex;flex-wrap:wrap/.test(src));
   ok('Markup liegt in der Huelle',
      /<body>\s*<div id="shell">/.test(src) && /<\/div><!-- \/shell -->/.test(src));
-  ok('Reiterleiste steht nach der Huelle',
+  ok('Reiterleiste liegt ausserhalb der Huelle',
      src.indexOf('</div><!-- /shell -->') < src.indexOf('<nav class="tabs"'));
   ok('kein Pinch-Zoom', /touch-action:pan-y/.test(src) && /user-scalable=no/.test(src));
   ok('kein Gummiband', /overscroll-behavior:none/.test(src) && /overscroll-behavior-y:contain/.test(src));
