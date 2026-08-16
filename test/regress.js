@@ -30,7 +30,10 @@ global.document = { querySelector: get, querySelectorAll: s => {
     if (s === '#tabs button') return [get('t1'),get('t2'),get('t3'),get('t4')];
     if (s === '#p-tage .ttl') return (els['#p-tage'].innerHTML.match(/class="ttl" data-d="(\d+)"/g)||[])
       .map(x => { const e = El('ttl'); e.dataset.d = x.match(/data-d="(\d+)"/)[1]; return e });
-    return [] }, createElement: El, addEventListener(){} };
+    return [] }, createElement: El, addEventListener(){},
+  documentElement: { _theme:null, setAttribute(k,v){ this._theme=v }, getAttribute(){ return this._theme } } };
+// Kein echter Netzzugriff im Test
+global.fetch = () => Promise.reject(new Error('kein Netz im Test'));
 global.window = { addEventListener(){}, scrollTo(){}, matchMedia:()=>({matches:false}), location:{origin:'x'} };
 global.window.Notification = global.Notification = { permission:'default', requestPermission:()=>Promise.resolve('granted') };
 global.navigator = { userAgent:'node' };
@@ -122,6 +125,19 @@ console.log('\nKarte');
   const urls = eval('active=0;renderDay();tileUrls()');
   ok('Kachel-URLs, Deckel 160', urls.length>0 && urls.length<=160 && /^https:\/\/tile\.openstreetmap\.org\//.test(urls[0]), `${urls.length}`);
 
+console.log('\nFotos und Stadtkarte');
+  eval('active=1;renderDay();');
+  ok('Fotoblock in der Tageskarte', /id="fgrid"/.test(els['#p-tage'].innerHTML)
+     && /id="fotofile"/.test(els['#p-tage'].innerHTML));
+  ok('Fotopfad je Tag getrennt', eval('fotoPath(2,"IMG 1.jpg")')==='fotos/2/IMG%201.jpg');
+  const stadt = eval('tileUrls(CITY)');
+  ok('Stadtkarte liefert Kacheln unter dem Deckel',
+     stadt.length>50 && stadt.length<=eval('CITY.max'), `${stadt.length}`);
+  ok('Stadtkacheln beginnen beim Stadtzoom',
+     stadt[0].indexOf('/'+eval('CITY.z1')+'/')!==-1, stadt[0]);
+  ok('beide Knoepfe im Markup', /id="dlcity"/.test(els['#p-tage'].innerHTML)
+     && /id="dltiles"/.test(els['#p-tage'].innerHTML));
+
 console.log('\nDokumentenablage');
   ok('Pfad wird sauber kodiert',
      eval('docPath("Zug Ticket.pdf")')==='docs/Zug%20Ticket.pdf');
@@ -203,7 +219,33 @@ console.log('\nHotel- und Flugschalter');
   eval("withFood=false;withHotel=false;withFlug=false;renderCosts();");
 
 console.log('\nKostenmodell');
-  ok('Essensbudget passt zu den geplanten Lokalen', /withFood\?220\*people\*9/.test(src));
+  const fpp = eval('foodPerPerson()');
+  ok('Essensbudget kommt aus den Chips, nicht aus einer Pauschale',
+     !/220\*people\*9/.test(src) && fpp.sum>1500 && fpp.sum<2600, JSON.stringify(fpp));
+  ok('Chip-Parser: Bereich, ca., ohne Betrag',
+     eval('chipMAD("25–35 MAD")')===30 && eval('chipMAD("ca. 130 MAD")')===130
+     && eval('chipMAD("im Zimmerpreis")')===0 && eval('chipMAD("gebucht")')===0);
+  ok('Essenssumme folgt einer Preisaenderung',
+     (()=>{const vor=eval('foodPerPerson()').sum;
+           eval(`setOv(6,${TRIP[6].items.findIndex(i=>i.h==='Rio do Texas')},'p','x');`);
+           const gleich=eval('foodPerPerson()').sum===vor;
+           eval(`delete OV['6_${TRIP[6].items.findIndex(i=>i.h==='Rio do Texas')}'];`);
+           return gleich;})());
+
+console.log('\nAbrechnung');
+  eval("SPENT={};EXTRA=[];people=2;withFood=false;withHotel=false;withFlug=false;renderCosts();");
+  ok('leer: noch nichts erfasst', /noch nichts erfasst/.test(els['#tblBilanz'].innerHTML));
+  ok('Geplant-Zeile zeigt eine Zahl, kein NaN',
+     /Geplant/.test(els['#tblBilanz'].innerHTML) && !/NaN/.test(els['#tblBilanz'].innerHTML));
+  eval("SPENT={t0:200,e0:100};renderCosts();");
+  ok('Ist-Werte summieren sich', /300 MAD/.test(els['#tblBilanz'].innerHTML), els['#tblBilanz'].innerHTML.replace(/<[^>]+>/g,' ').slice(0,120));
+  ok('unter dem Plan wird als under markiert', /bilrow under/.test(els['#tblBilanz'].innerHTML));
+  eval("EXTRA=[{t:'Taxi zum Markt',v:40},{t:'Geschenk',v:160}];renderCosts();");
+  ok('freie Ausgaben zaehlen mit', /500 MAD/.test(els['#tblBilanz'].innerHTML));
+  ok('freie Ausgaben werden gelistet', /Taxi zum Markt/.test(els['#extras'].innerHTML) && /160 MAD/.test(els['#extras'].innerHTML));
+  eval("SPENT={t0:99999};EXTRA=[];renderCosts();");
+  ok('ueber dem Plan wird als over markiert', /bilrow over/.test(els['#tblBilanz'].innerHTML));
+  eval("SPENT={};EXTRA=[];renderCosts();");
   ok('kein Hammam-Posten mehr', !COSTS_E.some(c=>/Hammam/.test(c.n)));
   ok('kein Paradise-Beach-Taxi mehr', !COSTS_T.some(c=>/Paradise/.test(c.n)));
   ok('Mietwagen statt Achakkar-Taxi',
@@ -288,6 +330,22 @@ console.log('\nJetzt-Zeile');
   log.now.length=0; eval('goDay(3);goDay(2);');
   ok('Tageswechsel springt nicht', log.now.length===0);
   global.Date = RD;
+
+console.log('\nDarstellung und Wetter');
+  eval("DARK=false;applyTheme();");
+  ok('hell ist Voreinstellung', document.documentElement.getAttribute()==='light');
+  eval("DARK=true;applyTheme();");
+  ok('dunkel setzt data-theme', document.documentElement.getAttribute()==='dark');
+  ok('Dunkelpalette im CSS definiert', /:root\[data-theme="dark"\]\{/.test(src));
+  eval("DARK=false;applyTheme();");
+  eval("WX=null;renderWx();");
+  ok('ohne Vorhersage sauberer Hinweis statt leerer Karte',
+     /noch keine Vorhersage/.test(els['#wxbox'].innerHTML));
+  eval(`WX={time:["2026-09-02","2026-09-03"],tmax:[29,31],tmin:[20,21],code:[0,2],stand:"01.09."};renderWx();`);
+  ok('Vorhersage wird auf die Reisetage gelegt',
+     /MI 02\.09\./i.test(els['#wxbox'].innerHTML) && /29°/.test(els['#wxbox'].innerHTML)
+     && /teils bewölkt/.test(els['#wxbox'].innerHTML), els['#wxbox'].innerHTML.replace(/<[^>]+>/g,' ').slice(0,90));
+  eval("WX=null;");
 
 console.log('\nGlocke');
   ['default','granted','denied'].forEach(p => {

@@ -30,6 +30,27 @@
   --f:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   --m:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Roboto Mono",monospace;
 }
+/* Dunkel: nur die Farbtoken werden getauscht, kein zweites Layout */
+:root[data-theme="dark"]{
+  --paper:#11181C; --card:#1A2328; --line:#2E3A40; --line-2:#232D33;
+  --text:#E6EDF0; --muted:#93A3AA; --faint:#6C7A81;
+  --ink:#0C1417; --ink-2:#18252B; --ink-3:#B9C9D0;
+  --saffron-wash:#3A2D10; --sea-wash:#15302B; --alert-wash:#3A1E17;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 18px -8px rgba(0,0,0,.6);
+}
+:root[data-theme="dark"] .note.warn{color:#F3B7A5}
+:root[data-theme="dark"] .note.tip{color:#93D8C6}
+:root[data-theme="dark"] .note.plan{background:#1F2A2F;color:#C3D2D8}
+:root[data-theme="dark"] .route{background:#1F2A2F}
+:root[data-theme="dark"] .rnote{background:#151E23}
+:root[data-theme="dark"] .maptools{background:#151E23}
+:root[data-theme="dark"] .tabs{background:rgba(17,24,28,.94)}
+:root[data-theme="dark"] .tabs button.on{color:var(--text)}
+:root[data-theme="dark"] #map{background:#1A2328}
+:root[data-theme="dark"] .tl li.editing{background:#151E23}
+:root[data-theme="dark"] .chip{background:#263238}
+:root[data-theme="dark"] table.cost td small{color:var(--faint)}
+
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 body{background:var(--paper);color:var(--text);font-family:var(--f);font-size:15px;line-height:1.5;
@@ -145,6 +166,20 @@ h1,h2,h3,h4{margin:0;font-weight:700;letter-spacing:-.022em;line-height:1.15}
 .chip.pay{background:var(--saffron-wash);color:var(--saffron-deep)}
 .chip.free{background:var(--sea-wash);color:var(--sea)}
 .chip+.chip{margin-left:5px}
+
+.fotos{margin-top:12px;padding-top:12px;border-top:1px solid var(--line-2)}
+.fotos h4{font-family:var(--m);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--saffron-deep);margin-bottom:9px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:7px}
+.fgrid figure{position:relative;margin:0;aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--line-2)}
+.fgrid img{width:100%;height:100%;object-fit:cover;display:block}
+.fgrid button{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;
+  background:rgba(16,34,43,.72);color:#fff;display:grid;place-items:center}
+.fgrid button svg{width:9px;height:9px;stroke:currentColor;fill:none;stroke-width:3;stroke-linecap:round}
+.faddwrap{margin-top:9px}
+label.fadd{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:8px;
+  background:var(--line-2);color:var(--ink-3);font-size:12.5px;font-weight:600;cursor:pointer}
+label.fadd svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 .mapl{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:4px 9px 4px 7px;
   border-radius:6px;background:var(--sea-wash);color:var(--sea);text-decoration:none;
@@ -338,6 +373,21 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 .cmprow.under td:last-child{color:var(--sea)}
 .cmprow.over td:last-child{color:var(--alert)}
 .cmprow td small{font-weight:400}
+.extras{margin-top:4px}
+.exrow{display:flex;align-items:center;gap:9px;padding:9px 0;border-top:1px solid var(--line-2);font-size:13.5px}
+.exrow span{flex:1;min-width:0;word-break:break-word}
+.exrow b{font-family:var(--m);font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.addex{display:flex;gap:7px;margin-top:12px}
+.addex input{border:1px solid var(--line);border-radius:6px;padding:8px 9px;background:var(--paper);
+  font-size:13px;color:var(--text);-webkit-appearance:none;appearance:none;min-width:0}
+.addex #exTxt{flex:1}
+.addex #exVal{width:82px;font-family:var(--m);text-align:right}
+.addex input:focus{outline:none;border-color:var(--saffron);background:var(--card)}
+.addex button{flex:0 0 auto;padding:8px 14px;border-radius:6px;background:var(--ink);color:#fff;
+  font-size:13px;font-weight:600}
+.bilrow td{border-top:2px solid var(--ink)!important;padding-top:11px!important;font-weight:700}
+.bilrow.under td:last-child{color:var(--sea)}
+.bilrow.over td:last-child{color:var(--alert)}
 
 /* ---------- Erinnerungen ---------- */
 .notif{display:flex;align-items:center;gap:11px;margin-top:11px}
@@ -401,6 +451,19 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 .docdel:active{background:var(--alert-wash);color:var(--alert)}
 .docdel svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.6;stroke-linecap:round}
 .dochint{margin:0 0 12px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.showbox{border:2px solid var(--ink);border-radius:var(--r-s);overflow:hidden}
+.showbox .ar{background:var(--ink);color:#fff;padding:15px 14px;font-size:21px;line-height:1.75;
+  text-align:center;direction:rtl}
+.showbox .fr{padding:13px 14px;font-size:17px;line-height:1.5;text-align:center;font-weight:600;color:var(--text)}
+.showhint{margin:11px 0 13px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.showhint b{font-size:14px;color:var(--text)}
+.wxrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line-2);font-size:13.5px}
+.wxrow:first-child{border-top:0}
+.wxrow .wd{flex:0 0 62px;font-family:var(--m);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.wxrow .ic{flex:0 0 22px;font-size:17px;text-align:center}
+.wxrow .tx{flex:1;color:var(--muted);font-size:12.5px}
+.wxrow .tp{font-family:var(--m);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.wxrow .tp small{color:var(--faint);font-weight:400}
 label.sbtn{cursor:pointer}
 
 button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-offset:2px}
@@ -494,7 +557,7 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
     </div>
 
     <div class="pplbar"><span>Wie viele mit marokkanischem Ausweis?<small>Ermäßigter Bustarif, wird kontrolliert</small></span><div class="pplbtn" id="mabtn"></div></div>
-    <button class="tgl" id="tglFood"><div class="sw"></div><div class="lb">Essen mitrechnen<small>ca. 220 MAD pro Person und Tag — Schnitt der geplanten Lokale</small></div></button>
+    <button class="tgl" id="tglFood"><div class="sw"></div><div class="lb">Essen mitrechnen<small id="lbFood"></small></div></button>
     <button class="tgl" id="tglHotel"><div class="sw"></div><div class="lb">Hotel mitrechnen<small id="lbHotel"></small></div></button>
     <button class="tgl" id="tglFlug"><div class="sw"></div><div class="lb">Flug mitrechnen<small id="lbFlug"></small></div></button>
 
@@ -504,6 +567,16 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
     <div class="card"><div class="card-h"><div class="meta">Pro Person</div><h3>Eintritte</h3></div>
       <div class="card-b"><table class="cost" id="tblE"></table>
         <div class="note tip"><b>Kostenlos:</b> Kasbah des Oudayas, Hassan-Turm, Mausoleum Mohammed V., Parc Perdicaris, alle Medinas und alle Strände.</div></div></div>
+
+    <div class="card"><div class="card-h"><div class="meta">Abrechnung</div><h3>Geplant gegen tatsächlich</h3>
+      <p>Zählt alle Ist-Felder aus den Tabellen plus alles, was du unten dazuschreibst.</p></div>
+      <div class="card-b"><table class="cost" id="tblBilanz"></table>
+        <div class="extras" id="extras"></div>
+        <div class="addex">
+          <input id="exTxt" placeholder="Wofür? z. B. Taxi zum Markt">
+          <input id="exVal" type="number" inputmode="decimal" min="0" step="1" placeholder="MAD">
+          <button id="exAdd">Dazu</button>
+        </div></div></div>
 
     <div class="card"><div class="card-h"><div class="meta">Bargeld</div><h3>Woran du denken musst</h3></div>
       <div class="card-b"><table class="cost">
@@ -539,6 +612,24 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
         <tr><td><strong>Kleidung</strong><small>Am Strand alles frei, in der Medina lieber Schultern und Knie bedeckt</small></td><td>—</td></tr>
       </table>
       <div class="note warn"><b>Guides in der Medina:</b> Am Petit Socco wirst du angesprochen. Freundlich, aber klar ablehnen — „Non merci, ça va". Wenn du einen Guide willst, buch ihn über die Rezeption, ca. 300 MAD für einen halben Tag.</div></div></div>
+
+    <div class="card show"><div class="card-h"><div class="meta">Dem Fahrer zeigen</div><h3>Bring mich hierhin</h3></div>
+      <div class="card-b">
+        <div class="showbox">
+          <div class="ar">فندق المامورة<br>19 زنقة مختار أحرضان<br>المدينة القديمة، قرب السوق الداخل<br>طنجة</div>
+          <div class="fr">Hôtel Mamora<br>19, rue Mokhtar Ahardane<br>Médina, près du Petit Socco<br>Tanger</div>
+        </div>
+        <p class="showhint">Für die Rückfahrt zum Flughafen: <b>المطار — Aéroport Ibn Battouta</b></p>
+        <a class="sbtn" href="https://www.google.com/maps/search/?api=1&amp;query=H%C3%B4tel%20Mamora%2C%20Tanger"
+           target="_blank" rel="noopener">Auf der Karte zeigen</a>
+      </div></div>
+
+    <div class="card"><div class="card-h"><div class="meta">Vorhersage</div><h3>Wetter für die Reisetage</h3></div>
+      <div class="card-b" id="wxbox"></div></div>
+
+    <div class="card"><div class="card-h"><div class="meta">Darstellung</div><h3>Ansicht</h3></div>
+      <div class="card-b"><button class="tgl" id="tglTheme"><div class="sw"></div>
+        <div class="lb">Dunkle Ansicht<small>Abends und in der Medina angenehmer für die Augen</small></div></button></div></div>
 
     <div class="card"><div class="card-h"><div class="meta">Offline dabei</div><h3>Tickets &amp; Dokumente</h3>
       <p>Bleibt auf diesem Handy. Nichts davon wird hochgeladen oder geteilt.</p></div>
@@ -774,6 +865,30 @@ var active=0,people=2,busMA=1,withFood=false,withHotel=false,withFlug=false;
 var EURMAD=11;
 var HOTEL_EUR=433.31, FLUG_EUR=255;
 
+/* Preis-Chip in eine Zahl lesen. "ca. 130 MAD" -> 130, "25–35 MAD" -> 30,
+   Posten ohne Betrag ("im Zimmerpreis", "gebucht") zaehlen null. */
+function chipMAD(c){
+  if(!c)return 0;
+  if(/Zimmerpreis|gebucht|Hinfahrpreis|vor Ort|Tagesmiete|frei/i.test(c))return 0;
+  var r=String(c).match(/(\d+)\s*[–-]\s*(\d+)/);
+  if(r)return (+r[1]+ +r[2])/2;
+  var m=String(c).match(/(\d+)/);
+  return m?+m[1]:0;
+}
+
+/* Essensbudget aus den tatsaechlich geplanten Lokalen, nicht pauschal.
+   Aendert sich ein Restaurant, aendert sich die Summe von selbst. */
+function foodPerPerson(){
+  var sum=0,ohne=0;
+  TRIP.forEach(function(d,di){d.items.forEach(function(_,ii){
+    var it=item(di,ii);
+    if(!it.eat)return;
+    var v=chipMAD(it.c);
+    if(v)sum+=v; else if(!/Zimmerpreis/i.test(it.c||''))ohne++;
+  });});
+  return {sum:Math.round(sum),ohne:ohne};
+}
+
 var MAPS='https://www.google.com/maps/search/?api=1&query=';
 var ONCF='https://www.oncf-voyages.ma/';
 var TILE_CACHE='tanger-maps-v1',DATA_CACHE='tanger-data-v1',TILE_MAX=160;
@@ -786,6 +901,7 @@ var ICO_OK='<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></svg>';
 var ICO_NOTE='<svg viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9L14.5 20h-9A1.5 1.5 0 0 1 4 18.5Z"/><path d="M20 14.5h-5.5V20"/></svg>';
 var ICO_EDIT='<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.5 2.5 0 0 0-3.5-3.5L4.5 16.5Z"/><path d="M14.5 6.5 17.5 9.5"/></svg>';
 var ICO_BELL='<svg viewBox="0 0 24 24"><path d="M18 8.5a6 6 0 1 0-12 0c0 5-2 6.5-2 6.5h16s-2-1.5-2-6.5Z"/><path d="M13.7 19a2 2 0 0 1-3.4 0"/></svg>';
+var ICO_CAM='<svg viewBox="0 0 24 24"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3.4"/></svg>';
 var ICO_DOC='<svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>';
 var ICO_X='<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>';
 var ICO_CHEV='<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
@@ -793,7 +909,7 @@ var ICO_TARGET='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle 
 var ICO_BELL_OFF='<svg viewBox="0 0 24 24"><path d="M18 8.5a6 6 0 0 0-8.9-5.2M6.2 6.3A6 6 0 0 0 6 8.5c0 5-2 6.5-2 6.5h12"/><path d="M13.7 19a2 2 0 0 1-3.4 0M3 3l18 18"/></svg>';
 
 /* ---------- Overrides: Aenderungen liegen neben TRIP, nie darin ---------- */
-var OV={},RN={},SPENT={},NOTIF={},EDIT=false,mapObj=null,pinTarget=null;
+var OV={},RN={},SPENT={},NOTIF={},EXTRA=[],WX=null,DARK=false,EDIT=false,mapObj=null,pinTarget=null;
 function ik(di,ii){return di+'_'+ii;}
 
 /* Zusammengefuehrtes Item: Original + gespeicherte Aenderung.
@@ -1042,11 +1158,16 @@ function renderDay(){
   // unterhalb der Liste hat sie auf dem Handy niemand gefunden.
   var mapBlock=pts.length?'<div id="map"></div><div class="maptools">'+
     '<p id="maphint">'+pts.length+' Orte auf der Route · Kartendaten © OpenStreetMap</p>'+
-    '<button class="dlbtn" id="dltiles">'+ICO_DL+'Offline</button></div>':'';
+    '<button class="dlbtn" id="dlcity">'+ICO_DL+'Stadt</button>'+
+    '<button class="dlbtn" id="dltiles">'+ICO_DL+'Ausschnitt</button></div>':'';
+
+  var fotoBlock='<div class="fotos"><h4>Fotos vom Tag</h4><div class="fgrid" id="fgrid"></div>'+
+    '<div class="faddwrap"><label class="fadd" for="fotofile">'+ICO_CAM+'Foto hinzufügen</label>'+
+    '<input type="file" id="fotofile" accept="image/*" multiple hidden></div></div>';
 
   $("#p-tage").innerHTML=bar+'<div class="card"><div class="card-h"><div class="meta">Tag '+d.n+' · '+d.wd+' '+d.dd+
     '.09. · '+esc(d.tag)+'</div><div class="dnav"><h3>'+esc(d.title)+'</h3>'+arrows+'</div><p>'+esc(d.sub)+
-    '</p></div>'+mapBlock+'<div class="card-b"><ul class="tl">'+items+'</ul>'+notes+'</div></div>';
+    '</p></div>'+mapBlock+'<div class="card-b"><ul class="tl">'+items+'</ul>'+notes+fotoBlock+'</div></div>';
 
   $("#dprev").onclick=function(){goDay(active-1);};
   $("#dnext").onclick=function(){goDay(active+1);};
@@ -1055,6 +1176,7 @@ function renderDay(){
   wireEdit();
   wireNotes();
   $$("#p-tage .ttl").forEach(function(b){b.onclick=function(){openSheet(active,+b.dataset.d);};});
+  renderFotos();wireFotos();
   if(pts.length)buildMap(d,pts);
 
   // Zur laufenden Zeile springen — nur wenn angefordert, sonst wuerde jeder
@@ -1213,6 +1335,51 @@ function closeSheet(){
 }
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet();});
 
+/* ---------- Abrechnung: geplant gegen tatsaechlich ---------- */
+function extraSum(){
+  var v=0;EXTRA.forEach(function(e){v+=+e.v||0;});return v;
+}
+function renderBilanz(geplant){
+  var t=$("#tblBilanz");if(!t)return;
+  var bezahlt=0,n=0,k;
+  for(k in SPENT){bezahlt+=+SPENT[k]||0;n++;}
+  var frei=extraSum();
+  bezahlt+=frei;
+  var diff=Math.round(bezahlt-geplant);
+  var zeilen='<tr><td>Geplant<small>mit den Schaltern, die gerade an sind</small></td><td>'+
+      Math.round(geplant).toLocaleString('de-DE')+' MAD</td></tr>'+
+    '<tr><td>Erfasste Posten<small>'+n+' aus den Tabellen'+(EXTRA.length?' · '+EXTRA.length+' frei eingetragen':'')+
+      '</small></td><td>'+Math.round(bezahlt-frei).toLocaleString('de-DE')+' MAD</td></tr>';
+  if(EXTRA.length)zeilen+='<tr><td>Freie Ausgaben</td><td>'+Math.round(frei).toLocaleString('de-DE')+' MAD</td></tr>';
+  zeilen+='<tr class="bilrow '+(diff<=0?'under':'over')+'"><td>Bisher bezahlt<small>'+
+      (n||EXTRA.length?(diff<=0?'unter dem Plan':'über dem Plan'):'noch nichts erfasst')+
+      '</small></td><td>'+Math.round(bezahlt).toLocaleString('de-DE')+' MAD'+
+      (n||EXTRA.length?'<small>'+(diff<=0?'−':'+')+Math.abs(diff).toLocaleString('de-DE')+' MAD</small>':'')+'</td></tr>';
+  t.innerHTML=zeilen;
+
+  var box=$("#extras");
+  if(box){
+    box.innerHTML=EXTRA.map(function(e,i){
+      return '<div class="exrow"><span>'+esc(e.t||'Ohne Bezeichnung')+'</span><b>'+
+        Math.round(e.v).toLocaleString('de-DE')+' MAD</b>'+
+        '<button class="docdel" data-i="'+i+'" aria-label="Entfernen">'+ICO_X+'</button></div>';}).join('');
+    $$("#extras .docdel").forEach(function(b){b.onclick=function(){
+      EXTRA.splice(+b.dataset.i,1);Store.set('extra',EXTRA);renderCosts();};});
+  }
+}
+function wireExtra(){
+  var btn=$("#exAdd");if(!btn)return;
+  btn.onclick=function(){
+    var t=$("#exTxt"),v=$("#exVal");
+    var val=parseFloat(v.value);
+    if(!isFinite(val)||val<=0){v.focus();return;}
+    EXTRA.push({t:(t.value||'').trim(),v:Math.round(val)});
+    Store.set('extra',EXTRA);
+    t.value='';v.value='';
+    renderCosts();
+  };
+}
+
 /* ---------- Karte ---------- */
 function buildMap(d,pts){
   if(typeof L==='undefined'){$("#map").innerHTML='<p style="padding:14px;font-size:13px;color:#66757C">Karte nicht verfügbar.</p>';return;}
@@ -1242,6 +1409,8 @@ function buildMap(d,pts){
     if(s&&s[d.n]){btn.className='dlbtn done';btn.innerHTML=ICO_OK+s[d.n]+' Kacheln offline';}
   }).catch(function(){});
   btn.onclick=function(){saveTiles(btn,d.n);};
+  var cb=$("#dlcity");
+  if(cb)cb.onclick=function(){saveTiles(cb,'stadt',CITY);};
 }
 
 /* ---------- Offline-Kartenausschnitt ---------- */
@@ -1249,25 +1418,34 @@ function lon2x(lon,z){return Math.floor((lon+180)/360*Math.pow(2,z));}
 function lat2y(lat,z){var r=lat*Math.PI/180;
   return Math.floor((1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*Math.pow(2,z));}
 
-function tileUrls(){
-  var b=mapObj.getBounds(),z=mapObj.getZoom(),urls=[],zz,x,y;
-  for(zz=z;zz<=Math.min(z+1,17);zz++){
-    var x1=lon2x(b.getWest(),zz),x2=lon2x(b.getEast(),zz);
-    var y1=lat2y(b.getNorth(),zz),y2=lat2y(b.getSouth(),zz);
+// Stadtgebiet Tanger: Medina, Marshan, Neustadt, Malabata
+var CITY={w:-5.86,e:-5.75,n:35.81,s:35.75,z1:13,z2:16,max:420};
+
+function tileUrls(box){
+  var urls=[],zz,x,y,z1,z2,W,E,N,S,cap;
+  if(box){ W=box.w;E=box.e;N=box.n;S=box.s;z1=box.z1;z2=box.z2;cap=box.max; }
+  else{
+    var b=mapObj.getBounds(),z=mapObj.getZoom();
+    W=b.getWest();E=b.getEast();N=b.getNorth();S=b.getSouth();
+    z1=z;z2=Math.min(z+1,17);cap=TILE_MAX;
+  }
+  for(zz=z1;zz<=z2;zz++){
+    var x1=lon2x(W,zz),x2=lon2x(E,zz),y1=lat2y(N,zz),y2=lat2y(S,zz);
     for(x=x1;x<=x2;x++)for(y=y1;y<=y2;y++)
       urls.push('https://tile.openstreetmap.org/'+zz+'/'+x+'/'+y+'.png');
   }
-  return urls.slice(0,TILE_MAX);   // Deckel: die OSM-Kachelserver sind gespendet
+  return urls.slice(0,cap);   // Deckel: die OSM-Kachelserver sind gespendet
 }
 
-function saveTiles(btn,dayN){
-  if(!window.caches||!mapObj){btn.disabled=true;btn.textContent='Hier nicht möglich';return;}
-  var urls=tileUrls(),i=0,ok=0;
+function saveTiles(btn,dayN,box){
+  if(!window.caches||(!mapObj&&!box)){btn.disabled=true;btn.textContent='Hier nicht möglich';return;}
+  var urls=tileUrls(box),i=0,ok=0;
   btn.disabled=true;
   caches.open(TILE_CACHE).then(function(c){
     var done=function(){
       btn.disabled=false;btn.className='dlbtn done';btn.innerHTML=ICO_OK+ok+' Kacheln offline';
-      $("#maphint").textContent='Ausschnitt liegt im Cache — die Karte funktioniert hier auch ohne Netz.';
+      $("#maphint").textContent=(box?'Stadtgebiet Tanger':'Ausschnitt')+
+        ' liegt im Cache — die Karte funktioniert hier auch ohne Netz.';
       Store.get('tiles').then(function(s){s=s||{};s[dayN]=ok;Store.set('tiles',s);}).catch(function(){});
     };
     var next=function(){
@@ -1320,7 +1498,9 @@ function renderCosts(){
     Store.set('spent',SPENT);updateCmp();};});
 
   var hotelMAD=Math.round(HOTEL_EUR*EURMAD), flugMAD=Math.round(FLUG_EUR*EURMAD);
-  var sum=sumT+sumE+(withFood?220*people*9:0)+(withHotel?hotelMAD:0)+(withFlug?flugMAD:0);
+  var fpp=foodPerPerson();
+  var foodMAD=fpp.sum*people;
+  var sum=sumT+sumE+(withFood?foodMAD:0)+(withHotel?hotelMAD:0)+(withFlug?flugMAD:0);
   $("#tot").innerHTML=sum.toLocaleString('de-DE')+'<span>MAD</span>';
 
   // Untertitel benennt, was gerade drinsteckt — sonst raet man beim Ablesen
@@ -1331,11 +1511,15 @@ function renderCosts(){
   $("#toteur").textContent='rund '+Math.round(sum/EURMAD).toLocaleString('de-DE')+' € · '+
     (drin.length?'mit '+drin.join(', '):'nur Transport und Eintritte');
 
+  var lfo=$("#lbFood");
+  if(lfo)lfo.textContent=fpp.sum.toLocaleString('de-DE')+' MAD pro Person aus den geplanten Lokalen'+
+    (fpp.ohne?' · '+fpp.ohne+' Posten ohne Preisangabe':'');
   var lh=$("#lbHotel"),lf=$("#lbFlug");
   if(lh)lh.textContent=HOTEL_EUR.toLocaleString('de-DE',{minimumFractionDigits:2})+' € für beide, acht Nächte — '+hotelMAD.toLocaleString('de-DE')+' MAD';
   if(lf)lf.textContent=FLUG_EUR.toLocaleString('de-DE')+' € — '+flugMAD.toLocaleString('de-DE')+' MAD';
   $("#tglHotel").className='tgl'+(withHotel?' on':'');
   $("#tglFlug").className='tgl'+(withFlug?' on':'');
+  renderBilanz(sum);          // erst hier — vorher steht sum noch nicht fest
   var maBox=$("#mabtn");
   if(maBox){
     var opts=[];for(var m=0;m<=people;m++)opts.push(m);
@@ -1393,6 +1577,7 @@ window.addEventListener('orientationchange',function(){setTimeout(moveInd,150);}
 $("#tglFood").onclick=function(){withFood=!withFood;Store.set('food',withFood);renderCosts();};
 $("#tglHotel").onclick=function(){withHotel=!withHotel;Store.set('hotel',withHotel);renderCosts();};
 $("#tglFlug").onclick=function(){withFlug=!withFlug;Store.set('flug',withFlug);renderCosts();};
+$("#tglTheme").onclick=function(){DARK=!DARK;Store.set('dark',DARK);applyTheme();};
 
 (function(){
   var ios=/iPad|iPhone|iPod/.test(navigator.userAgent),got=false;
@@ -1407,6 +1592,66 @@ $("#tglFlug").onclick=function(){withFlug=!withFlug;Store.set('flug',withFlug);r
       ? 'Tippe unten auf <b>Teilen</b> und dann auf <b>Zum Home-Bildschirm</b>. Danach startet der Plan wie eine App.'
       : 'Öffne das Browser-Menü und wähle <b>Zum Startbildschirm hinzufügen</b>. Danach startet der Plan wie eine App.';},900);
 })();
+
+/* ---------- Dunkle Ansicht ---------- */
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme',DARK?'dark':'light');
+  var m=document.querySelector('meta[name="theme-color"]');
+  if(m)m.setAttribute('content',DARK?'#0C1417':'#10222B');
+  var b=$("#tglTheme");if(b)b.className='tgl'+(DARK?' on':'');
+}
+
+/* ---------- Wetter ---------- */
+// open-meteo, ohne Schluessel. Die Vorhersage reicht rund 16 Tage — liegt die
+// Reise weiter weg, kommt nichts zurueck und die Karte sagt das auch.
+var WMO={0:['☀️','klar'],1:['🌤️','überwiegend klar'],2:['⛅','teils bewölkt'],3:['☁️','bedeckt'],
+ 45:['🌫️','Nebel'],48:['🌫️','Nebel'],51:['🌦️','Nieselregen'],53:['🌦️','Nieselregen'],55:['🌦️','Nieselregen'],
+ 61:['🌧️','Regen'],63:['🌧️','Regen'],65:['🌧️','starker Regen'],80:['🌦️','Schauer'],81:['🌦️','Schauer'],
+ 82:['⛈️','kräftige Schauer'],95:['⛈️','Gewitter'],96:['⛈️','Gewitter'],99:['⛈️','Gewitter']};
+
+function renderWx(){
+  var box=$("#wxbox");if(!box)return;
+  if(!WX||!WX.time||!WX.time.length){
+    box.innerHTML='<p class="dochint">Für die Reisetage gibt es noch keine Vorhersage — die reicht rund zwei Wochen '+
+      'im Voraus. Bis dahin gilt der Erfahrungswert aus dem Info-Bereich: 26 bis 30 Grad, '+
+      'Atlantik um 20 Grad, abends eine Jacke.</p>';return;
+  }
+  var byDate={};
+  WX.time.forEach(function(d,i){byDate[d]={mx:WX.tmax[i],mn:WX.tmin[i],c:WX.code[i]};});
+  var zeilen=TRIP.map(function(d){
+    var w=byDate[d.date];if(!w)return '';
+    var ic=WMO[w.c]||['·',''];
+    return '<div class="wxrow"><div class="wd">'+d.wd+' '+d.dd+'.09.</div><div class="ic">'+ic[0]+'</div>'+
+      '<div class="tx">'+ic[1]+'</div><div class="tp">'+Math.round(w.mx)+'°<small> / '+Math.round(w.mn)+'°</small></div></div>';
+  }).join('');
+  box.innerHTML=zeilen?zeilen+'<p class="dochint" style="margin:12px 0 0">Stand '+
+      (WX.stand||'unbekannt')+' · Quelle open-meteo.com</p>'
+    :'<p class="dochint">Die Vorhersage deckt die Reisetage noch nicht ab.</p>';
+}
+
+function loadWx(){
+  if(!window.caches){renderWx();return;}
+  // Erst den letzten Stand zeigen, dann im Hintergrund auffrischen
+  caches.open(DATA_CACHE).then(function(c){return c.match('./wx.json');})
+    .then(function(r){return r?r.json():null;})
+    .then(function(j){if(j){WX=j;renderWx();}else{renderWx();}})
+    .catch(function(){renderWx();});
+
+  var url='https://api.open-meteo.com/v1/forecast?latitude=35.785&longitude=-5.81'+
+    '&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=Africa%2FCasablanca'+
+    '&start_date='+TRIP[0].date+'&end_date='+TRIP[TRIP.length-1].date;
+  fetch(url).then(function(r){return r.ok?r.json():null;}).then(function(j){
+    if(!j||!j.daily||!j.daily.time||!j.daily.time.length)return;
+    var d=new Date();
+    WX={time:j.daily.time,tmax:j.daily.temperature_2m_max,tmin:j.daily.temperature_2m_min,
+        code:j.daily.weather_code,
+        stand:('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'};
+    renderWx();
+    caches.open(DATA_CACHE).then(function(c){
+      c.put('./wx.json',new Response(JSON.stringify(WX),{headers:{'Content-Type':'application/json'}}));
+    }).catch(function(){});
+  }).catch(function(){});
+}
 
 /* ---------- Erinnerungen fuer die "wichtig"-Punkte ---------- */
 function reminders(){
@@ -1497,6 +1742,42 @@ function registerSync(){
   }).catch(function(){});
 }
 
+/* ---------- Fotos je Tag, ebenfalls nur lokal ---------- */
+var FOTO_CACHE='tanger-fotos-v1';
+function fotoPath(tag,n){return 'fotos/'+tag+'/'+encodeURIComponent(n);}
+
+function renderFotos(){
+  var g=$("#fgrid");if(!g)return;
+  if(!window.caches){g.innerHTML='';return;}
+  var tag=TRIP[active].n;
+  caches.open(FOTO_CACHE).then(function(c){return c.keys();}).then(function(keys){
+    var mein=keys.filter(function(r){return r.url.indexOf('/fotos/'+tag+'/')!==-1;});
+    g.innerHTML=mein.map(function(r){
+      var n=decodeURIComponent(r.url.split('/fotos/'+tag+'/')[1]);
+      return '<figure><img src="'+fotoPath(tag,n)+'" alt="'+esc(n)+'" loading="lazy">'+
+        '<button data-n="'+encodeURIComponent(n)+'" aria-label="Foto entfernen">'+ICO_X+'</button></figure>';
+    }).join('');
+    $$("#fgrid button").forEach(function(b){b.onclick=function(){
+      caches.open(FOTO_CACHE)
+        .then(function(c){return c.delete(fotoPath(tag,decodeURIComponent(b.dataset.n)));})
+        .then(renderFotos).catch(function(){});};});
+  }).catch(function(){});
+}
+
+function wireFotos(){
+  var inp=$("#fotofile");if(!inp||!window.caches)return;
+  var tag=TRIP[active].n;
+  inp.onchange=function(e){
+    var files=Array.prototype.slice.call(e.target.files||[]);
+    if(!files.length)return;
+    caches.open(FOTO_CACHE).then(function(c){
+      return Promise.all(files.map(function(f){
+        return c.put(fotoPath(tag,f.name),new Response(f,{headers:{'Content-Type':f.type||'image/jpeg'}}));
+      }));
+    }).then(function(){e.target.value='';renderFotos();}).catch(function(){});
+  };
+}
+
 /* ---------- Eigene Dokumente, nur lokal ---------- */
 var DOCS_CACHE='tanger-docs-v1';
 function docPath(n){return 'docs/'+encodeURIComponent(n);}
@@ -1535,7 +1816,7 @@ function wireDocs(){
 
 function boot(){
   wantNowScroll=true;                     // beim Start zur laufenden Zeile
-  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();
+  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();applyTheme();loadWx();
   centerTile(false);
   checkReminders();syncReminders();registerSync();
 }
@@ -1547,7 +1828,9 @@ Store.get('ppl').then(function(v){people=v||2;return Store.get('busMA');})
 .then(function(v){withFlug=!!v;return Store.get('overrides');})
 .then(function(v){OV=v||{};return Store.get('rnotes');})
 .then(function(v){RN=v||{};return Store.get('spent');})
-.then(function(v){SPENT=v||{};return Store.get('notified');})
+.then(function(v){SPENT=v||{};return Store.get('extra');})
+.then(function(v){EXTRA=Array.isArray(v)?v:[];return Store.get('dark');})
+.then(function(v){DARK=!!v;return Store.get('notified');})
 .then(function(v){NOTIF=v||{};boot();})
 .catch(function(){boot();});
 
