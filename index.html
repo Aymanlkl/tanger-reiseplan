@@ -167,6 +167,12 @@ h1,h2,h3,h4{margin:0;font-weight:700;letter-spacing:-.022em;line-height:1.15}
 .chip.free{background:var(--sea-wash);color:var(--sea)}
 .chip+.chip{margin-left:5px}
 
+.tagsum{display:flex;align-items:baseline;gap:9px;margin-top:14px;padding:11px 13px;
+  background:var(--ink);color:#fff;border-radius:var(--r-s)}
+.tagsum span{flex:1;font-size:13px;font-weight:600}
+.tagsum b{font-family:var(--m);font-size:16px;font-weight:700;font-variant-numeric:tabular-nums}
+.tagsum small{flex:0 0 100%;font-size:11px;color:#A9C0CB;margin-top:2px}
+
 .fotos{margin-top:12px;padding-top:12px;border-top:1px solid var(--line-2)}
 .fotos h4{font-family:var(--m);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;
   color:var(--saffron-deep);margin-bottom:9px}
@@ -358,6 +364,12 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 .ed-c,.ed-u{font-family:var(--m);font-size:11.5px}
 .ed-q:focus,.ed-c:focus,.ed-u:focus{outline:none;border-color:var(--saffron)}
 .ed-c.bad{border-color:var(--alert);background:var(--alert-wash)}
+.ed-preis{display:flex;gap:7px;align-items:stretch}
+.ed-preis .ed-v{flex:1;font-family:var(--m)}
+.ed-pp{flex:0 0 auto;padding:6px 11px;border-radius:6px;background:var(--line-2);color:var(--muted);
+  font-size:11.5px;font-weight:600;transition:background .18s var(--ease),color .18s var(--ease)}
+.ed-pp.on{background:var(--saffron);color:#1A1200}
+
 .ed-pin{margin-top:9px;font-size:11.5px;font-weight:600;color:var(--sea);
   padding:6px 10px;border-radius:6px;background:var(--sea-wash);transition:background .18s var(--ease),color .18s var(--ease)}
 .ed-pin.armed{background:var(--saffron);color:#1A1200}
@@ -373,6 +385,9 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 .cmprow.under td:last-child{color:var(--sea)}
 .cmprow.over td:last-child{color:var(--alert)}
 .cmprow td small{font-weight:400}
+.taglink{font-weight:600;font-size:13.5px;color:var(--ink);text-align:left;
+  border-bottom:1.5px dotted var(--line);padding-bottom:1px}
+.taglink:active{color:var(--saffron-deep)}
 .extras{margin-top:4px}
 .exrow{display:flex;align-items:center;gap:9px;padding:9px 0;border-top:1px solid var(--line-2);font-size:13.5px}
 .exrow span{flex:1;min-width:0;word-break:break-word}
@@ -582,12 +597,9 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
     <button class="tgl" id="tglFlug"><div class="sw"></div><div class="lb">Flug mitrechnen<small id="lbFlug"></small></div></button>
     <button class="tgl" id="tglPark"><div class="sw"></div><div class="lb">Parken in Weeze mitrechnen<small id="lbPark"></small></div></button>
 
-    <div class="card"><div class="card-h"><div class="meta">Bewegung</div><h3>Transport</h3></div>
-      <div class="card-b"><table class="cost" id="tblT"></table></div></div>
-
-    <div class="card"><div class="card-h"><div class="meta">Pro Person</div><h3>Eintritte</h3></div>
-      <div class="card-b"><table class="cost" id="tblE"></table>
-        <div class="note tip"><b>Kostenlos:</b> Kasbah des Oudayas, Hassan-Turm, Mausoleum Mohammed V., Parc Perdicaris, alle Medinas und alle Strände.</div></div></div>
+    <div class="card"><div class="card-h"><div class="meta">Nach Tagen</div><h3>Was jeder Tag kostet</h3>
+      <p>Gerechnet aus den Preisen, die an den Programmpunkten hängen. Tippe einen Tag an, um ihn zu öffnen.</p></div>
+      <div class="card-b"><table class="cost" id="tblTage"></table></div></div>
 
     <div class="card"><div class="card-h"><div class="meta">Abrechnung</div><h3>Geplant gegen tatsächlich</h3>
       <p>Zählt alle Ist-Felder aus den Tabellen plus alles, was du unten dazuschreibst.</p></div>
@@ -697,128 +709,128 @@ var TRIP=[
 {n:1,date:"2026-09-02",wd:"Mi",dd:"02",tag:"Ankunft",title:"Landung 14:10 & erste Runde",sub:"Locker gehalten — falls sich der Flug verspätet, schiebst du einfach alles nach hinten.",
 items:[
 {t:"14:10",h:"Landung in Tanger",p:"Pass und Gepäck: 30–45 Minuten einplanen. Uhr eine Stunde zurückstellen.",loc:{q:"Aéroport Tanger Ibn Battouta",lat:35.72919,lng:-5.91297},info:"Der Flughafen Ibn Battouta liegt rund 15 km südwestlich der Stadt. Nach Pass und Gepäck: Geldautomat in der Ankunftshalle, dann raus zu den Taxis. Der Preis in die Stadt wird vorher vereinbart, nicht nach Taxameter gefahren."},
-{t:"14:50",h:"Geld abheben",p:"Automat in der Ankunftshalle. Dirham bekommst du in Deutschland nicht.",c:"Gebühr ca. 30 MAD"},
-{t:"15:10",h:"Taxi in die Medina",p:"15 km, 25–35 Minuten. Festpreis vorher vereinbaren.",c:"150–200 MAD"},
+{t:"14:50",h:"Geld abheben",p:"Automat in der Ankunftshalle. Dirham bekommst du in Deutschland nicht.",v:30,pp:1,cn:"Automatengebühr"},
+{t:"15:10",h:"Taxi in die Medina",p:"15 km, 25–35 Minuten. Festpreis vorher vereinbaren.",v:175,cn:"Festpreis vorher vereinbaren"},
 {t:"15:45",h:"Check-in Mamora Bay",p:"Direkt am Petit Socco, gegenüber dem Hafen.",loc:{q:"Hôtel Mamora, Tanger",lat:35.78536,lng:-5.80971},info:"Einfaches Hotel direkt am Petit Socco, wenige Minuten vom Hafen. Der eigentliche Grund für die Lage ist die Dachterrasse mit Blick über den Hafen — abends der beste Platz für den Sonnenuntergang."},
-{t:"16:30",h:"Petit Socco",p:"Minztee im Café Tingis, Leute beobachten. Startet direkt vor der Haustür.",c:"20 MAD",loc:{q:"Petit Socco, Tanger",lat:35.78556,lng:-5.81037},eat:1,info:"Der kleine Platz im Herzen der Medina, umringt von Cafés mit Korbstühlen auf dem Gehsteig. Hier bestellt man Minztee und schaut zu, mehr Programm braucht es nicht. Abends am belebtesten.",snack:1},
+{t:"16:30",h:"Petit Socco",p:"Minztee im Café Tingis, Leute beobachten. Startet direkt vor der Haustür.",v:20,pp:1,loc:{q:"Petit Socco, Tanger",lat:35.78556,lng:-5.81037},eat:1,info:"Der kleine Platz im Herzen der Medina, umringt von Cafés mit Korbstühlen auf dem Gehsteig. Hier bestellt man Minztee und schaut zu, mehr Programm braucht es nicht. Abends am belebtesten.",snack:1},
 {t:"17:15",h:"Grand Socco & Mendoubia-Garten",p:"Die Rue Siaghine hoch, quer durch die Medina.",f:1,loc:{q:"Grand Socco, Tanger",lat:35.7843,lng:-5.81309},info:"Der große Platz zwischen Medina und Neustadt, mit Springbrunnen und dem Stadttor Bab Fahs. Dahinter liegt der Mendoubia-Garten mit uralten Drachenbäumen — schattig, ruhig und der beste Ort für eine Pause zwischen zwei Medina-Runden."},
 {t:"18:15",h:"Terrasse des Paresseux",p:"Alte Kanonen, Blick über die Straße von Gibraltar. Bei klarer Sicht siehst du Spanien.",f:1,loc:{q:"Terrasse des Paresseux, Tanger",lat:35.78086,lng:-5.81179},info:"Die Terrasse der Faulen, eine Aussichtsplattform mit alten Bronzekanonen hoch über dem Hafen. Bei klarer Sicht siehst du über die Straße von Gibraltar bis nach Spanien. Kostet nichts, dauert zehn Minuten, lohnt sich besonders zum Sonnenuntergang."},
 {t:"19:00",h:"Am Hafen-Kiosk fragen",p:"Fährt der City-Tour-Bus? Fünf Minuten Umweg, entscheidet über Tag 3 und 4.",k:"wichtig",loc:{q:"Port de Tanger Ville",lat:35.78912,lng:-5.80454},info:"Der alte Stadthafen mit Fähranleger und Marina. Am Kiosk beim Eingang starten beide Linien des City-Tour-Busses — hier erfährst du, ob er überhaupt fährt, und kaufst später das Ticket."},
 {t:"19:45",h:"Sonnenuntergang",p:"Von der Hoteldachterrasse über dem Hafen."},
-{t:"20:30",h:"Sushi Pro",p:"An der Place Roudani, 1,4 km — nach dem Sonnenuntergang.",c:"ca. 150 MAD",eat:1,loc:{q:"Sushi Pro, Place Brahim Roudani, Tanger",lat:35.77528,lng:-5.80057,url:"https://maps.google.com/?q=sushipro,+Pl.+Brahim+Roudani,+Tangier+90060,+Marokko&ftid=0xd0b81000372f44b:0xaf3e97e6ad9d3af8"},info:"Sushi an der Place Roudani, auf dem Weg vom Bahnhof zurück in die Medina. Nach einem Rabat-Tag mit nur einer richtigen Mahlzeit die naheliegende Station. Ob um Viertel vor zehn noch offen ist, weiß ich nicht — falls nicht, gibt es im Hotel etwas. Der Marker sitzt auf dem Platz, der Knopf öffnet deinen Maps-Link mit der genauen Adresse."},
+{t:"20:30",h:"Sushi Pro",p:"An der Place Roudani, 1,4 km — nach dem Sonnenuntergang.",v:150,pp:1,eat:1,loc:{q:"Sushi Pro, Place Brahim Roudani, Tanger",lat:35.77528,lng:-5.80057,url:"https://maps.google.com/?q=sushipro,+Pl.+Brahim+Roudani,+Tangier+90060,+Marokko&ftid=0xd0b81000372f44b:0xaf3e97e6ad9d3af8"},info:"Sushi an der Place Roudani, auf dem Weg vom Bahnhof zurück in die Medina. Nach einem Rabat-Tag mit nur einer richtigen Mahlzeit die naheliegende Station. Ob um Viertel vor zehn noch offen ist, weiß ich nicht — falls nicht, gibt es im Hotel etwas. Der Marker sitzt auf dem Platz, der Knopf öffnet deinen Maps-Link mit der genauen Adresse."},
 {t:"22:00",h:"Zugtickets offline speichern",p:"Dossier KVDYJH als PDF aufs Handy.",k:"wichtig",info:"Die Tickets für Montag sind gebucht — Dossier KVDYJH, zwei Personen, Sitzplätze reserviert. Lade die PDFs jetzt herunter und leg sie in die Dateien-App: Im Bahnhof Tanger Ville ist das Netz launisch, und die Kontrolle am Bahnsteig will den Code sehen, nicht deine Geduld."}],
 },
 
 {n:2,date:"2026-09-03",wd:"Do",dd:"03",tag:"Tanger",title:"Medina, Kasbah & Marshan",sub:"Alles zu Fuß — von der Stadtmauer am Morgen bis zum Sonnenuntergang im Café Hafa.",
 items:[
-{t:"08:00",h:"Frühstück im Hotel",p:"Msemen, Eier und Kaffee auf der Dachterrasse. Danach geht es direkt los.",c:"im Zimmerpreis",eat:1,loc:{q:"Hôtel Mamora, Tanger",lat:35.78536,lng:-5.80971},info:"Die Dachterrasse über dem Hafen liegt morgens noch im Schatten und ist der ruhigste Ort im Haus. Guter Moment, um den Tag durchzugehen — vom Frühstückstisch sind es zwei Minuten bis zum Petit Socco.",snack:1},
+{t:"08:00",h:"Frühstück im Hotel",p:"Msemen, Eier und Kaffee auf der Dachterrasse. Danach geht es direkt los.",cn:"im Zimmerpreis",eat:1,loc:{q:"Hôtel Mamora, Tanger",lat:35.78536,lng:-5.80971},info:"Die Dachterrasse über dem Hafen liegt morgens noch im Schatten und ist der ruhigste Ort im Haus. Guter Moment, um den Tag durchzugehen — vom Frühstückstisch sind es zwei Minuten bis zum Petit Socco.",snack:1},
 {t:"08:45",h:"Rue Siaghine & Grand Socco",p:"Die Hauptgasse der Medina hoch, während die Läden aufmachen.",f:1,loc:{q:"Grand Socco, Tanger",lat:35.7843,lng:-5.81309},info:"Die Rue Siaghine verbindet Petit und Grand Socco und ist die belebteste Gasse der Medina. Morgens werden die Rollläden hochgezogen, Handkarren versperren den Weg, es riecht nach frischem Brot — die Stunde, in der die Altstadt für sich selbst arbeitet und nicht für Besucher. Am oberen Ende öffnet sich der Grand Socco."},
 {t:"09:15",h:"Borj Dar El Baroud",p:"Die alte Pulverbastion an der Nordostecke der Stadtmauer.",f:1,loc:{q:"Borj Dar Al-Baroud, Tanger",lat:35.78861,lng:-5.80818},info:"Ein Geschützturm an der nordöstlichen Ecke der Medina-Mauer, hoch über der Corniche. Dar El Baroud heißt Haus des Pulvers — hier lagerte die Munition der Stadt. Von der Plattform siehst du den Hafen von oben und bei klarer Luft die spanische Küste. Frei zugänglich und morgens praktisch menschenleer; von hier führt der Mauerweg weiter zur Kasbah."},
 {t:"09:45",h:"Rue Riad Sultan & Bab Bhar",p:"Weiter auf dem Mauerweg von der Bastion zur Kasbah.",f:1,loc:{q:"Bab Bhar, Tanger",lat:35.78884,lng:-5.81031},info:"Der Weg an der alten Stadtmauer entlang, unter dir die Klippen und das offene Meer. Bab Bhar, das Meerestor, ist der Punkt, an dem alle fotografieren — von hier siehst du die ganze Bucht."},
-{t:"10:30",h:"Musée Dar Niaba",p:"Kleines Museum an der Rue Siaghine, fünf Minuten vom Hotel.",c:"Eintritt vor Ort",loc:{q:"Musée Dar Niaba, 41 Rue Siaghine, Tanger",lat:35.78528,lng:-5.81115},info:"Ein Verwaltungshaus aus dem 19. Jahrhundert, in dem die Niaba saß — die Vertretung des Sultans gegenüber den ausländischen Gesandtschaften, als Tanger diplomatische Sonderzone war. Heute Ausstellungshaus mit Arbeiten von Malern, die in Tanger gelebt haben. Klein, in einer halben Stunde durch. Die Öffnungszeiten wechseln — an der Tür prüfen."},
-{t:"11:30",h:"American Legation Museum",p:"Ältestes US-Auslandsgebäude der Welt, mitten in der Medina versteckt.",c:"50 MAD",loc:{q:"Tangier American Legation Museum",lat:35.78386,lng:-5.81088},hours:{days:[1,2,3,4,5,6],from:"10:00",to:"17:00"},info:"Das erste Grundstück, das die USA je im Ausland besaßen — ein Geschenk des Sultans von 1821. Heute ein Museum mit marokkanischer Malerei, alten Karten und einem eigenen Raum für den Schriftsteller Paul Bowles. Klein, ruhig, gut klimatisiert, versteckt in einer Gasse der Medina."},
+{t:"10:30",h:"Musée Dar Niaba",p:"Kleines Museum an der Rue Siaghine, fünf Minuten vom Hotel.",v:20,pp:1,cn:"Richtwert, Preis vor Ort",loc:{q:"Musée Dar Niaba, 41 Rue Siaghine, Tanger",lat:35.78528,lng:-5.81115},info:"Ein Verwaltungshaus aus dem 19. Jahrhundert, in dem die Niaba saß — die Vertretung des Sultans gegenüber den ausländischen Gesandtschaften, als Tanger diplomatische Sonderzone war. Heute Ausstellungshaus mit Arbeiten von Malern, die in Tanger gelebt haben. Klein, in einer halben Stunde durch. Die Öffnungszeiten wechseln — an der Tür prüfen."},
+{t:"11:30",h:"American Legation Museum",p:"Ältestes US-Auslandsgebäude der Welt, mitten in der Medina versteckt.",v:50,pp:1,loc:{q:"Tangier American Legation Museum",lat:35.78386,lng:-5.81088},hours:{days:[1,2,3,4,5,6],from:"10:00",to:"17:00"},info:"Das erste Grundstück, das die USA je im Ausland besaßen — ein Geschenk des Sultans von 1821. Heute ein Museum mit marokkanischer Malerei, alten Karten und einem eigenen Raum für den Schriftsteller Paul Bowles. Klein, ruhig, gut klimatisiert, versteckt in einer Gasse der Medina."},
 {t:"12:45",h:"Durch die Medina zur Kasbah",p:"Einfach bergauf halten, die Gassen führen von selbst hin.",f:1,loc:{q:"Kasbah de Tanger",lat:35.78875,lng:-5.81343},info:"Die Kasbah ist der befestigte, obere Teil der Altstadt. Von der Medina hältst du einfach bergauf, die Gassen führen von selbst hin. Oben wird es schlagartig ruhiger: weiße Häuser, blaue Türen, immer wieder Blick aufs Meer."},
-{t:"13:00",h:"Mittagessen in der Kasbah",p:"Le Salon Bleu, Dachterrasse über den Dächern.",c:"ca. 80 MAD",loc:{q:"Le Salon Bleu, Tanger",lat:35.78862,lng:-5.81189},eat:1,info:"Kleines Lokal am Mechouar-Platz mit Dachterrasse über den Dächern der Kasbah. Man kommt vor allem für die Aussicht; die Karte ist überschaubar und marokkanisch."},
-{t:"14:30",h:"Kasbah-Museum · Dar el Makhzen",p:"Sultanspalast mit andalusischem Garten und Blick über die Bucht.",c:"30 MAD",loc:{q:"Musée de la Kasbah Dar el Makhzen, Tanger",lat:35.78848,lng:-5.81243},hours:{days:[0,1,3,4,5,6],from:"09:00",to:"16:00"},info:"Der ehemalige Sultanspalast am Mechouar-Platz. Innen Zellij-Mosaike, geschnitzte Zedernholzdecken und ein andalusischer Innengarten; die Sammlung reicht von römischen Funden aus der Region bis zu Teppichen und Waffen. Der Garten allein ist den Eintritt wert."},
-{t:"15:15",h:"Maison des huîtres",p:"Von der Kasbah hinunter nach Dradeb, gut 25 Minuten zu Fuß.",c:"ca. 80 MAD",eat:1,snack:1,loc:{q:"Les Huîtres, Avenue Sidi Boukhari, Dradeb, Tanger",lat:35.78297,lng:-5.83266},info:"Austernlokal an der Avenue Sidi Boukhari, auf halbem Weg zwischen Medina und Marshan. Marokkos Austern kommen aus Oualidia an der Atlantikküste. Als Zwischenstopp gedacht, nicht als volle Mahlzeit — danach geht es weiter hinunter zum Strand von Merkala. In OSM heißt das Lokal Les Huîtres; dass es dasselbe ist, schließe ich aus der Lage."},
+{t:"13:00",h:"Mittagessen in der Kasbah",p:"Le Salon Bleu, Dachterrasse über den Dächern.",v:80,pp:1,loc:{q:"Le Salon Bleu, Tanger",lat:35.78862,lng:-5.81189},eat:1,info:"Kleines Lokal am Mechouar-Platz mit Dachterrasse über den Dächern der Kasbah. Man kommt vor allem für die Aussicht; die Karte ist überschaubar und marokkanisch."},
+{t:"14:30",h:"Kasbah-Museum · Dar el Makhzen",p:"Sultanspalast mit andalusischem Garten und Blick über die Bucht.",v:30,pp:1,loc:{q:"Musée de la Kasbah Dar el Makhzen, Tanger",lat:35.78848,lng:-5.81243},hours:{days:[0,1,3,4,5,6],from:"09:00",to:"16:00"},info:"Der ehemalige Sultanspalast am Mechouar-Platz. Innen Zellij-Mosaike, geschnitzte Zedernholzdecken und ein andalusischer Innengarten; die Sammlung reicht von römischen Funden aus der Region bis zu Teppichen und Waffen. Der Garten allein ist den Eintritt wert."},
+{t:"15:15",h:"Maison des huîtres",p:"Von der Kasbah hinunter nach Dradeb, gut 25 Minuten zu Fuß.",v:80,pp:1,eat:1,snack:1,loc:{q:"Les Huîtres, Avenue Sidi Boukhari, Dradeb, Tanger",lat:35.78297,lng:-5.83266},info:"Austernlokal an der Avenue Sidi Boukhari, auf halbem Weg zwischen Medina und Marshan. Marokkos Austern kommen aus Oualidia an der Atlantikküste. Als Zwischenstopp gedacht, nicht als volle Mahlzeit — danach geht es weiter hinunter zum Strand von Merkala. In OSM heißt das Lokal Les Huîtres; dass es dasselbe ist, schließe ich aus der Lage."},
 {t:"16:00",h:"Merkala Beach",p:"Von der Kasbah über Marshan hinunter zur Bucht, gut 20 Minuten zu Fuß.",f:1,loc:{q:"Plage Merkala, Tanger",lat:35.79438,lng:-5.8353},info:"Eine kleine Bucht unterhalb des Viertels Marshan, links und rechts von Felsen eingefasst — der Strand der Tangerois, nicht der Touristen. Nachmittags spielen hier Jugendliche Fußball, Familien sitzen auf den Steinen. Zum Laufen und Zuschauen lohnt es sich; ob du baden willst, schau dir das Wasser vor Ort an. Von hier führt der Weg hoch zum Café Hafa."},
-{t:"18:00",h:"Café Hafa",p:"Von Merkala den Hang hoch. Bleib bis zum Sonnenuntergang gegen 19:50.",c:"20 MAD",loc:{q:"Café Hafa, Tanger",lat:35.7914,lng:-5.82198},eat:1,info:"Seit 1921 auf mehreren Terrassenstufen am Hang über dem Meer. Es gibt Minztee und sonst fast nichts, und genau das ist der Punkt. Nachmittags ist es voll, zum Sonnenuntergang am schönsten — such dir eine Stufe weit unten.",snack:1},
+{t:"18:00",h:"Café Hafa",p:"Von Merkala den Hang hoch. Bleib bis zum Sonnenuntergang gegen 19:50.",v:20,pp:1,loc:{q:"Café Hafa, Tanger",lat:35.7914,lng:-5.82198},eat:1,info:"Seit 1921 auf mehreren Terrassenstufen am Hang über dem Meer. Es gibt Minztee und sonst fast nichts, und genau das ist der Punkt. Nachmittags ist es voll, zum Sonnenuntergang am schönsten — such dir eine Stufe weit unten.",snack:1},
 {t:"20:00",h:"Cinema Rif",p:"Das Art-déco-Kino am Grand Socco, heute Kulturzentrum mit Café. Auf dem Rückweg vom Marshan.",f:1,loc:{q:"Cinéma Rif, Tanger",lat:35.78383,lng:-5.81307},info:"Das Kino am Grand Socco, 1938 im Art déco gebaut und vor gut zwanzig Jahren als Cinémathèque wiedereröffnet. Heute Programmkino, Archiv und Café in einem — die Terrasse davor ist einer der besten Plätze, um dem Treiben auf dem Platz zuzusehen. Der Saal ist original erhalten."},
-{t:"20:45",h:"Cappero Resto",p:"Pizza in der Neustadt, 3,4 km — mit dem Petit Taxi.",c:"ca. 150 MAD",eat:1,loc:{q:"Cappero Resto, 40 Rue Salah Ben Ghadbane, Tanger",lat:35.7632,lng:-5.83627},info:"Pizzeria im Süden der Neustadt. Mit dem Petit Taxi 10 bis 15 Minuten, hin und zurück etwa 40 MAD. Die Lage habe ich über die Rue Salah Ben Ghadbane bestimmt, der Marker kann also ein paar Häuser danebenliegen — der Maps-Link sucht den Namen und führt trotzdem hin."}]},
+{t:"20:45",h:"Cappero Resto",p:"Pizza in der Neustadt, 3,4 km — mit dem Petit Taxi.",v:150,pp:1,eat:1,loc:{q:"Cappero Resto, 40 Rue Salah Ben Ghadbane, Tanger",lat:35.7632,lng:-5.83627},info:"Pizzeria im Süden der Neustadt. Mit dem Petit Taxi 10 bis 15 Minuten, hin und zurück etwa 40 MAD. Die Lage habe ich über die Rue Salah Ben Ghadbane bestimmt, der Marker kann also ein paar Häuser danebenliegen — der Maps-Link sucht den Namen und führt trotzdem hin."}]},
 
 {n:3,date:"2026-09-04",wd:"Fr",dd:"04",tag:"Bus · Linie 1",title:"Cap Spartel & Herkuleshöhlen",sub:"Heute das 48-Stunden-Ticket kaufen — es gilt dann bis Sonntagmorgen.",
 items:[
-{t:"08:00",h:"Frühstück im Hotel",p:"Früh frühstücken, der erste Bus fährt um 10 Uhr ab dem Hafen.",c:"im Zimmerpreis",eat:1,loc:{q:"Hôtel Mamora, Tanger",lat:35.78536,lng:-5.80971},info:"Die Dachterrasse über dem Hafen liegt morgens noch im Schatten und ist der ruhigste Ort im Haus. Guter Moment, um den Tag durchzugehen — vom Frühstückstisch sind es zwei Minuten bis zum Petit Socco.",snack:1},
-{t:"09:00",h:"Ticket am Hafen-Kiosk",p:"Fahrplanzettel für die Herkules-Linie unbedingt mitnehmen. Nur fünf Abfahrten am Tag.",c:"80 + 130 MAD",k:"wichtig",loc:{q:"Port de Tanger Ville",lat:35.78912,lng:-5.80454},info:"Startpunkt beider Buslinien am Hafeneingang. Hier kauft ihr das 48-Stunden-Ticket und nehmt den Fahrplanzettel mit — es gibt nur fünf Abfahrten am Tag, danach richtet sich der ganze Tag. Zum Tarif: Der ermäßigte Preis von 80 MAD gilt für Marokkaner und für Residenten, und der Ausweis wird kontrolliert. Für ein gemischtes Paar heißt das zwei verschiedene Tickets, 80 und 130 MAD. Wenn deine Frau eine marokkanische Aufenthaltskarte hat, gilt für sie ebenfalls der ermäßigte Tarif — in dem Fall am Schalter danach fragen."},
+{t:"08:00",h:"Frühstück im Hotel",p:"Früh frühstücken, der erste Bus fährt um 10 Uhr ab dem Hafen.",cn:"im Zimmerpreis",eat:1,loc:{q:"Hôtel Mamora, Tanger",lat:35.78536,lng:-5.80971},info:"Die Dachterrasse über dem Hafen liegt morgens noch im Schatten und ist der ruhigste Ort im Haus. Guter Moment, um den Tag durchzugehen — vom Frühstückstisch sind es zwei Minuten bis zum Petit Socco.",snack:1},
+{t:"09:00",h:"Ticket am Hafen-Kiosk",p:"Fahrplanzettel für die Herkules-Linie unbedingt mitnehmen. Nur fünf Abfahrten am Tag.",v:80,pp:1,id:"bus",cn:"80 ermäßigt, 130 regulär",k:"wichtig",loc:{q:"Port de Tanger Ville",lat:35.78912,lng:-5.80454},info:"Startpunkt beider Buslinien am Hafeneingang. Hier kauft ihr das 48-Stunden-Ticket und nehmt den Fahrplanzettel mit — es gibt nur fünf Abfahrten am Tag, danach richtet sich der ganze Tag. Zum Tarif: Der ermäßigte Preis von 80 MAD gilt für Marokkaner und für Residenten, und der Ausweis wird kontrolliert. Für ein gemischtes Paar heißt das zwei verschiedene Tickets, 80 und 130 MAD. Wenn deine Frau eine marokkanische Aufenthaltskarte hat, gilt für sie ebenfalls der ermäßigte Tarif — in dem Fall am Schalter danach fragen."},
 {t:"10:00",h:"Abfahrt Linie Grottes d'Hercule",p:"Start am Hafen, Oberdeck offen."},
 {t:"10:45",h:"Parc Perdicaris · Rmilat",p:"Pinienwald über der Küste, kaum Menschen.",f:1,loc:{q:"Parc Perdicaris, Tanger",lat:35.78558,lng:-5.89462},info:"Ein großer Pinien- und Eukalyptuswald auf den Klippen westlich der Stadt, benannt nach einem Amerikaner, der hier 1904 entführt wurde. Angelegte Spazierwege führen durch den Wald zu Aussichtspunkten über dem Atlantik. Kaum Touristen, viel Schatten, Eintritt frei — rechne mit einer knappen Stunde für die Runde."},
-{t:"12:15",h:"Cap Spartel",p:"Leuchtturm an der Ecke Afrikas — hier trifft der Atlantik aufs Mittelmeer.",c:"60 MAD",loc:{q:"Cap Spartel",lat:35.79153,lng:-5.92567},hours:{days:[0,1,2,3,4,5,6],from:"09:00",to:"18:00"},info:"Die Nordwestecke Afrikas, wo Atlantik und Mittelmeer aufeinandertreffen. Der Leuchtturm von 1864 kann besichtigt werden, davor liegt eine Terrasse mit Blick auf beide Meere. Windig, auch im September — nimm etwas zum Überziehen mit."},
+{t:"12:15",h:"Cap Spartel",p:"Leuchtturm an der Ecke Afrikas — hier trifft der Atlantik aufs Mittelmeer.",v:60,pp:1,loc:{q:"Cap Spartel",lat:35.79153,lng:-5.92567},hours:{days:[0,1,2,3,4,5,6],from:"09:00",to:"18:00"},info:"Die Nordwestecke Afrikas, wo Atlantik und Mittelmeer aufeinandertreffen. Der Leuchtturm von 1864 kann besichtigt werden, davor liegt eine Terrasse mit Blick auf beide Meere. Windig, auch im September — nimm etwas zum Überziehen mit."},
 {t:"13:00",h:"Signpost Atlantik & Mittelmeer",p:"Der Wegweiser am Kap, wenige Minuten vom Leuchtturm.",f:1,loc:{q:"Signpost Atlantic Mediterranean, Cap Spartel",lat:35.78774,lng:-5.92714},info:"Ein schlichter Pfosten mit zwei Schildern: dorthin der Atlantik, dorthin das Mittelmeer. Die Trennlinie ist eine geografische Konvention und keine sichtbare Grenze im Wasser — trotzdem das Foto, das hier jeder macht. Der eigentliche Grund stehen zu bleiben ist der Blick von der Klippe über beide Meere."},
-{t:"13:30",h:"Grottes d'Hercule",p:"Die berühmte Öffnung in Form Afrikas. Rechne mit 45 Minuten.",c:"80 MAD · nur bar",loc:{q:"Grottes d'Hercule, Tanger",lat:35.7598,lng:-5.93915},hours:{days:[0,1,2,3,4,5,6],from:"09:00",to:"18:00"},info:"Meereshöhlen, deren Öffnung zum Atlantik hin die Form des afrikanischen Kontinents hat — das meistfotografierte Motiv der Gegend. Der Sage nach ruhte hier Herkules zwischen seinen Aufgaben. Innen ein kurzer Rundweg mit Ausstellung, draußen Stände. Nur Barzahlung am Eingang."},
+{t:"13:30",h:"Grottes d'Hercule",p:"Die berühmte Öffnung in Form Afrikas. Rechne mit 45 Minuten.",v:85,pp:1,cn:"nur bar",loc:{q:"Grottes d'Hercule, Tanger",lat:35.7598,lng:-5.93915},hours:{days:[0,1,2,3,4,5,6],from:"09:00",to:"18:00"},info:"Meereshöhlen, deren Öffnung zum Atlantik hin die Form des afrikanischen Kontinents hat — das meistfotografierte Motiv der Gegend. Der Sage nach ruhte hier Herkules zwischen seinen Aufgaben. Innen ein kurzer Rundweg mit Ausstellung, draußen Stände. Nur Barzahlung am Eingang."},
 {t:"14:30",h:"Mittagessen im Le Mirage",p:"Direkt über den Höhlen, Terrasse mit Blick auf den Atlantik.",eat:1,loc:{q:"Le Mirage, Tanger",lat:35.75911,lng:-5.93873},info:"Hotel und Restaurant auf der Klippe unmittelbar über den Herkuleshöhlen, mit Terrasse über dem Strand. Bezahlt wird vor allem die Aussicht — das Niveau liegt deutlich über den einfachen Fischbuden unten am Strandzugang, wo ein Teller bei rund 80 MAD liegt. Beides funktioniert; entscheide vor Ort nach Hunger und Laune."},
-{t:"15:45",h:"Achakkar-Beach",p:"Weiter Atlantikstrand, langer Spaziergang. Kamelritt optional.",c:"Kamel 100 MAD",loc:{q:"Plage Achakkar, Tanger",lat:35.76802,lng:-5.93382},info:"Weiter Atlantikstrand mit Dünen und ordentlicher Brandung, nördlich der Höhlen. Zum Laufen ideal, zum Schwimmen wegen der Strömung Vorsicht. Am Strand werden Kamelritte angeboten, der Preis wird vorher ausgehandelt."},
+{t:"15:45",h:"Achakkar-Beach",p:"Weiter Atlantikstrand, langer Spaziergang. Kamelritt optional.",v:100,pp:1,cn:"Kamelritt, optional",loc:{q:"Plage Achakkar, Tanger",lat:35.76802,lng:-5.93382},info:"Weiter Atlantikstrand mit Dünen und ordentlicher Brandung, nördlich der Höhlen. Zum Laufen ideal, zum Schwimmen wegen der Strömung Vorsicht. Am Strand werden Kamelritte angeboten, der Preis wird vorher ausgehandelt."},
 {t:"17:30",h:"Rückfahrt mit dem Bus",p:"Nicht die letzte Abfahrt nehmen, sondern die vorletzte."},
-{t:"19:30",h:"99grill",p:"Burger an der Avenue Mohammed VI, gut ein Kilometer vom Hafen.",c:"ca. 100 MAD",eat:1,loc:{q:"99Grill, Avenue Mohammed VI, Tanger",lat:35.7792,lng:-5.80248,url:"https://maps.app.goo.gl/DSEJXHLi2xwje5Qs7"},info:"Burgerlokal an der Avenue Mohammed VI, der Restaurantachse zwischen Medina und Marina. Der Bus setzt euch am Hafen ab, von dort ein guter Kilometer am Wasser entlang. Der Marker sitzt auf der Avenue, nicht exakt auf der Tür — der Knopf öffnet deinen eigenen Maps-Link, der trifft genau. Nebenbei: Freitag ist in Marokko Couscous-Tag, falls ihr es euch anders überlegt."}],
+{t:"19:30",h:"99grill",p:"Burger an der Avenue Mohammed VI, gut ein Kilometer vom Hafen.",v:100,pp:1,eat:1,loc:{q:"99Grill, Avenue Mohammed VI, Tanger",lat:35.7792,lng:-5.80248,url:"https://maps.app.goo.gl/DSEJXHLi2xwje5Qs7"},info:"Burgerlokal an der Avenue Mohammed VI, der Restaurantachse zwischen Medina und Marina. Der Bus setzt euch am Hafen ab, von dort ein guter Kilometer am Wasser entlang. Der Marker sitzt auf der Avenue, nicht exakt auf der Tür — der Knopf öffnet deinen eigenen Maps-Link, der trifft genau. Nebenbei: Freitag ist in Marokko Couscous-Tag, falls ihr es euch anders überlegt."}],
 notes:[{k:"plan",t:"<b>Ohne Bus:</b> Grand Taxi privat am Grand Socco chartern, halber Tag mit Wartezeit für 300–400 MAD pro Wagen. Preis vorher festlegen und die Rückfahrt ausdrücklich einschließen."}]},
 
 {n:4,date:"2026-09-05",wd:"Sa",dd:"05",tag:"Bus · Linie 2",title:"Neustadt, Villa Harris & Malabata",sub:"Das Ticket von gestern gilt noch.",
 items:[
-{t:"08:00",h:"Frühstück im Hotel",p:"In Ruhe frühstücken, der Bus fährt erst um 10 Uhr.",c:"im Zimmerpreis",eat:1,loc:{q:"Hôtel Mamora, Tanger",lat:35.78536,lng:-5.80971},info:"Die Dachterrasse über dem Hafen liegt morgens noch im Schatten und ist der ruhigste Ort im Haus. Guter Moment, um den Tag durchzugehen — vom Frühstückstisch sind es zwei Minuten bis zum Petit Socco.",snack:1},
+{t:"08:00",h:"Frühstück im Hotel",p:"In Ruhe frühstücken, der Bus fährt erst um 10 Uhr.",cn:"im Zimmerpreis",eat:1,loc:{q:"Hôtel Mamora, Tanger",lat:35.78536,lng:-5.80971},info:"Die Dachterrasse über dem Hafen liegt morgens noch im Schatten und ist der ruhigste Ort im Haus. Guter Moment, um den Tag durchzugehen — vom Frühstückstisch sind es zwei Minuten bis zum Petit Socco.",snack:1},
 {t:"10:00",h:"Linie Tanger Ville ab Hafen",p:"Ohne neue Kosten — die 48 Stunden laufen bis morgen früh.",f:1,loc:{q:"Port de Tanger Ville",lat:35.78912,lng:-5.80454},info:"Abfahrt der zweiten Buslinie durch die Neustadt bis zur Marina. Das Ticket von gestern gilt noch — die 48 Stunden laufen bis morgen früh."},
 {t:"10:30",h:"Place Faro",p:"Kanonenterrasse mit dem besten Panorama über die Bucht.",f:1,loc:{q:"Place Faro, Tanger",lat:35.78022,lng:-5.81019},info:"Kanonenterrasse am Ende des Boulevard Pasteur, hoch über der Bucht. Ein kurzer Stopp mit dem besten Stadtpanorama, dazu ein paar Cafés in Laufweite."},
 {t:"11:30",h:"Palais Moulay Hafid & Phönizische Gräber",p:"Felsgräber direkt über dem Meer, 2.500 Jahre alt.",f:1,loc:{q:"Palais Moulay Hafid, Tanger",lat:35.78616,lng:-5.82062},info:"Ein Palast von 1900 im maurisch-andalusischen Stil, heute Kultur- und Veranstaltungsort. Gleich daneben liegen phönizische Felsgräber direkt an der Klippe — rechteckige Mulden im Fels, rund 2.500 Jahre alt, frei zugänglich und mit weitem Blick aufs Meer."},
-{t:"13:00",h:"Napolitano",p:"Italienisch an der Rue Lafayette, 417 m vom Place Faro.",c:"ca. 120 MAD",eat:1,loc:{q:"Napolitano, 34 Rue Lafayette, Tanger",lat:35.77649,lng:-5.80968},info:"Italiener in der Neustadt, wenige Minuten vom Place Faro, wo ihr am Vormittag steht. Passt auch geografisch: Der Bus fährt danach nach Osten zur Villa Harris, während das ursprünglich geplante Mittagessen an der westlichen Corniche in die Gegenrichtung gezeigt hätte. Zum Nachtisch Tiramisu."},
-{t:"14:30",h:"Villa Harris Museum",p:"Ehemalige Privatvilla in Malabata, heute Museum mit großem Park am Meer.",c:"30 MAD",loc:{q:"Villa Harris Museum, Tanger",lat:35.78274,lng:-5.76393},hours:{days:[0,2,3,4,5,6],from:"10:00",to:"18:00"},info:"Die frühere Privatvilla des britischen Journalisten Walter Harris in Malabata, aufwendig restauriert. Heute Museum zur Geschichte und Kunst Tangers, drumherum ein großer Park mit altem Baumbestand direkt am Meer — der Park ist mindestens so schön wie die Ausstellung."},
+{t:"13:00",h:"Napolitano",p:"Italienisch an der Rue Lafayette, 417 m vom Place Faro.",v:120,pp:1,eat:1,loc:{q:"Napolitano, 34 Rue Lafayette, Tanger",lat:35.77649,lng:-5.80968},info:"Italiener in der Neustadt, wenige Minuten vom Place Faro, wo ihr am Vormittag steht. Passt auch geografisch: Der Bus fährt danach nach Osten zur Villa Harris, während das ursprünglich geplante Mittagessen an der westlichen Corniche in die Gegenrichtung gezeigt hätte. Zum Nachtisch Tiramisu."},
+{t:"14:30",h:"Villa Harris Museum",p:"Ehemalige Privatvilla in Malabata, heute Museum mit großem Park am Meer.",v:30,pp:1,loc:{q:"Villa Harris Museum, Tanger",lat:35.78274,lng:-5.76393},hours:{days:[0,2,3,4,5,6],from:"10:00",to:"18:00"},info:"Die frühere Privatvilla des britischen Journalisten Walter Harris in Malabata, aufwendig restauriert. Heute Museum zur Geschichte und Kunst Tangers, drumherum ein großer Park mit altem Baumbestand direkt am Meer — der Park ist mindestens so schön wie die Ausstellung."},
 {t:"16:00",h:"Malabata-Strand",p:"Der beste Stadtstrand von Tanger, ruhiger als der Hauptstrand.",f:1,loc:{q:"Plage Malabata, Tanger",lat:35.77854,lng:-5.77687},info:"Der ruhigere Stadtstrand östlich des Zentrums, breit und gepflegt. Zum Schwimmen besser geeignet als der Hauptstrand und deutlich weniger voll."},
 {t:"17:30",h:"Tanja Marina Bay",p:"Yachthafen mit Cafés. Guter Ort für ein Eis vor der Rückfahrt.",loc:{q:"Tanja Marina Bay",lat:35.78397,lng:-5.79646},info:"Der zum Yachthafen umgebaute alte Hafen mit langer Promenade, Cafés und Eisdielen. Abends spazieren hier halb Tanger — guter Ort für eine Pause vor der Rückfahrt."},
-{t:"19:30",h:"La Boca Negra",p:"Fisch und Pasta, 813 m von der Marina.",c:"ca. 150 MAD",eat:1,loc:{q:"La Boca Negra, Avenue Louis Van Beethoven, Tanger",lat:35.77703,lng:-5.79931},info:"Fisch- und Pastalokal an der Avenue Beethoven, im Viertel um die Place Roudani. Von Tanja Marina Bay, wo ihr um halb sechs seid, gut zehn Minuten zu Fuß. Direkter Nachbar von Rio do Texas — 45 Meter Abstand, ihr könnt vor Ort noch vergleichen."}],
+{t:"19:30",h:"La Boca Negra",p:"Fisch und Pasta, 813 m von der Marina.",v:150,pp:1,eat:1,loc:{q:"La Boca Negra, Avenue Louis Van Beethoven, Tanger",lat:35.77703,lng:-5.79931},info:"Fisch- und Pastalokal an der Avenue Beethoven, im Viertel um die Place Roudani. Von Tanja Marina Bay, wo ihr um halb sechs seid, gut zehn Minuten zu Fuß. Direkter Nachbar von Rio do Texas — 45 Meter Abstand, ihr könnt vor Ort noch vergleichen."}],
 notes:[{k:"plan",t:"<b>Ohne Bus:</b> Alles per Petit Taxi, ca. 100–120 MAD für den ganzen Tag zu zweit."}]},
 
 {n:5,date:"2026-09-06",wd:"So",dd:"06",tag:"Asilah",title:"Weiße Stadt am Atlantik",sub:"45 Minuten mit dem Zug. In der Altstadt liegt alles im Umkreis von 300 Metern.",
 items:[
-{t:"08:00",h:"Frühstück im Hotel",p:"Frühstücken, dann zum Bahnhof — der Zug fährt um 10 Uhr.",c:"im Zimmerpreis",eat:1,loc:{q:"Hôtel Mamora, Tanger",lat:35.78536,lng:-5.80971},info:"Die Dachterrasse über dem Hafen liegt morgens noch im Schatten und ist der ruhigste Ort im Haus. Guter Moment, um den Tag durchzugehen — vom Frühstückstisch sind es zwei Minuten bis zum Petit Socco.",snack:1},
-{t:"09:20",h:"Taxi zum Bahnhof Tanger Ville",p:"",c:"15 MAD",loc:{q:"Gare de Tanger Ville",lat:35.77153,lng:-5.78622},info:"Der moderne Hauptbahnhof östlich des Zentrums, Ausgangspunkt für Al Boraq und die Regionalzüge. Tickets am Schalter oder Automaten; zum Bahnsteig geht es durch eine Sicherheitskontrolle."},
-{t:"10:00",h:"Zug nach Asilah",p:"Regionalzug, ca. 40–45 Minuten. Zeiten am Vortag prüfen.",c:"25–35 MAD",loc:{q:"Gare d'Asilah",lat:35.48238,lng:-6.02353},rail:{a:"Tanger Ville",b:"Asilah"},info:"Der Bahnhof von Asilah liegt gut zwei Kilometer außerhalb an der Landstraße, nicht in der Altstadt. Vom Bahnsteig nimmst du ein Taxi in die Medina, das sind wenige Minuten."},
+{t:"08:00",h:"Frühstück im Hotel",p:"Frühstücken, dann zum Bahnhof — der Zug fährt um 10 Uhr.",cn:"im Zimmerpreis",eat:1,loc:{q:"Hôtel Mamora, Tanger",lat:35.78536,lng:-5.80971},info:"Die Dachterrasse über dem Hafen liegt morgens noch im Schatten und ist der ruhigste Ort im Haus. Guter Moment, um den Tag durchzugehen — vom Frühstückstisch sind es zwei Minuten bis zum Petit Socco.",snack:1},
+{t:"09:20",h:"Taxi zum Bahnhof Tanger Ville",p:"",v:15,loc:{q:"Gare de Tanger Ville",lat:35.77153,lng:-5.78622},info:"Der moderne Hauptbahnhof östlich des Zentrums, Ausgangspunkt für Al Boraq und die Regionalzüge. Tickets am Schalter oder Automaten; zum Bahnsteig geht es durch eine Sicherheitskontrolle."},
+{t:"10:00",h:"Zug nach Asilah",p:"Regionalzug, ca. 40–45 Minuten. Zeiten am Vortag prüfen.",v:30,pp:1,loc:{q:"Gare d'Asilah",lat:35.48238,lng:-6.02353},rail:{a:"Tanger Ville",b:"Asilah"},info:"Der Bahnhof von Asilah liegt gut zwei Kilometer außerhalb an der Landstraße, nicht in der Altstadt. Vom Bahnsteig nimmst du ein Taxi in die Medina, das sind wenige Minuten."},
 {t:"11:00",h:"Medina von Asilah",p:"Durch Bab Al Homar hinein, dann treiben lassen.",f:1,loc:{q:"Medina of Asilah",lat:35.46553,lng:-6.03817},info:"Eine kleine, auffallend saubere Altstadt hinter portugiesischen Mauern. Weiß gekalkte Häuser mit blauen Sockeln, und an vielen Wänden große Wandbilder, die beim jährlichen Kunstfestival entstehen. In einer Stunde durchquert, aber zum Bummeln gemacht."},
 {t:"11:40",h:"Wandbilder-Rundgang & Galerie Monassilah",p:"Kreuz und quer durch die Gassen der Medina.",f:1,loc:{q:"Galerie Monassilah, Assilah",lat:35.46537,lng:-6.03949},info:"Seit 1978 kommen jeden Sommer Künstler nach Asilah und bemalen beim Kulturfestival die weiß gekalkten Mauern der Medina. Die Bilder bleiben bis zum nächsten Jahr, dann wird übermalt — was ihr seht, gibt es so nur in dieser Saison. In OpenStreetMap sind sieben Wandbilder einzeln verzeichnet, verteilt zwischen 60 und 280 Metern: Gesichter, Hände, blaue Kalligrafie, eine Katze mit einem Fisch. Die Galerie Monassilah liegt mittendrin."},
-{t:"12:20",h:"Palais Rassouni",p:"Der Palast auf der Seemauer, 190 m weiter.",c:"Eintritt vor Ort",loc:{q:"Palais Rassouni, Assilah",lat:35.46573,lng:-6.04024},info:"Moulay Ahmed er Raisuni ließ ihn um 1909 direkt an die Seemauer setzen — Räuberhauptmann, Entführer und zeitweise Pascha von Asilah, eine der schillerndsten Figuren Nordmarokkos. Innen ein Empfangssaal mit Fenstern aufs offene Meer; die Stadt erzählt sich, Gefangene seien von der Terrasse in die Brandung geworfen worden. Heute gehört das Haus zum Kulturzentrum Hassan II. Ob offen ist, hängt vom Programm ab — von der Mauer aus ist der Bau ohnehin am eindrucksvollsten."},
+{t:"12:20",h:"Palais Rassouni",p:"Der Palast auf der Seemauer, 190 m weiter.",v:20,pp:1,cn:"Richtwert, Preis vor Ort",loc:{q:"Palais Rassouni, Assilah",lat:35.46573,lng:-6.04024},info:"Moulay Ahmed er Raisuni ließ ihn um 1909 direkt an die Seemauer setzen — Räuberhauptmann, Entführer und zeitweise Pascha von Asilah, eine der schillerndsten Figuren Nordmarokkos. Innen ein Empfangssaal mit Fenstern aufs offene Meer; die Stadt erzählt sich, Gefangene seien von der Terrasse in die Brandung geworfen worden. Heute gehört das Haus zum Kulturzentrum Hassan II. Ob offen ist, hängt vom Programm ab — von der Mauer aus ist der Bau ohnehin am eindrucksvollsten."},
 {t:"13:00",h:"Tour Al Qamra & Bab el Bahr",p:"Am nördlichen Ende der Mauer.",f:1,loc:{q:"Tour Al Qamra, Assilah",lat:35.46625,lng:-6.03779},info:"Der Mondturm, ein portugiesischer Wachturm des frühen 16. Jahrhunderts, und zehn Meter daneben Bab el Bahr, das Meerestor. Durch dieses Tor wurden früher die Boote versorgt; heute ist es vor allem ein steinerner Rahmen um den Atlantik, durch den jeder fotografiert."},
-{t:"13:40",h:"Meeresfrüchte",p:"Casa Garcia oder Oceano Casa Pepe an der Mauer.",c:"ca. 100 MAD",loc:{q:"Casa Garcia, Asilah",lat:35.46822,lng:-6.03307},eat:1,info:"Fischlokal in Laufweite der Stadtmauer. Bestellt wird, was am Morgen ankam — Garnelen, Tintenfisch, Fisch des Tages."},
+{t:"13:40",h:"Meeresfrüchte",p:"Casa Garcia oder Oceano Casa Pepe an der Mauer.",v:100,pp:1,loc:{q:"Casa Garcia, Asilah",lat:35.46822,lng:-6.03307},eat:1,info:"Fischlokal in Laufweite der Stadtmauer. Bestellt wird, was am Morgen ankam — Garnelen, Tintenfisch, Fisch des Tages."},
 {t:"15:00",h:"Portugiesische Stadtmauer — Wehrgang",p:"Oben auf der Mauer entlang, mit dem Atlantik unter dir.",f:1,loc:{q:"Bab Homar, Asilah",lat:35.46507,lng:-6.038},info:"Die Befestigung aus dem frühen 16. Jahrhundert mit begehbarem Wehrgang direkt über dem Atlantik. Bab Homar ist das alte Landtor mit dem portugiesischen Wappen darüber. Oben läuft man an der Mauer entlang, unten schlagen die Wellen gegen die Felsen."},
 {t:"15:45",h:"Fort Antonio da Fonseca",p:"An der Südwestecke der Stadtmauer.",f:1,loc:{q:"Fort Antonio da Fonseca, Assilah",lat:35.46448,lng:-6.03893},info:"Ein Bollwerk der portugiesischen Befestigung, benannt nach einem ihrer Kommandanten. Portugal hielt Asilah von 1471 bis 1550 und zog dann ab, ohne dass gekämpft wurde. Der Turm sitzt an der Südwestecke der Mauer, unterhalb schlägt die Brandung gegen die Felsen."},
 {t:"16:20",h:"Bab Al Kasbah & Borj Al Kasabah",p:"Das ruhigste Eck der Altstadt.",f:1,loc:{q:"Bab Al Kasbah, Assilah",lat:35.46667,lng:-6.03655},info:"Das Kasbah-Tor am nordöstlichen Ende der Medina, in OpenStreetMap als Aussichtspunkt geführt, daneben der Eckturm Borj Al Kasabah. Von hier sieht man auf der einen Seite über die Dächer der Altstadt, auf der anderen zum Hafen. Der stillste Punkt der Stadt, weil kaum jemand so weit läuft."},
-{t:"17:15",h:"Promenade & Galerien",p:"Letzte Runde am Wasser, bevor der Zug fährt.",c:"30 MAD",loc:{q:"Corniche d'Asilah",lat:35.45999,lng:-6.03663},info:"Die Uferpromenade mit Blick auf den Atlantik. Asilah ist seit Jahrzehnten eine Künstlerstadt; in den Gassen dahinter liegen kleine Galerien und Ateliers, in die man einfach hineingehen kann."},
-{t:"18:40",h:"Zug zurück",p:"",c:"25–35 MAD",loc:{q:"Gare d'Asilah",lat:35.48238,lng:-6.02353},rail:{a:"Asilah",b:"Tanger Ville"},info:"Zurück zum Bahnhof außerhalb der Stadt, wieder mit dem Taxi. Die Regionalzüge fahren etwa alle zwei Stunden — die Rückfahrzeit besser am Morgen schon prüfen."},
-{t:"20:00",h:"Puerto Marina",p:"Fisch, 1,1 km vom Bahnhof — auf dem Rückweg aus Asilah.",c:"ca. 150 MAD",eat:1,loc:{q:"Puerto Marina, Avenue Beethoven, Tanger",lat:35.77394,lng:-5.79784},info:"Fischlokal nahe der Marina an der Avenue Beethoven. Der Zug aus Asilah kommt gegen 19:45 an, von dort gut zehn Minuten mit dem Petit Taxi. OSM führt es als Bar — mit Küche, aber rechnet eher mit lockerer Runde als mit weißen Tischdecken."}],
+{t:"17:15",h:"Promenade & Galerien",p:"Letzte Runde am Wasser, bevor der Zug fährt.",v:30,pp:1,loc:{q:"Corniche d'Asilah",lat:35.45999,lng:-6.03663},info:"Die Uferpromenade mit Blick auf den Atlantik. Asilah ist seit Jahrzehnten eine Künstlerstadt; in den Gassen dahinter liegen kleine Galerien und Ateliers, in die man einfach hineingehen kann."},
+{t:"18:40",h:"Zug zurück",p:"",v:30,pp:1,loc:{q:"Gare d'Asilah",lat:35.48238,lng:-6.02353},rail:{a:"Asilah",b:"Tanger Ville"},info:"Zurück zum Bahnhof außerhalb der Stadt, wieder mit dem Taxi. Die Regionalzüge fahren etwa alle zwei Stunden — die Rückfahrzeit besser am Morgen schon prüfen."},
+{t:"20:00",h:"Puerto Marina",p:"Fisch, 1,1 km vom Bahnhof — auf dem Rückweg aus Asilah.",v:150,pp:1,eat:1,loc:{q:"Puerto Marina, Avenue Beethoven, Tanger",lat:35.77394,lng:-5.79784},info:"Fischlokal nahe der Marina an der Avenue Beethoven. Der Zug aus Asilah kommt gegen 19:45 an, von dort gut zehn Minuten mit dem Petit Taxi. OSM führt es als Bar — mit Küche, aber rechnet eher mit lockerer Runde als mit weißen Tischdecken."}],
 notes:[{k:"tip",t:"Zugzeiten am Vortag am Bahnhof oder auf oncf-voyages.ma prüfen. Die Regionalzüge fahren etwa alle zwei Stunden."}]},
 
 {n:6,date:"2026-09-07",wd:"Mo",dd:"07",tag:"Rabat",title:"Die Hauptstadt mit dem Al Boraq",sub:"Der einzige Tag, der früh startet. Montag bewusst gewählt: dienstags sind Rabats Museen geschlossen.",
 items:[
-{t:"07:20",h:"Taxi zum Bahnhof",p:"",c:"15 MAD",loc:{q:"Gare de Tanger Ville",lat:35.77153,lng:-5.78622},info:"Früher Start zum Hauptbahnhof. Um diese Zeit ist die Medina noch leer, deshalb das Taxi am Vorabend an der Rezeption bestellen."},
-{t:"08:00",h:"Al Boraq nach Rabat",p:"Zug 2009, Wagen 6, Plätze 22 und 24. Ankunft 09:22.",c:"198 / 239 MAD p. P. · gebucht",rail:{a:"Tanger Ville",b:"Rabat Agdal"},info:"Afrikas einziger Hochgeschwindigkeitszug, 320 km/h, eine Stunde 22 Minuten für 250 Kilometer. Gebucht auf Dossier KVDYJH: Zug 2009, Wagen 6, Plätze 22 und 24. Bei der Kontrolle wird neben dem QR-Code ein gültiger Ausweis verlangt — Pass einstecken. Wenn ihr die Tickets ausdruckt: den QR-Code nicht knicken, auf dem Handy reicht das PDF."},
-{t:"09:22",h:"Ankunft Rabat Agdal",p:"Tram oder Taxi in die Altstadt.",c:"Tram 6 MAD",loc:{q:"Gare Rabat Agdal",lat:34.0011,lng:-6.85744},info:"Moderner Bahnhof im Viertel Agdal, Endpunkt des Al Boraq. Von hier bringen dich Tram oder Taxi in rund einer Viertelstunde in die Altstadt."},
+{t:"07:20",h:"Taxi zum Bahnhof",p:"",v:15,loc:{q:"Gare de Tanger Ville",lat:35.77153,lng:-5.78622},info:"Früher Start zum Hauptbahnhof. Um diese Zeit ist die Medina noch leer, deshalb das Taxi am Vorabend an der Rezeption bestellen."},
+{t:"08:00",h:"Al Boraq nach Rabat",p:"Zug 2009, Wagen 6, Plätze 22 und 24. Ankunft 09:22.",v:219,pp:1,cn:"gebucht, Dossier KVDYJH",rail:{a:"Tanger Ville",b:"Rabat Agdal"},info:"Afrikas einziger Hochgeschwindigkeitszug, 320 km/h, eine Stunde 22 Minuten für 250 Kilometer. Gebucht auf Dossier KVDYJH: Zug 2009, Wagen 6, Plätze 22 und 24. Bei der Kontrolle wird neben dem QR-Code ein gültiger Ausweis verlangt — Pass einstecken. Wenn ihr die Tickets ausdruckt: den QR-Code nicht knicken, auf dem Handy reicht das PDF."},
+{t:"09:22",h:"Ankunft Rabat Agdal",p:"Tram oder Taxi in die Altstadt.",v:6,pp:1,cn:"Tram",loc:{q:"Gare Rabat Agdal",lat:34.0011,lng:-6.85744},info:"Moderner Bahnhof im Viertel Agdal, Endpunkt des Al Boraq. Von hier bringen dich Tram oder Taxi in rund einer Viertelstunde in die Altstadt."},
 {t:"09:50",h:"Kasbah des Oudayas",p:"Blau-weiße Gassen hinter dem großen Almohadentor Bab Oudaïa.",f:1,loc:{q:"Kasbah des Oudayas, Rabat",lat:34.03166,lng:-6.83585},info:"Eine Festungsanlage aus dem 12. Jahrhundert an der Mündung des Bouregreg. Innen ein Viertel aus blau-weiß gestrichenen Gassen, dazu ein andalusischer Garten und das Café Maure auf der Terrasse mit Blick auf Salé. Der Eintritt ist frei, man geht durch das große Tor einfach hinein."},
-{t:"10:30",h:"Jardin Andalou & Café Maure",p:"Im Kasbah-Gelände, gleich hinter dem Tor.",c:"20 MAD",eat:1,snack:1,loc:{q:"Café Maure, Kasbah des Oudayas, Rabat",lat:34.03118,lng:-6.83486},info:"Der andalusische Garten wurde in den 1920er Jahren innerhalb der Kasbah-Mauern angelegt — Orangenbäume, Zypressen, Bougainvillea und sehr viele Katzen. Am unteren Ende führt eine Treppe zum Café Maure, dessen Terrassen über dem Bouregreg liegen, gegenüber die weiße Medina von Salé. Es gibt Minztee und Mandelgebäck, sonst nichts."},
-{t:"11:05",h:"Musée des Oudayas",p:"Im alten Palast innerhalb der Kasbah, 130 m weiter.",c:"30 MAD",hours:{days:[0,1,3,4,5,6],from:"10:00",to:"18:00"},loc:{q:"Musée des Oudayas, Kasbah des Oudayas, Rabat",lat:34.03049,lng:-6.8357},info:"Untergebracht in dem Palast, den Sultan Moulay Ismail Ende des 17. Jahrhunderts in die Kasbah setzen ließ. Heute Nationalmuseum für Schmuck: Silberarbeiten der Berberstämme, Fibeln, Stirnbänder, Dolche, dazu Teppiche. Klein, ruhig, in einer halben Stunde durch — der Innenhof mit den Zellij-Wänden allein lohnt den Eintritt."},
+{t:"10:30",h:"Jardin Andalou & Café Maure",p:"Im Kasbah-Gelände, gleich hinter dem Tor.",v:20,pp:1,eat:1,snack:1,loc:{q:"Café Maure, Kasbah des Oudayas, Rabat",lat:34.03118,lng:-6.83486},info:"Der andalusische Garten wurde in den 1920er Jahren innerhalb der Kasbah-Mauern angelegt — Orangenbäume, Zypressen, Bougainvillea und sehr viele Katzen. Am unteren Ende führt eine Treppe zum Café Maure, dessen Terrassen über dem Bouregreg liegen, gegenüber die weiße Medina von Salé. Es gibt Minztee und Mandelgebäck, sonst nichts."},
+{t:"11:05",h:"Musée des Oudayas",p:"Im alten Palast innerhalb der Kasbah, 130 m weiter.",v:30,pp:1,hours:{days:[0,1,3,4,5,6],from:"10:00",to:"18:00"},loc:{q:"Musée des Oudayas, Kasbah des Oudayas, Rabat",lat:34.03049,lng:-6.8357},info:"Untergebracht in dem Palast, den Sultan Moulay Ismail Ende des 17. Jahrhunderts in die Kasbah setzen ließ. Heute Nationalmuseum für Schmuck: Silberarbeiten der Berberstämme, Fibeln, Stirnbänder, Dolche, dazu Teppiche. Klein, ruhig, in einer halben Stunde durch — der Innenhof mit den Zellij-Wänden allein lohnt den Eintritt."},
 {t:"11:45",h:"Medina & Rue des Consuls",p:"Teppiche, Leder, Silber — deutlich entspannter als in Tanger.",f:1,loc:{q:"Rue des Consuls, Rabat",lat:34.02797,lng:-6.83403},info:"Rabats Altstadt ist übersichtlich und deutlich entspannter als die in Tanger. Die Rue des Consuls war früher die Straße der Konsulate, heute die Hauptgasse für Teppiche, Leder und Silber. Gehandelt wird auch hier, aber ohne Druck."},
-{t:"13:00",h:"Mittagessen",p:"",c:"ca. 100 MAD",eat:1},
+{t:"13:00",h:"Mittagessen",p:"",v:100,pp:1,eat:1},
 {t:"14:15",h:"Bab El Had",p:"Auf dem Weg von der Medina ins Zentrum, 890 m zu Fuß.",f:1,loc:{q:"Bab El Had, Rabat",lat:34.02194,lng:-6.84039},info:"Almohadisches Stadttor aus dem späten 12. Jahrhundert, der westliche Zugang zur Medina. Heute umtost von Verkehr, aber die doppelten Hufeisenbögen und das Steinmetzwerk darüber sind original. Ein Stopp von zehn Minuten — kein Umweg, das Tor liegt genau zwischen Altstadt und Neustadt."},
-{t:"14:45",h:"Musée d'Histoire et des Civilisations",p:"Das Archäologiemuseum im Zentrum, kurzer Weg von Bab El Had.",c:"30 MAD",hours:{days:[0,1,3,4,5,6],from:"10:00",to:"18:00"},loc:{q:"Musée d Histoire et des Civilisations, Rabat",lat:34.01376,lng:-6.83159},info:"Marokkos Archäologiemuseum, 1932 gegründet. Herzstück ist der Bronzesaal mit den Funden aus Volubilis — darunter die Büste des Königs Juba II. und der bronzene Hund, römische Güsse von einer Qualität, die man sonst in Neapel sucht. Dazu prähistorische Funde und Keramik aus Sala Colonia, der Römerstadt, deren Ruinen ihr nachmittags in Chellah seht."},
-{t:"16:00",h:"Chellah",p:"Römische Ruinen und Nekropole, voller Storchennester. Schließt um 18 Uhr.",c:"70 MAD",loc:{q:"Chellah, Rabat",lat:34.00637,lng:-6.82078},hours:{days:[0,1,2,3,4,5,6],from:"09:00",to:"18:00"},info:"Eine römische Ruinenstadt, später Nekropole der Meriniden, überwachsen von Feigen- und Bananenstauden. Auf den Mauern und Minaretten nisten Störche, deren Klappern man überall hört. Nach längerer Restaurierung 2024 wiedereröffnet — der ruhigste Ort in Rabat."},
-{t:"17:45",h:"Frühes Abendessen in Rabat",p:"Vor der offenen Abendrunde, der Zug fährt erst um 20:56.",c:"ca. 130 MAD",eat:1,loc:{q:"Rue des Consuls, Rabat",lat:34.02797,lng:-6.83403},info:"Bewusst früh gelegt. Der Zug kommt erst um 22:17 in Tanger an — da ist an ein Abendessen nicht mehr zu denken. Also wird in Rabat gegessen, solange noch Zeit ist, und der Abend danach gehört den Toren und dem Hassan-Turm im Scheinwerferlicht. Lokale gibt es rund um die Medina und die Avenue Mohammed V."},
+{t:"14:45",h:"Musée d'Histoire et des Civilisations",p:"Das Archäologiemuseum im Zentrum, kurzer Weg von Bab El Had.",v:30,pp:1,hours:{days:[0,1,3,4,5,6],from:"10:00",to:"18:00"},loc:{q:"Musée d Histoire et des Civilisations, Rabat",lat:34.01376,lng:-6.83159},info:"Marokkos Archäologiemuseum, 1932 gegründet. Herzstück ist der Bronzesaal mit den Funden aus Volubilis — darunter die Büste des Königs Juba II. und der bronzene Hund, römische Güsse von einer Qualität, die man sonst in Neapel sucht. Dazu prähistorische Funde und Keramik aus Sala Colonia, der Römerstadt, deren Ruinen ihr nachmittags in Chellah seht."},
+{t:"16:00",h:"Chellah",p:"Römische Ruinen und Nekropole, voller Storchennester. Schließt um 18 Uhr.",v:70,pp:1,loc:{q:"Chellah, Rabat",lat:34.00637,lng:-6.82078},hours:{days:[0,1,2,3,4,5,6],from:"09:00",to:"18:00"},info:"Eine römische Ruinenstadt, später Nekropole der Meriniden, überwachsen von Feigen- und Bananenstauden. Auf den Mauern und Minaretten nisten Störche, deren Klappern man überall hört. Nach längerer Restaurierung 2024 wiedereröffnet — der ruhigste Ort in Rabat."},
+{t:"17:45",h:"Frühes Abendessen in Rabat",p:"Vor der offenen Abendrunde, der Zug fährt erst um 20:56.",v:130,pp:1,eat:1,loc:{q:"Rue des Consuls, Rabat",lat:34.02797,lng:-6.83403},info:"Bewusst früh gelegt. Der Zug kommt erst um 22:17 in Tanger an — da ist an ein Abendessen nicht mehr zu denken. Also wird in Rabat gegessen, solange noch Zeit ist, und der Abend danach gehört den Toren und dem Hassan-Turm im Scheinwerferlicht. Lokale gibt es rund um die Medina und die Avenue Mohammed V."},
 {t:"18:50",h:"Palais Royal Dar Al Makhzen",p:"Mit dem Taxi, 1,1 km — von außen.",f:1,loc:{q:"Palais Royal Dar Al Makhzen, Rabat",lat:34.00556,lng:-6.83499},info:"Die königliche Residenz von 1864, umgeben vom Mechouar: einem ummauerten Areal mit weiter Esplanade, der Moschee Ahl Fas und mehreren monumentalen Toren. Hinein kommt ihr nicht — das Gelände ist bewohnt und bewacht. Der Vorplatz und die Tore sind zugänglich, das Taxi kann langsam durchfahren. Die Wachen nicht fotografieren."},
 {t:"19:20",h:"Bab Rouah",p:"Das Tor der Winde, 900 m vom Palast.",f:1,loc:{q:"Bab Rouah, Rabat",lat:34.01281,lng:-6.83757},info:"Um 1197 unter Yacoub al-Mansour gebaut, eines der großen Almohadentore des Maghreb. Über dem Bogen liegen Muschelnischen und geometrischer Steinschnitt, der Durchgang knickt mehrfach ab — gebaut, um einen Angriff zu bremsen. Innen ist heute ein Ausstellungsraum; von außen ist es das eindrucksvollere Stück."},
 {t:"19:45",h:"Hassan-Turm & Mausoleum",p:"Nach Sonnenuntergang, die Anlage ist beleuchtet.",f:1,loc:{q:"Tour Hassan, Rabat",lat:34.02415,lng:-6.8228},info:"Das Minarett einer Moschee, die 1195 unvollendet blieb, davor ein Feld aus über 200 abgebrochenen Säulen. Gegenüber liegt das Mausoleum Mohammed V. mit Wachen in traditioneller Tracht; der Innenraum mit dem Zedernholzdach ist frei zugänglich."},
 {t:"20:20",h:"Taxi zum Bahnhof Rabat Agdal",p:"Rund 4 km vom Hassan-Turm, gut eine Viertelstunde.",loc:{q:"Gare Rabat Agdal",lat:34.0011,lng:-6.85744},info:"Puffer mit Absicht: Vom Hassan-Turm sind es gut vier Kilometer quer durch die Stadt, und die Rückfahrkarten sind nicht umtauschbar. Abends ist die Avenue Mohammed V frei, aber rechnet lieber mit zwanzig Minuten als mit zehn."},
-{t:"20:56",h:"Rückzug ab Rabat Agdal",p:"Zug 1057, Wagen 5, Plätze 21 und 23. Ankunft Tanger 22:17.",c:"im Hinfahrpreis",loc:{q:"Gare Rabat Agdal",lat:34.0011,lng:-6.85744},rail:{a:"Rabat Agdal",b:"Tanger Ville"},info:"Abfahrt 20:56 ab Rabat Agdal, Ankunft Tanger Ville 22:17. Wichtig: Beide Rückfahrkarten sind NON FLEX — weder umtauschbar noch erstattungsfähig. Wer diesen Zug verpasst, hat kein Ticket mehr, sondern kauft ein neues zum Tagespreis. Deshalb steht das Taxi schon um 20:20 im Plan.",k:"wichtig"},
+{t:"20:56",h:"Rückzug ab Rabat Agdal",p:"Zug 1057, Wagen 5, Plätze 21 und 23. Ankunft Tanger 22:17.",cn:"im Hinfahrpreis",loc:{q:"Gare Rabat Agdal",lat:34.0011,lng:-6.85744},rail:{a:"Rabat Agdal",b:"Tanger Ville"},info:"Abfahrt 20:56 ab Rabat Agdal, Ankunft Tanger Ville 22:17. Wichtig: Beide Rückfahrkarten sind NON FLEX — weder umtauschbar noch erstattungsfähig. Wer diesen Zug verpasst, hat kein Ticket mehr, sondern kauft ein neues zum Tagespreis. Deshalb steht das Taxi schon um 20:20 im Plan.",k:"wichtig"},
 {t:"22:17",h:"Ankunft Tanger",p:"Taxi in die Medina. Heute wurde in Rabat gegessen."}],
 notes:[{k:"warn",t:"<b>Die Rückfahrt ist nicht umtauschbar.</b> Beide Tickets für den 20:56-Zug sind NON FLEX — verpasst heißt verfallen. Am Hassan-Turm spätestens um 20:20 ins Taxi. Dossier <b>KVDYJH</b>: hin Zug 2009, Wagen 6, Plätze 22 und 24 · zurück Zug 1057, Wagen 5, Plätze 21 und 23. Bei der Kontrolle wird ein gültiger Ausweis verlangt."}]},
 
 {n:7,date:"2026-09-08",wd:"Di",dd:"08",tag:"Ostküste",title:"Belyounech, Dalia & langer Abend",sub:"Mit dem Mietwagen nach Osten ans Mittelmeer — geschützte Buchten, klares Wasser.",
 items:[
-{t:"08:00",h:"Frühstück im Hotel",p:"Ohne Eile — heute hat nichts Öffnungszeiten.",c:"im Zimmerpreis",eat:1,loc:{q:"Hôtel Mamora, Tanger",lat:35.78536,lng:-5.80971},info:"Die Dachterrasse über dem Hafen liegt morgens noch im Schatten und ist der ruhigste Ort im Haus. Guter Moment, um den Tag durchzugehen — vom Frühstückstisch sind es zwei Minuten bis zum Petit Socco.",snack:1},
-{t:"08:45",h:"Mietwagen holen",p:"Für die Ostküste lohnt das eigene Auto.",c:"Tagesmiete",loc:{q:"Hôtel Mamora, Tanger",lat:35.78536,lng:-5.80971},info:"Belyounech und Dalia liegen an derselben Straße — mit dem Taxi wäre jede Etappe eine eigene Verhandlung, mit dem Auto fahrt ihr, wann ihr wollt. Vermieter sitzen in der Neustadt und am Flughafen, für die Übergabe an der Medina reicht ein Anruf am Vortag. Vorher volltanken: auf dem letzten Stück Richtung Belyounech ist in OSM keine Tankstelle verzeichnet."},
+{t:"08:00",h:"Frühstück im Hotel",p:"Ohne Eile — heute hat nichts Öffnungszeiten.",cn:"im Zimmerpreis",eat:1,loc:{q:"Hôtel Mamora, Tanger",lat:35.78536,lng:-5.80971},info:"Die Dachterrasse über dem Hafen liegt morgens noch im Schatten und ist der ruhigste Ort im Haus. Guter Moment, um den Tag durchzugehen — vom Frühstückstisch sind es zwei Minuten bis zum Petit Socco.",snack:1},
+{t:"08:45",h:"Mietwagen holen",p:"Für die Ostküste lohnt das eigene Auto.",v:550,cn:"Tagesmiete plus Sprit, Richtwert",loc:{q:"Hôtel Mamora, Tanger",lat:35.78536,lng:-5.80971},info:"Belyounech und Dalia liegen an derselben Straße — mit dem Taxi wäre jede Etappe eine eigene Verhandlung, mit dem Auto fahrt ihr, wann ihr wollt. Vermieter sitzen in der Neustadt und am Flughafen, für die Übergabe an der Medina reicht ein Anruf am Vortag. Vorher volltanken: auf dem letzten Stück Richtung Belyounech ist in OSM keine Tankstelle verzeichnet."},
 {t:"10:00",h:"Ksar es-Seghir — Portugiesische Festung",p:"Erster Halt, gut 45 Minuten östlich.",f:1,loc:{q:"Portugiesische Festung Ksar es-Seghir",lat:35.84275,lng:-5.55855},info:"Ein kleiner Fischerhafen an der Mündung des Oued Ksar, und mittendrin die Reste einer portugiesischen Festung: ein fast kreisrunder Mauerring direkt am Wasser, mit Toren zum Meer und zum Fluss. Portugal nahm den Ort 1458 und hielt ihn rund hundert Jahre. Frei zugänglich, für eine gute Stunde. Wer will, frühstückt hier ein zweites Mal im Hafen."},
 {t:"12:00",h:"Belyounech — Baden unter dem Jbel Mousa",p:"Die Bucht gegenüber von Gibraltar.",f:1,loc:{q:"Plage Belyounech, Tanger-Tétouan",lat:35.9095,lng:-5.3936},info:"Eine Bucht am Fuß des Jbel Mousa, mit 839 Metern die afrikanische Säule des Herkules — die europäische, der Fels von Gibraltar, liegt gegenüber. Durch Berg und Meerenge geschützt, deshalb ruhiges und klares Wasser, ganz anders als am Atlantik. Kaum bebaut und entsprechend leer. Wichtig: Hier ist kein einziges Lokal verzeichnet, nur Parkflächen — Essen, Wasser und Schatten gehören ins Auto. Auf dem letzten Stück Richtung Ceuta ist mit Polizeikontrollen zu rechnen, Pass griffbereit."},
-{t:"15:30",h:"Späte Mahlzeit in Dalia",p:"Auf dem Rückweg, 20 Minuten von Belyounech.",c:"ca. 120 MAD",eat:1,loc:{q:"Plage Dalia, Tanger-Tétouan",lat:35.9058,lng:-5.4764},info:"Anders als in Belyounech gibt es hier mehrere Lokale direkt über dem Strand — Mirador Dalia, La casa del mar und ein paar Snackbars, dazu Parkflächen. Fisch, Tajine, Salate. Wer nach dem Essen noch Lust hat, springt hier ein zweites Mal ins Wasser: dieselbe geschützte Küste, nur mit Infrastruktur."},
+{t:"15:30",h:"Späte Mahlzeit in Dalia",p:"Auf dem Rückweg, 20 Minuten von Belyounech.",v:120,pp:1,eat:1,loc:{q:"Plage Dalia, Tanger-Tétouan",lat:35.9058,lng:-5.4764},info:"Anders als in Belyounech gibt es hier mehrere Lokale direkt über dem Strand — Mirador Dalia, La casa del mar und ein paar Snackbars, dazu Parkflächen. Fisch, Tajine, Salate. Wer nach dem Essen noch Lust hat, springt hier ein zweites Mal ins Wasser: dieselbe geschützte Küste, nur mit Infrastruktur."},
 {t:"17:00",h:"Rückfahrt nach Tanger",p:"Gut eine Stunde auf der N16 an der Meerenge entlang.",info:"Die Küstenstraße läuft mit Blick auf die Meerenge zurück, bei klarer Luft die ganze Zeit mit Spanien am Horizont. Am Hafen Tanger Med kann LKW-Verkehr dazukommen — dort ruhig fahren und Zeit einplanen."},
 {t:"18:30",h:"Auto abgeben & Pause",p:"Wagen zurückgeben, dann Füße hoch.",f:1,loc:{q:"Hôtel Mamora, Tanger",lat:35.78536,lng:-5.80971},info:"Bewusst leer gelassen. Um neun wartet ein Buffet, und wer vorher noch drei Stunden Programm läuft, kommt satt und müde an. Die Terrasse über dem Hafen ist der beste Platz zum Nichtstun."},
 {t:"20:15",h:"Hinüber zur Avenue Mohammed VI",p:"Gut 1,3 km am Wasser entlang, oder Petit Taxi.",f:1,loc:{q:"Avenue Mohammed VI, Tanger",lat:35.7792,lng:-5.80248},info:"Der Weg vom Petit Socco zur Restaurantachse führt am Hafen und an der Marina vorbei — abends beleuchtet und voller Leute. Zu Fuß eine gute Viertelstunde, mit dem Petit Taxi 15 bis 20 MAD."},
-{t:"21:00",h:"Rio do Texas",p:"All you can eat. Geöffnet bis 01:00 Uhr.",c:"299 MAD p. P.",eat:1,loc:{q:"Rio do Texas, Avenue Mohammed VI, Tanger",lat:35.77737,lng:-5.79904},info:"Buffet an der Avenue Mohammed VI, all you can eat für 299 MAD pro Person, geöffnet bis ein Uhr nachts. Der Ruhetag ist bewusst dafür gewählt: Am nächsten Morgen steht kein Zug und kein Bus an. Der Betrag liegt deutlich über den 150 MAD, mit denen der Plan pro Person und Tag fürs Essen rechnet — plant den Abend also als Ausnahme ein."}],
+{t:"21:00",h:"Rio do Texas",p:"All you can eat. Geöffnet bis 01:00 Uhr.",v:299,pp:1,cn:"All you can eat",eat:1,loc:{q:"Rio do Texas, Avenue Mohammed VI, Tanger",lat:35.77737,lng:-5.79904},info:"Buffet an der Avenue Mohammed VI, all you can eat für 299 MAD pro Person, geöffnet bis ein Uhr nachts. Der Ruhetag ist bewusst dafür gewählt: Am nächsten Morgen steht kein Zug und kein Bus an. Der Betrag liegt deutlich über den 150 MAD, mit denen der Plan pro Person und Tag fürs Essen rechnet — plant den Abend also als Ausnahme ein."}],
 notes:[{k:"warn",t:"<b>Belyounech hat keine Lokale.</b> Wasser, Essen und Schatten gehören ins Auto — gegessen wird erst auf dem Rückweg in Dalia. Auf dem letzten Stück Richtung Ceuta ist mit Polizeikontrollen zu rechnen, Pass griffbereit halten."},{k:"plan",t:"<b>Ohne Mietwagen:</b> Grand Taxi privat für den ganzen Tag, Preis und Wartezeit vorher festlegen. Ein Roller ist für die 140 km auf der kurvigen N16 nicht zu empfehlen — Teile der Strecke teilen sich die Straße mit dem LKW-Verkehr zum Hafen Tanger Med."}]},
 
 {n:8,date:"2026-09-09",wd:"Mi",dd:"09",tag:"Letzter Tag",title:"Das andere Tanger",sub:"Die Ecken, die in der Woche noch nicht drankamen. Alles zu Fuß, alles unter 650 Metern.",
 items:[
-{t:"08:00",h:"Frühstück im Hotel",p:"Letztes Frühstück auf der Terrasse.",c:"im Zimmerpreis",eat:1,loc:{q:"Hôtel Mamora, Tanger",lat:35.78536,lng:-5.80971},info:"Die Dachterrasse über dem Hafen liegt morgens noch im Schatten und ist der ruhigste Ort im Haus. Guter Moment, um den Tag durchzugehen — vom Frühstückstisch sind es zwei Minuten bis zum Petit Socco.",snack:1},
+{t:"08:00",h:"Frühstück im Hotel",p:"Letztes Frühstück auf der Terrasse.",cn:"im Zimmerpreis",eat:1,loc:{q:"Hôtel Mamora, Tanger",lat:35.78536,lng:-5.80971},info:"Die Dachterrasse über dem Hafen liegt morgens noch im Schatten und ist der ruhigste Ort im Haus. Guter Moment, um den Tag durchzugehen — vom Frühstückstisch sind es zwei Minuten bis zum Petit Socco.",snack:1},
 {t:"09:00",h:"Hôtel Continental",p:"Zwei Minuten vom Hotel, oben über dem Hafen.",f:1,loc:{q:"Hotel Continental, Rue Dar Baroud, Tanger",lat:35.78752,lng:-5.80952},info:"Das älteste Hotel der Stadt, 1870 eröffnet, an der Kante der Medina über dem Hafen. Hineingehen ist erlaubt: Halle mit Stuck und Zellij, dahinter eine Terrasse mit Blick über die Bucht. Bertolucci drehte hier Himmel über der Wüste. Ein Kaffee genügt als Eintritt."},
-{t:"09:45",h:"Fondation Lorin",p:"Kleines Museum in der Medina, 200 m vom Hotel.",c:"Eintritt vor Ort",loc:{q:"Musée de la Fondation Lorin, Rue Touahin, Tanger",lat:35.78447,lng:-5.8117},info:"Untergebracht in einer ehemaligen Synagoge mitten in der Medina. Gezeigt werden historische Fotografien und Plakate aus der Zeit der internationalen Zone — Straßenszenen, Hafen, Kinos, Gesichter. Klein, in einer halben Stunde durch. Die Öffnungszeiten wechseln, deshalb steht hier keine Angabe — an der Tür prüfen."},
+{t:"09:45",h:"Fondation Lorin",p:"Kleines Museum in der Medina, 200 m vom Hotel.",v:20,pp:1,cn:"Richtwert, Preis vor Ort",loc:{q:"Musée de la Fondation Lorin, Rue Touahin, Tanger",lat:35.78447,lng:-5.8117},info:"Untergebracht in einer ehemaligen Synagoge mitten in der Medina. Gezeigt werden historische Fotografien und Plakate aus der Zeit der internationalen Zone — Straßenszenen, Hafen, Kinos, Gesichter. Klein, in einer halben Stunde durch. Die Öffnungszeiten wechseln, deshalb steht hier keine Angabe — an der Tür prüfen."},
 {t:"11:00",h:"Gran Teatro Cervantes",p:"Von außen — das Haus ist seit Jahrzehnten geschlossen.",f:1,loc:{q:"Gran Teatro Cervantes, Rue Anoual, Tanger",lat:35.782,lng:-5.8107},info:"Spanisches Theater von 1913, einst das größte Nordafrikas, mit Jugendstilfassade und Kacheln über dem Eingang. Seit Jahrzehnten geschlossen und im Verfall; eine Restaurierung ist vereinbart, aber nicht fertig. Hinein kommt ihr nicht — die Fassade und die Geschichte sind der Grund für den Umweg von fünf Minuten."},
 {t:"12:00",h:"Marché Central de Poissons",p:"Der Fischmarkt, 230 m vom Hotel.",f:1,loc:{q:"Marché Central de Poissons, Tanger",lat:35.78399,lng:-5.81164},info:"Die Fischhalle am Rand der Medina. Auf Eis liegt, was nachts vor der Küste gefangen wurde: Sardinen, Seebrasse, Tintenfisch, Garnelen. Hier kaufen die Restaurants der Stadt ein — und die Buden nebenan grillen dir, was du dir aussuchst."},
-{t:"13:00",h:"Sardinen vom Grill",p:"Am Markt aussuchen und grillen lassen.",c:"ca. 60 MAD",eat:1,loc:{q:"Marché Central de Poissons, Tanger",lat:35.78399,lng:-5.81164},info:"Das billigste und ehrlichste Fischessen der Stadt: Du zeigst auf deinen Fisch, er wandert auf den Grill, dazu Brot, Tomatensalat und Zitrone. Sardinen sind das Standardgericht der marokkanischen Atlantikküste. Keine Karte, kein Tischtuch — lass dir den Preis vorher nennen."},
+{t:"13:00",h:"Sardinen vom Grill",p:"Am Markt aussuchen und grillen lassen.",v:60,pp:1,eat:1,loc:{q:"Marché Central de Poissons, Tanger",lat:35.78399,lng:-5.81164},info:"Das billigste und ehrlichste Fischessen der Stadt: Du zeigst auf deinen Fisch, er wandert auf den Grill, dazu Brot, Tomatensalat und Zitrone. Sardinen sind das Standardgericht der marokkanischen Atlantikküste. Keine Karte, kein Tischtuch — lass dir den Preis vorher nennen."},
 {t:"14:30",h:"Église Saint-André & Friedhof",p:"Zehn Minuten vom Grand Socco.",f:1,loc:{q:"Église Saint-André, Rue d Angleterre, Tanger",lat:35.78359,lng:-5.81474},info:"Anglikanische Kirche von 1894, innen vollständig maurisch ausgestattet: Hufeisenbögen, Stuckarbeit und das Vaterunser in arabischer Kalligrafie hinter dem Altar. Auf dem Friedhof daneben liegen die Tanger-Engländer des letzten Jahrhunderts. Meist führt der Küster herum, ein Trinkgeld ist üblich."},
 {t:"16:00",h:"Bd Pasteur & Librairie des Colonnes",p:"Die Hauptstraße der Neustadt, 600 m vom Hotel.",f:1,loc:{q:"Librairie des Colonnes, Boulevard Pasteur, Tanger",lat:35.7799,lng:-5.80936},info:"Der Boulevard Pasteur ist die Flaniermeile der Neustadt. Auf halber Strecke liegt die Librairie des Colonnes, 1949 gegründet, der Buchladen von Paul Bowles, Jean Genet und Mohamed Choukri — bis heute in Betrieb, mit französischen, spanischen und arabischen Titeln. Am Ende der Straße wartet die Terrasse am Place Faro."},
 {t:"17:30",h:"Rückweg über den Grand Socco",p:"Zurück in die Medina, letzter Blick.",f:1,loc:{q:"Grand Socco, Tanger",lat:35.7843,lng:-5.81309},info:"Von der Neustadt zurück in die Altstadt führt der Weg über den Grand Socco, nachmittags der belebteste Platz der Stadt. Von dort die Rue Siaghine hinunter — dieselbe Gasse wie an Tag 2 am Morgen, jetzt in der Gegenrichtung und zu einer ganz anderen Tageszeit."},
-{t:"19:00",h:"Abschiedsessen im La Fuga",p:"In der Kasbah, im Riad Dar Chams Tanja. Gute Gelegenheit, die restlichen Dirham loszuwerden.",c:"ca. 150 MAD",eat:1,loc:{q:"Dar Chams Tanja, Rue Jnan Kabtan, Tanger",lat:35.78766,lng:-5.81203},info:"Restaurant im Riad Dar Chams Tanja, oben in der Kasbah an der Rue Jnan Kabtan — dieselbe Gasse, in der an Tag 2 das Mittagessen liegt. Innenhof und Dachterrasse mit Blick über die Bucht. Für den letzten Abend praktisch, weil der Rückweg ins Hotel bergab und kurz ist. Preisniveau eines Riad-Restaurants, also über dem der einfachen Medina-Lokale — die Karte hängt am Eingang."},
+{t:"19:00",h:"Abschiedsessen im La Fuga",p:"In der Kasbah, im Riad Dar Chams Tanja. Gute Gelegenheit, die restlichen Dirham loszuwerden.",v:150,pp:1,eat:1,loc:{q:"Dar Chams Tanja, Rue Jnan Kabtan, Tanger",lat:35.78766,lng:-5.81203},info:"Restaurant im Riad Dar Chams Tanja, oben in der Kasbah an der Rue Jnan Kabtan — dieselbe Gasse, in der an Tag 2 das Mittagessen liegt. Innenhof und Dachterrasse mit Blick über die Bucht. Für den letzten Abend praktisch, weil der Rückweg ins Hotel bergab und kurz ist. Preisniveau eines Riad-Restaurants, also über dem der einfachen Medina-Lokale — die Karte hängt am Eingang."},
 {t:"22:00",h:"Ryanair-Check-in für morgen",p:"Online erledigen. Ohne Check-in kostet der Schalter 55 €. Bordkarte offline speichern.",k:"wichtig"},
 {t:"22:15",h:"Taxi für 06:15 Uhr bestellen",p:"An der Rezeption. Morgens früh findest du in der Medina spontan keins.",k:"wichtig"},
 {t:"22:30",h:"Packen und früh schlafen",p:"Wecker 05:30. Bordkarte, Pass und Rest-Dirham griffbereit legen."}]},
@@ -826,7 +838,7 @@ items:[
 {n:9,date:"2026-09-10",wd:"Do",dd:"10",tag:"Abreise",title:"Abflug 09:20",sub:"Früher Start — dafür bist du mittags zu Hause.",
 items:[
 {t:"05:30",h:"Aufstehen & Check-out",p:"Die Rezeption ist rund um die Uhr besetzt."},
-{t:"06:15",h:"Taxi zum Flughafen",p:"30 Minuten. Nachttarif plus 50 %.",c:"250–300 MAD",loc:{q:"Aéroport Tanger Ibn Battouta",lat:35.72919,lng:-5.91297},info:"Rund 30 Minuten zum Flughafen, nachts mit Zuschlag. Ryanair schließt das Gate 30 Minuten vor Abflug, und das Ausreiseformular gibt es erst am Schalter oder vor der Passkontrolle."},
+{t:"06:15",h:"Taxi zum Flughafen",p:"30 Minuten. Nachttarif plus 50 %.",v:275,cn:"Nachttarif",loc:{q:"Aéroport Tanger Ibn Battouta",lat:35.72919,lng:-5.91297},info:"Rund 30 Minuten zum Flughafen, nachts mit Zuschlag. Ryanair schließt das Gate 30 Minuten vor Abflug, und das Ausreiseformular gibt es erst am Schalter oder vor der Passkontrolle."},
 {t:"06:50",h:"Ankunft TNG",p:"Ryanair schließt das Gate 30 Minuten vor Abflug."},
 {t:"07:20",h:"Gepäck, Ausreiseformular, Sicherheit",p:"Das Formular bekommst du am Schalter oder vor der Passkontrolle."},
 {t:"09:20",h:"Abflug nach Weeze",p:""},
@@ -834,22 +846,12 @@ items:[
 notes:[{k:"warn",t:"Frühstück gibt es im Hotel um die Zeit nicht mehr. Nimm dir am Vorabend etwas mit oder iss am Flughafen."}]}
 ];
 
-var COSTS_T=[
-{n:"Flughafen → Medina",d:"Taxi bei Ankunft, Festpreis",v:175,per:"g"},
-{n:"Medina → Flughafen",d:"10.09. um 06:15, Nachttarif",v:275,per:"g"},
-{n:"City-Tour-Bus, 48 Std.",d:"Gilt für beide Linien",v:80,per:"p",id:"bus"},
-{n:"Petit Taxis in Tanger",d:"Über die Woche, inkl. Abende an der Avenue Mohammed VI",v:350,per:"g"},
-{n:"Zug Asilah, hin und zurück",d:"2. Klasse",v:60,per:"p"},
-
-{n:"Al Boraq Rabat, hin und zurück",d:"gebucht: 198 + 239 DH für zwei, hin und zurück",v:219,per:"p"},
-{n:"Rabat vor Ort",d:"Tram und Taxis, jetzt 12 Stopps quer durch die Stadt",v:180,per:"g"},
-{n:"Mietwagen Ostküste",d:"Tagesmiete plus Sprit, Richtwert",v:550,per:"g"}];
-
-var COSTS_E=[
-{n:"American Legation Museum",v:50},{n:"Kasbah-Museum Tanger",v:30},
-{n:"Cap Spartel Leuchtturm",v:60},{n:"Herkuleshöhlen",d:"inkl. Ausstellung, nur bar",v:85},
-{n:"Villa Harris",v:30},{n:"Chellah Rabat",v:70},{n:"Museen in Rabat",d:"Oudayas & Archäologie, Richtwert",v:60},
-{n:"Kleine Museen",d:"Dar Niaba, Fondation Lorin, Palais Rassouni — Preise vor Ort, Richtwert",v:60},{n:"Puffer",d:"Kamelritt, Liegen, Trinkgelder",v:125}];
+/* Nur noch, was sich keinem einzelnen Punkt zuordnen laesst. Alles andere
+   haengt jetzt als v/pp direkt am Tagespunkt. */
+var COSTS_X=[
+{n:"Petit Taxis in Tanger",d:"Über die Woche verteilt, inkl. Abende an der Avenue Mohammed VI",v:350},
+{n:"Tram und Taxis in Rabat",d:"Zwölf Stopps quer durch die Stadt",v:180,tag:6},
+{n:"Puffer",d:"Liegen, Trinkgelder, Kleinkram",v:125,pp:1}];
 
 var CHECK=[
 {t:"Al-Boraq-Tickets offline speichern",s:"Dossier KVDYJH · PDF aufs Handy. Ausweis wird bei der Kontrolle verlangt"},
@@ -912,8 +914,8 @@ function foodPerPerson(){
   TRIP.forEach(function(d,di){d.items.forEach(function(_,ii){
     var it=item(di,ii);
     if(!it.eat)return;
-    var v=chipMAD(it.c);
-    if(v)sum+=v; else if(!/Zimmerpreis/i.test(it.c||''))ohne++;
+    if(it.v)sum+=it.pp?it.v:it.v/Math.max(people,1);
+    else if(!/Zimmerpreis/i.test(it.cn||''))ohne++;
   });});
   return {sum:Math.round(sum),ohne:ohne};
 }
@@ -951,6 +953,8 @@ function item(di,ii){
   if(o.t!==undefined)r.t=o.t;
   if(o.h!==undefined)r.h=o.h;
   if(o.p!==undefined)r.p=o.p;
+  if(o.v!==undefined)r.v=o.v;
+  if(o.pp!==undefined)r.pp=o.pp?1:0;
   // Ort immer als frisches Objekt bauen — sonst wuerde TRIP mitveraendert
   if(o.q!==undefined||o.url!==undefined||o.lat!==undefined){
     var L={};
@@ -986,7 +990,45 @@ function origVal(di,ii,field){
   var s=TRIP[di].items[ii];
   if(field==='q')return (s.loc&&s.loc.q)||'';
   if(field==='url')return (s.loc&&s.loc.url)||'';
+  if(field==='v')return s.v||0;
+  if(field==='pp')return s.pp?1:0;
   return s[field]||'';
+}
+
+/* ---------- Preise: eine Quelle, direkt am Tagespunkt ---------- */
+function busPreis(){
+  var ma=Math.min(busMA,people);
+  return 80*ma+130*(people-ma);
+}
+function itemKosten(it){
+  if(it.id==='bus')return busPreis();
+  if(!it.v)return 0;
+  return it.pp?it.v*people:it.v;
+}
+function preisChip(it){
+  if(it.id==='bus')return '<span class="chip pay">'+esc(it.cn||'')+'</span>';
+  var txt=it.v?(it.v.toLocaleString('de-DE')+' MAD'+(it.pp?' p. P.':'')):'';
+  if(it.cn)txt=txt?txt+' · '+it.cn:it.cn;
+  return txt?'<span class="chip pay">'+esc(txt)+'</span>':'';
+}
+/* Tageskosten. Essen zaehlt nur, wenn der Schalter an ist — sonst waere die
+   Tagessumme etwas anderes als das, was oben in der Gesamtsumme steht. */
+function tagKosten(di){
+  var sum=0;
+  TRIP[di].items.forEach(function(_,ii){
+    var it=item(di,ii);
+    if(it.eat&&!withFood)return;
+    sum+=itemKosten(it);
+  });
+  COSTS_X.forEach(function(c){
+    if(c.tag===TRIP[di].n)sum+=c.pp?c.v*people:c.v;
+  });
+  return sum;
+}
+function uebergreifend(){
+  var sum=0;
+  COSTS_X.forEach(function(c){if(!c.tag)sum+=c.pp?c.v*people:c.v;});
+  return sum;
 }
 
 function setCoords(di,ii,ll){
@@ -1143,6 +1185,10 @@ function renderDay(){
       '<input class="ed-q" data-i="'+i+'" value="'+esc(L.q||'')+'" placeholder="z. B. Café Hafa, Tanger">'+
       '<label>Koordinaten — setzen den Marker</label>'+
       '<input class="ed-c" data-i="'+i+'" value="'+esc(koord)+'" placeholder="35.7914, -5.8220 oder Maps-Link">'+
+      '<label>Preis in MAD — fließt in die Kostenseite</label>'+
+      '<div class="ed-preis"><input class="ed-v" data-i="'+i+'" type="number" inputmode="decimal" min="0" step="1" '+
+      'value="'+(it.v||'')+'" placeholder="0">'+
+      '<button class="ed-pp'+(it.pp?' on':'')+'" data-i="'+i+'">'+(it.pp?'pro Person':'für alle')+'</button></div>'+
       '<label>Eigener Maps-Link — hat Vorrang</label>'+
       '<input class="ed-u" data-i="'+i+'" value="'+esc(L.url||'')+'" placeholder="https://maps.app.goo.gl/…">'+
       '<button class="ed-pin'+(pinTarget===i?' armed':'')+'" data-i="'+i+'">'+
@@ -1151,8 +1197,7 @@ function renderDay(){
       '</div></li>';
     }
 
-    var ch='';
-    if(it.c)ch+='<span class="chip pay">'+esc(it.c)+'</span>';
+    var ch=preisChip(it);
     if(it.f)ch+='<span class="chip free">kostenlos</span>';
     if(it.k)ch+='<span class="chip pay">'+esc(it.k)+'</span>';
     if(it.edited)ch+='<span class="chip edit">geändert</span>';
@@ -1198,13 +1243,18 @@ function renderDay(){
     '<button class="dlbtn" id="dlcity">'+ICO_DL+'Stadt</button>'+
     '<button class="dlbtn" id="dltiles">'+ICO_DL+'Ausschnitt</button></div>':'';
 
+  var tagSum=tagKosten(active);
+  var summenZeile='<div class="tagsum"><span>Kosten für diesen Tag</span><b>'+
+    tagSum.toLocaleString('de-DE')+' MAD</b><small>'+people+(people===1?' Person':' Personen')+
+    (withFood?', mit Essen':', ohne Essen')+'</small></div>';
+
   var fotoBlock='<div class="fotos"><h4>Fotos vom Tag</h4><div class="fgrid" id="fgrid"></div>'+
     '<div class="faddwrap"><label class="fadd" for="fotofile">'+ICO_CAM+'Foto hinzufügen</label>'+
     '<input type="file" id="fotofile" accept="image/*" multiple hidden></div></div>';
 
   $("#p-tage").innerHTML=bar+'<div class="card"><div class="card-h"><div class="meta">Tag '+d.n+' · '+d.wd+' '+d.dd+
     '.09. · '+esc(d.tag)+'</div><div class="dnav"><h3>'+esc(d.title)+'</h3>'+arrows+'</div><p>'+esc(d.sub)+
-    '</p></div>'+mapBlock+'<div class="card-b"><ul class="tl">'+items+'</ul>'+notes+fotoBlock+'</div></div>';
+    '</p></div>'+mapBlock+'<div class="card-b"><ul class="tl">'+items+'</ul>'+summenZeile+notes+fotoBlock+'</div></div>';
 
   $("#dprev").onclick=function(){goDay(active-1);};
   $("#dnext").onclick=function(){goDay(active+1);};
@@ -1241,6 +1291,18 @@ function wireEdit(){
       el.classList.toggle('bad',!ll);
       if(ll)setCoords(active,+el.dataset.i,ll);
     };});
+  $$("#p-tage .ed-v").forEach(function(el){
+    el.oninput=function(){
+      var v=parseFloat(el.value);
+      setOv(active,+el.dataset.i,'v',(el.value===''||isNaN(v))?0:Math.round(v));
+      renderCosts();                       // Kostenseite sofort mitziehen
+      var t=$(".tagsum b");
+      if(t)t.textContent=tagKosten(active).toLocaleString('de-DE')+' MAD';
+    };});
+  $$("#p-tage .ed-pp").forEach(function(b){b.onclick=function(){
+    var i=+b.dataset.i,neu=item(active,i).pp?0:1;
+    setOv(active,i,'pp',neu);
+    renderDay();renderCosts();};});
   $$("#p-tage .ed-pin").forEach(function(b){b.onclick=function(){
     var i=+b.dataset.i;
     pinTarget=(pinTarget===i)?null:i;
@@ -1302,7 +1364,7 @@ function cmpRow(est){
       ', bezahlt '+Math.round(a)+' MAD</small></td><td>'+(diff<=0?'−':'+')+Math.abs(diff)+' MAD</td>'};
 }
 function updateCmp(){
-  [['#cmpT',EST.t],['#cmpE',EST.e]].forEach(function(p){
+  [['#cmpT',EST.t]].forEach(function(p){
     var row=$(p[0]);if(!row)return;
     var r=cmpRow(p[1]);
     row.className='cmprow'+(r.cls?' '+r.cls:'');
@@ -1314,8 +1376,7 @@ function openSheet(di,ii){
   var d=TRIP[di],it=item(di,ii),sh=$("#sheet"),bg=$("#sheetbg");
   if(!sh||!bg)return;
 
-  var chips='';
-  if(it.c)chips+='<span class="chip pay">'+esc(it.c)+'</span>';
+  var chips=preisChip(it);
   if(it.f)chips+='<span class="chip free">kostenlos</span>';
   if(it.k)chips+='<span class="chip pay">'+esc(it.k)+'</span>';
 
@@ -1507,39 +1568,37 @@ function renderCosts(){
   $$("#pplbtn button").forEach(function(b){b.onclick=function(){
     people=+b.dataset.n;Store.set('ppl',people);renderCosts();};});
 
-  var estT={},estE={};
-  var sumT=0,rowsT=COSTS_T.map(function(c,i){
-    var v=c.v, tot, sub;
-    if(c.id==='bus'){
-      var ma=Math.min(busMA,people);                 // Ausweise koennen nicht mehr sein als Personen
-      tot=80*ma+130*(people-ma);
-      sub=esc(c.d)+' · '+ma+'× 80 + '+(people-ma)+'× 130 MAD';
-    }else{
-      tot=(c.per==='p')?v*people:v;
-      sub=(c.d?esc(c.d):'')+(c.per==='p'?(c.d?' · ':'')+v+' pro Person':'');
-    }
-    sumT+=tot; estT['t'+i]=tot;
-    return '<tr><td>'+esc(c.n)+(sub?'<small>'+sub+'</small>':'')+'</td><td>'+tot+spendInput('t'+i)+'</td></tr>';}).join('');
-  $("#tblT").innerHTML=rowsT+'<tr class="sumrow"><td>Summe Transport</td><td>'+sumT+' MAD</td></tr>'+
+  var est={},zeilen='',gesTage=0;
+  TRIP.forEach(function(d,di){
+    var v=tagKosten(di);gesTage+=v;est['d'+d.n]=v;
+    zeilen+='<tr><td><button class="taglink" data-i="'+di+'">Tag '+d.n+' · '+esc(d.tag)+'</button>'+
+      '<small>'+d.wd+' '+d.dd+'.09. · '+esc(d.title)+'</small></td><td>'+
+      v.toLocaleString('de-DE')+spendInput('d'+d.n)+'</td></tr>';
+  });
+  var ueber=uebergreifend();
+  if(ueber){
+    gesTage+=ueber;est['x']=ueber;
+    zeilen+='<tr><td>Übergreifend<small>'+COSTS_X.filter(function(c){return !c.tag;})
+      .map(function(c){return esc(c.n);}).join(' · ')+'</small></td><td>'+
+      ueber.toLocaleString('de-DE')+spendInput('x')+'</td></tr>';
+  }
+  $("#tblTage").innerHTML=zeilen+
+    '<tr class="sumrow"><td>Summe vor Ort</td><td>'+gesTage.toLocaleString('de-DE')+' MAD</td></tr>'+
     '<tr class="cmprow" id="cmpT"></tr>';
-
-  var sumE=0,rowsE=COSTS_E.map(function(c,i){var tot=c.v*people;sumE+=tot; estE['e'+i]=tot;
-    return '<tr><td>'+esc(c.n)+'<small>'+(c.d?esc(c.d)+' · ':'')+c.v+' pro Person</small></td><td>'+tot+spendInput('e'+i)+'</td></tr>';}).join('');
-  $("#tblE").innerHTML=rowsE+'<tr class="sumrow"><td>Summe Eintritte</td><td>'+sumE+' MAD</td></tr>'+
-    '<tr class="cmprow" id="cmpE"></tr>';
-
-  EST={t:estT,e:estE};
+  EST={t:est,e:{}};
   updateCmp();
+  $$("#tblTage .taglink").forEach(function(b){b.onclick=function(){
+    goDay(+b.dataset.i);goTab('tage');};});
   $$(".spend input").forEach(function(inp){inp.oninput=function(){
-    var v=parseFloat(inp.value);
-    if(inp.value===''||isNaN(v)){delete SPENT[inp.dataset.k];}else{SPENT[inp.dataset.k]=v;}
+    var x=parseFloat(inp.value);
+    if(inp.value===''||isNaN(x)){delete SPENT[inp.dataset.k];}else{SPENT[inp.dataset.k]=x;}
     Store.set('spent',SPENT);updateCmp();};});
 
   var hotelMAD=Math.round(HOTEL_EUR*EURMAD), flugMAD=Math.round(FLUG_EUR*EURMAD),
       parkMAD=Math.round(PARK_EUR*EURMAD);
   var fpp=foodPerPerson();
   var foodMAD=fpp.sum*people;
-  var sum=sumT+sumE+(withFood?foodMAD:0)+(withHotel?hotelMAD:0)+(withFlug?flugMAD:0)+(withPark?parkMAD:0);
+  var sum=gesTage+(withHotel?hotelMAD:0)+(withFlug?flugMAD:0)+(withPark?parkMAD:0);
   $("#tot").innerHTML=sum.toLocaleString('de-DE')+'<span>MAD</span>';
 
   // Untertitel benennt, was gerade drinsteckt — sonst raet man beim Ablesen
@@ -1549,7 +1608,7 @@ function renderCosts(){
   if(withFlug)drin.push('Flug');
   if(withPark)drin.push('Parken');
   $("#toteur").textContent='rund '+Math.round(sum/EURMAD).toLocaleString('de-DE')+' € · '+
-    (drin.length?'mit '+drin.join(', '):'nur Transport und Eintritte');
+    (drin.length?'mit '+drin.join(', '):'nur Kosten vor Ort ohne Essen');
 
   var lfo=$("#lbFood");
   if(lfo)lfo.textContent=fpp.sum.toLocaleString('de-DE')+' MAD pro Person aus den geplanten Lokalen'+

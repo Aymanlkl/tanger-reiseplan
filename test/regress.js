@@ -186,23 +186,21 @@ console.log('\nFahrplan');
      && /Tanger Ville → Rabat Agdal/.test(els['#p-tage'].innerHTML) && /Mo 07\.09\./.test(els['#p-tage'].innerHTML));
 
 console.log('\nBustarif gemischt');
-  // 2 Personen, 1 marokkanischer Ausweis -> 80 + 130
   eval("people=2;busMA=1;renderCosts();");
-  ok('1 von 2 ermaessigt -> 210 MAD', /210/.test(els['#tblT'].innerHTML) && /1× 80 \+ 1× 130/.test(els['#tblT'].innerHTML),
-     (els['#tblT'].innerHTML.match(/1× 80[^<]*/)||[''])[0]);
-  eval("busMA=2;renderCosts();");
-  ok('beide ermaessigt -> 160 MAD', /2× 80 \+ 0× 130/.test(els['#tblT'].innerHTML));
-  eval("busMA=0;renderCosts();");
-  ok('keiner ermaessigt -> 260 MAD', /0× 80 \+ 2× 130/.test(els['#tblT'].innerHTML));
-  eval("people=2;busMA=4;renderCosts();");
-  ok('mehr Ausweise als Personen wird gedeckelt', /2× 80 \+ 0× 130/.test(els['#tblT'].innerHTML));
+  ok('1 von 2 ermaessigt -> 210 MAD', eval('busPreis()')===210, `${eval('busPreis()')}`);
+  eval("busMA=2;"); ok('beide ermaessigt -> 160 MAD', eval('busPreis()')===160);
+  eval("busMA=0;"); ok('keiner ermaessigt -> 260 MAD', eval('busPreis()')===260);
+  eval("busMA=4;"); ok('mehr Ausweise als Personen wird gedeckelt', eval('busPreis()')===160);
   eval("busMA=1;renderCosts();");
+  ok('Bus steckt in der Tagessumme von Tag 3',
+     (()=>{const mit=eval('tagKosten(2)'); eval('busMA=0;'); const ohne=eval('tagKosten(2)');
+           eval('busMA=1;'); return ohne-mit===50;})());
 
 console.log('\nHotel- und Flugschalter');
   eval("people=2;busMA=1;withFood=false;withHotel=false;withFlug=false;renderCosts();");
   const basis = parseInt(els['#tot'].innerHTML.replace(/[^\d]/g,''),10);
-  ok('ohne Schalter: nur Transport und Eintritte',
-     /nur Transport und Eintritte/.test(els['#toteur'].textContent), els['#toteur'].textContent);
+  ok('ohne Schalter: nur Kosten vor Ort',
+     /nur Kosten vor Ort/.test(els['#toteur'].textContent), els['#toteur'].textContent);
   eval("withHotel=true;renderCosts();");
   const mitHotel = parseInt(els['#tot'].innerHTML.replace(/[^\d]/g,''),10);
   ok('Hotel addiert 433,31 € in MAD', mitHotel-basis===Math.round(433.31*11), `${mitHotel-basis}`);
@@ -224,47 +222,75 @@ console.log('\nHotel- und Flugschalter');
   eval("withFood=false;withHotel=false;withFlug=false;withPark=false;renderCosts();");
 
 console.log('\nKostenmodell');
+  ok('Preise haengen an den Tagespunkten, nicht in Extratabellen',
+     !/var COSTS_T=|var COSTS_E=/.test(src) && /var COSTS_X=/.test(src));
+  ok('nur noch uebergreifende Posten in der Tabelle', eval('COSTS_X.length')===3);
+  const preisPunkte = TRIP.reduce((a,d)=>a+d.items.filter(i=>i.v).length,0);
+  ok('Punkte tragen eigene Preise', preisPunkte>=40, `${preisPunkte}`);
+  ok('kein alter c-Chip mehr uebrig', !TRIP.some(d=>d.items.some(i=>i.c!==undefined)));
+  ok('pro Person und pro Gruppe unterschieden',
+     TRIP.some(d=>d.items.some(i=>i.v&&i.pp)) && TRIP.some(d=>d.items.some(i=>i.v&&!i.pp)));
+  ok('Herkuleshoehlen jetzt einheitlich 85',
+     (()=>{const it=TRIP[2].items.find(i=>i.h==="Grottes d'Hercule"); return it.v===85;})());
   const fpp = eval('foodPerPerson()');
-  ok('Essensbudget kommt aus den Chips, nicht aus einer Pauschale',
-     !/220\*people\*9/.test(src) && fpp.sum>1500 && fpp.sum<2600, JSON.stringify(fpp));
-  ok('Chip-Parser: Bereich, ca., ohne Betrag',
-     eval('chipMAD("25–35 MAD")')===30 && eval('chipMAD("ca. 130 MAD")')===130
-     && eval('chipMAD("im Zimmerpreis")')===0 && eval('chipMAD("gebucht")')===0);
+  ok('Essensbudget kommt aus den Punktpreisen', fpp.sum>1500 && fpp.sum<2600, JSON.stringify(fpp));
   ok('Essenssumme folgt einer Preisaenderung',
-     (()=>{const vor=eval('foodPerPerson()').sum;
-           eval(`setOv(6,${TRIP[6].items.findIndex(i=>i.h==='Rio do Texas')},'p','x');`);
-           const gleich=eval('foodPerPerson()').sum===vor;
-           eval(`delete OV['6_${TRIP[6].items.findIndex(i=>i.h==='Rio do Texas')}'];`);
-           return gleich;})());
+     (()=>{const i=TRIP[6].items.findIndex(x=>x.h==='Rio do Texas');
+           const vor=eval('foodPerPerson()').sum;
+           eval(`setOv(6,${i},'v',399);`);
+           const nach=eval('foodPerPerson()').sum;
+           eval(`delete OV['6_${i}'];`);
+           return nach-vor===100;})());
+  ok('Tagessumme folgt derselben Aenderung',
+     (()=>{const i=TRIP[6].items.findIndex(x=>x.h==='Rio do Texas');
+           eval('withFood=true;');
+           const vor=eval('tagKosten(6)');
+           eval(`setOv(6,${i},'v',399);`);
+           const nach=eval('tagKosten(6)');
+           eval(`delete OV['6_${i}'];withFood=false;`);
+           return nach-vor===200;})());
+  ok('kein Hammam, kein Paradise-Beach mehr',
+     !/Hammam/.test(src) && !TRIP.some(d=>d.items.some(i=>/Paradise/.test(i.h))));
+  ok('Zug-Chips zeigen nicht mehr die alte Schaetzung', !/115–172 MAD/.test(src));
+
+console.log('\nTagespreise bearbeitbar');
+  eval("EDIT=true;active=0;renderDay();");
+  ok('Preisfeld und Pro-Person-Schalter im Bearbeitungsmodus',
+     /class="ed-v"/.test(els['#p-tage'].innerHTML) && /class="ed-pp/.test(els['#p-tage'].innerHTML));
+  const T = TRIP[0].items.findIndex(i=>i.h==='Taxi in die Medina');
+  ok('Taxi Flughafen startet bei 175 fuer alle', TRIP[0].items[T].v===175 && !TRIP[0].items[T].pp);
+  eval(`setOv(0,${T},'v',260);`);
+  ok('geaenderter Preis kommt im Item an', eval(`item(0,${T})`).v===260);
+  ok('und schlaegt auf die Tagessumme durch',
+     (()=>{const a=eval('tagKosten(0)'); eval(`setOv(0,${T},'v',175);`);
+           return a-eval('tagKosten(0)')===85;})());
+  ok('Original bleibt unangetastet', TRIP[0].items[T].v===175);
+  eval(`delete OV['0_${T}'];EDIT=false;renderDay();`);
+  ok('Tagessumme steht in der Tageskarte', /class="tagsum"/.test(els['#p-tage'].innerHTML));
+  ok('Kostenseite listet alle neun Tage',
+     (els['#tblTage'].innerHTML.match(/class="taglink"/g)||[]).length===9,
+     `${(els['#tblTage'].innerHTML.match(/class="taglink"/g)||[]).length}`);
 
 console.log('\nAbrechnung');
-  eval("SPENT={};EXTRA=[];people=2;withFood=false;withHotel=false;withFlug=false;renderCosts();");
+  eval("SPENT={};EXTRA=[];people=2;withFood=false;withHotel=false;withFlug=false;withPark=false;renderCosts();");
   ok('leer: noch nichts erfasst', /noch nichts erfasst/.test(els['#tblBilanz'].innerHTML));
   ok('Geplant-Zeile zeigt eine Zahl, kein NaN',
      /Geplant/.test(els['#tblBilanz'].innerHTML) && !/NaN/.test(els['#tblBilanz'].innerHTML));
-  eval("SPENT={t0:200,e0:100};renderCosts();");
-  ok('Ist-Werte summieren sich', /300 MAD/.test(els['#tblBilanz'].innerHTML), els['#tblBilanz'].innerHTML.replace(/<[^>]+>/g,' ').slice(0,120));
+  eval("SPENT={d1:200,d3:100};renderCosts();");
+  ok('Ist-Werte je Tag summieren sich', /300 MAD/.test(els['#tblBilanz'].innerHTML));
   ok('unter dem Plan wird als under markiert', /bilrow under/.test(els['#tblBilanz'].innerHTML));
   eval("EXTRA=[{t:'Taxi zum Markt',v:40},{t:'Geschenk',v:160}];renderCosts();");
   ok('freie Ausgaben zaehlen mit', /500 MAD/.test(els['#tblBilanz'].innerHTML));
-  ok('freie Ausgaben werden gelistet', /Taxi zum Markt/.test(els['#extras'].innerHTML) && /160 MAD/.test(els['#extras'].innerHTML));
-  eval("SPENT={t0:99999};EXTRA=[];renderCosts();");
+  ok('freie Ausgaben werden gelistet', /Taxi zum Markt/.test(els['#extras'].innerHTML));
+  eval("SPENT={d1:99999};EXTRA=[];renderCosts();");
   ok('ueber dem Plan wird als over markiert', /bilrow over/.test(els['#tblBilanz'].innerHTML));
   eval("SPENT={};EXTRA=[];renderCosts();");
-  ok('kein Hammam-Posten mehr', !COSTS_E.some(c=>/Hammam/.test(c.n)));
-  ok('kein Paradise-Beach-Taxi mehr', !COSTS_T.some(c=>/Paradise/.test(c.n)));
-  ok('Mietwagen statt Achakkar-Taxi',
-     COSTS_T.some(c=>/Mietwagen/.test(c.n)) && !COSTS_T.some(c=>/Achakkar/.test(c.n)));
-  ok('Al Boraq mit gebuchtem Preis', COSTS_T.some(c=>/Boraq/.test(c.n) && c.v===219 && /gebucht/.test(c.d||'')));
-  ok('Rabat-Museen statt Museum Mohammed VI', COSTS_E.some(c=>/Museen in Rabat/.test(c.n)));
-  ok('kein unbelegtes kostenlos bei Museen mit Eintritt',
-     !TRIP.some(d=>d.items.some(i=>i.f && /Musée|Museum|Fondation|Palais Rassouni/.test(i.h))));
-  ok('Zug-Chips zeigen nicht mehr die alte Schaetzung', !/115–172 MAD/.test(src));
+
 
 console.log('\nAusgaben');
-  eval("SPENT={t0:150};EST={t:{t0:175,t1:275},e:{}};updateCmp();");
+  eval("SPENT={d1:150};EST={t:{d1:175,d2:275},e:{}};updateCmp();");
   ok('unter Budget', els['#cmpT'].className.includes('under') && /−25 MAD/.test(els['#cmpT'].innerHTML));
-  eval("SPENT={t0:300};updateCmp();");
+  eval("SPENT={d1:300};updateCmp();");
   ok('ueber Budget', els['#cmpT'].className.includes('over') && /\+125 MAD/.test(els['#cmpT'].innerHTML));
   eval("SPENT={};");
 
