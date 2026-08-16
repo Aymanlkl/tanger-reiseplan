@@ -314,6 +314,18 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 .ed-reset{margin-top:7px;font-size:11.5px;font-weight:600;color:var(--alert);
   padding:3px 8px;border-radius:5px;background:var(--alert-wash)}
 .chip.edit{background:var(--sea-wash);color:var(--sea)}
+.ed-loc{margin-top:10px;padding-top:9px;border-top:1px dashed var(--line)}
+.ed-loc label{display:block;font-family:var(--m);font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--faint);font-weight:600;margin:8px 0 3px}
+.ed-q,.ed-c,.ed-u{width:100%;border:1px solid var(--line);border-radius:6px;background:var(--card);
+  padding:6px 8px;font-size:12.5px;color:var(--text);-webkit-appearance:none;appearance:none;
+  transition:border-color .18s var(--ease),background .18s var(--ease)}
+.ed-c,.ed-u{font-family:var(--m);font-size:11.5px}
+.ed-q:focus,.ed-c:focus,.ed-u:focus{outline:none;border-color:var(--saffron)}
+.ed-c.bad{border-color:var(--alert);background:var(--alert-wash)}
+.ed-pin{margin-top:9px;font-size:11.5px;font-weight:600;color:var(--sea);
+  padding:6px 10px;border-radius:6px;background:var(--sea-wash);transition:background .18s var(--ease),color .18s var(--ease)}
+.ed-pin.armed{background:var(--saffron);color:#1A1200}
 
 /* ---------- Tatsaechliche Ausgaben ---------- */
 .spend{display:block;margin-top:5px}
@@ -483,6 +495,8 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
 
     <div class="pplbar"><span>Wie viele mit marokkanischem Ausweis?<small>Ermäßigter Bustarif, wird kontrolliert</small></span><div class="pplbtn" id="mabtn"></div></div>
     <button class="tgl" id="tglFood"><div class="sw"></div><div class="lb">Essen mitrechnen<small>ca. 220 MAD pro Person und Tag — Schnitt der geplanten Lokale</small></div></button>
+    <button class="tgl" id="tglHotel"><div class="sw"></div><div class="lb">Hotel mitrechnen<small id="lbHotel"></small></div></button>
+    <button class="tgl" id="tglFlug"><div class="sw"></div><div class="lb">Flug mitrechnen<small id="lbFlug"></small></div></button>
 
     <div class="card"><div class="card-h"><div class="meta">Bewegung</div><h3>Transport</h3></div>
       <div class="card-b"><table class="cost" id="tblT"></table></div></div>
@@ -749,10 +763,16 @@ var Store={mem:{},
 
 function $(s){return document.querySelector(s);}
 function $$(s){return Array.prototype.slice.call(document.querySelectorAll(s));}
-function esc(s){return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function today(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
 
-var active=0,people=2,busMA=1,withFood=false;
+var active=0,people=2,busMA=1,withFood=false,withHotel=false,withFlug=false;
+
+/* Festkosten in Euro, weil sie in Euro bezahlt wurden. EURMAD ist der einzige
+   Ort, an dem der Kurs steht — auch die Umrechnung der Gesamtsumme nutzt ihn. */
+var EURMAD=11;
+var HOTEL_EUR=433.31, FLUG_EUR=255;
 
 var MAPS='https://www.google.com/maps/search/?api=1&query=';
 var ONCF='https://www.oncf-voyages.ma/';
@@ -773,7 +793,7 @@ var ICO_TARGET='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle 
 var ICO_BELL_OFF='<svg viewBox="0 0 24 24"><path d="M18 8.5a6 6 0 0 0-8.9-5.2M6.2 6.3A6 6 0 0 0 6 8.5c0 5-2 6.5-2 6.5h12"/><path d="M13.7 19a2 2 0 0 1-3.4 0M3 3l18 18"/></svg>';
 
 /* ---------- Overrides: Aenderungen liegen neben TRIP, nie darin ---------- */
-var OV={},RN={},SPENT={},NOTIF={},EDIT=false,mapObj=null;
+var OV={},RN={},SPENT={},NOTIF={},EDIT=false,mapObj=null,pinTarget=null;
 function ik(di,ii){return di+'_'+ii;}
 
 /* Zusammengefuehrtes Item: Original + gespeicherte Aenderung.
@@ -786,11 +806,61 @@ function item(di,ii){
   if(o.t!==undefined)r.t=o.t;
   if(o.h!==undefined)r.h=o.h;
   if(o.p!==undefined)r.p=o.p;
-  r.edited=o.t!==undefined||o.h!==undefined||o.p!==undefined;
+  // Ort immer als frisches Objekt bauen — sonst wuerde TRIP mitveraendert
+  if(o.q!==undefined||o.url!==undefined||o.lat!==undefined){
+    var L={};
+    if(s.loc)for(k in s.loc)L[k]=s.loc[k];
+    if(o.q!==undefined)L.q=o.q;
+    if(o.url!==undefined){if(o.url)L.url=o.url;else delete L.url;}
+    if(o.lat!==undefined){
+      if(o.lat===null){delete L.lat;delete L.lng;}
+      else{L.lat=o.lat;L.lng=o.lng;}
+    }
+    r.loc=L.q?L:undefined;
+  }
+  r.edited=false;for(k in o)r.edited=true;
   return r;
 }
+
+/* Koordinaten aus Eingabe lesen: "35.789, -5.814", ein Maps-Link mit @lat,lng
+   oder ein Link mit q=lat,lng. Links mit reiner Google-Objekt-ID enthalten
+   keine Koordinaten — die muessen ueber den Kartentipp gesetzt werden. */
+function parseLatLng(txt){
+  txt=String(txt||'').trim();
+  if(!txt)return null;
+  var m=txt.match(/@(-?\d+\.\d+),\s*(-?\d+\.\d+)/)
+       ||txt.match(/[?&]q=(-?\d+\.\d+),\s*(-?\d+\.\d+)/)
+       ||txt.match(/(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})/);
+  if(!m)return null;
+  var la=parseFloat(m[1]),ln=parseFloat(m[2]);
+  if(!isFinite(la)||!isFinite(ln)||la<-90||la>90||ln<-180||ln>180)return null;
+  return {lat:la,lng:ln};
+}
+
+function origVal(di,ii,field){
+  var s=TRIP[di].items[ii];
+  if(field==='q')return (s.loc&&s.loc.q)||'';
+  if(field==='url')return (s.loc&&s.loc.url)||'';
+  return s[field]||'';
+}
+
+function setCoords(di,ii,ll){
+  var k=ik(di,ii),s=TRIP[di].items[ii];
+  OV[k]=OV[k]||{};
+  var o=s.loc&&s.loc.lat;
+  if(ll===null){
+    if(o){OV[k].lat=null;OV[k].lng=null;}else{delete OV[k].lat;delete OV[k].lng;}
+  }else{
+    var la=Math.round(ll.lat*1e5)/1e5, ln=Math.round(ll.lng*1e5)/1e5;
+    if(o&&s.loc.lat===la&&s.loc.lng===ln){delete OV[k].lat;delete OV[k].lng;}
+    else{OV[k].lat=la;OV[k].lng=ln;}
+  }
+  var n=0,x;for(x in OV[k])n++;
+  if(!n)delete OV[k];
+  Store.set('overrides',OV);
+}
 function setOv(di,ii,field,val){
-  var k=ik(di,ii),orig=TRIP[di].items[ii][field]||'';
+  var k=ik(di,ii),orig=origVal(di,ii,field);
   OV[k]=OV[k]||{};
   if(val===orig){delete OV[k][field];}else{OV[k][field]=val;}
   var n=0,x;for(x in OV[k])n++;
@@ -909,10 +979,24 @@ function renderDay(){
     merged.forEach(function(it,i){var pp=it.t.split(':');if(+pp[0]*60+ +pp[1]<=cur)nowIdx=i;});}
 
   var items=merged.map(function(it,i){
-    if(EDIT)return '<li class="editing"><div class="time"><input class="ed-t" data-i="'+i+'" value="'+esc(it.t)+
+    if(EDIT){
+      var L=it.loc||{};
+      var koord=(L.lat!==undefined&&L.lat!==null)?(L.lat+', '+L.lng):'';
+      return '<li class="editing"><div class="time"><input class="ed-t" data-i="'+i+'" value="'+esc(it.t)+
       '" aria-label="Uhrzeit"></div><div class="body"><input class="ed-h" data-i="'+i+'" value="'+esc(it.h)+
       '" aria-label="Titel"><textarea class="ed-p" data-i="'+i+'" rows="2" aria-label="Beschreibung">'+esc(it.p)+
-      '</textarea>'+(it.edited?'<button class="ed-reset" data-i="'+i+'">Auf Original zurücksetzen</button>':'')+'</div></li>';
+      '</textarea><div class="ed-loc">'+
+      '<label>Ort — steuert die Suche in Maps</label>'+
+      '<input class="ed-q" data-i="'+i+'" value="'+esc(L.q||'')+'" placeholder="z. B. Café Hafa, Tanger">'+
+      '<label>Koordinaten — setzen den Marker</label>'+
+      '<input class="ed-c" data-i="'+i+'" value="'+esc(koord)+'" placeholder="35.7914, -5.8220 oder Maps-Link">'+
+      '<label>Eigener Maps-Link — hat Vorrang</label>'+
+      '<input class="ed-u" data-i="'+i+'" value="'+esc(L.url||'')+'" placeholder="https://maps.app.goo.gl/…">'+
+      '<button class="ed-pin'+(pinTarget===i?' armed':'')+'" data-i="'+i+'">'+
+      (pinTarget===i?'Jetzt auf die Karte tippen':'Punkt auf der Karte antippen')+'</button>'+
+      '</div>'+(it.edited?'<button class="ed-reset" data-i="'+i+'">Auf Original zurücksetzen</button>':'')+
+      '</div></li>';
+    }
 
     var ch='';
     if(it.c)ch+='<span class="chip pay">'+esc(it.c)+'</span>';
@@ -984,11 +1068,30 @@ function renderDay(){
 
 /* Eingaben schreiben direkt in den Store — kein Re-Render, sonst springt der Fokus raus. */
 function wireEdit(){
-  if(!EDIT)return;
-  [['.ed-t','t'],['.ed-h','h'],['.ed-p','p']].forEach(function(pair){
+  if(!EDIT){pinTarget=null;return;}
+  [['.ed-t','t'],['.ed-h','h'],['.ed-p','p'],['.ed-q','q'],['.ed-u','url']].forEach(function(pair){
     $$("#p-tage "+pair[0]).forEach(function(el){
       el.oninput=function(){setOv(active,+el.dataset.i,pair[1],el.value);};});
   });
+  // Koordinaten: nur speichern, wenn sie lesbar sind — sonst rot markieren
+  $$("#p-tage .ed-c").forEach(function(el){
+    el.oninput=function(){
+      var t=el.value.trim();
+      if(!t){setCoords(active,+el.dataset.i,null);el.classList.remove('bad');return;}
+      var ll=parseLatLng(t);
+      el.classList.toggle('bad',!ll);
+      if(ll)setCoords(active,+el.dataset.i,ll);
+    };});
+  $$("#p-tage .ed-pin").forEach(function(b){b.onclick=function(){
+    var i=+b.dataset.i;
+    pinTarget=(pinTarget===i)?null:i;
+    renderDay();
+    if(pinTarget!==null){
+      var h=$("#maphint");
+      if(h)h.textContent='Tippe auf die Karte, um den Ort zu setzen.';
+      var m=$("#map");
+      if(m)m.scrollIntoView({behavior:smoothOk()?'smooth':'auto',block:'center'});
+    }};});
   $$("#p-tage .ed-reset").forEach(function(b){b.onclick=function(){
     delete OV[ik(active,+b.dataset.i)];Store.set('overrides',OV);renderDay();};});
 }
@@ -1126,6 +1229,14 @@ function buildMap(d,pts){
   });
   mapObj.fitBounds(L.latLngBounds(latlngs).pad(.18));
 
+  // Im Bearbeitungsmodus setzt ein Tipp auf die Karte den Ort des gewaehlten Punkts.
+  mapObj.on('click',function(e){
+    if(!EDIT||pinTarget===null)return;
+    setCoords(active,pinTarget,e.latlng);
+    pinTarget=null;
+    renderDay();
+  });
+
   var btn=$("#dltiles");
   Store.get('tiles').then(function(s){
     if(s&&s[d.n]){btn.className='dlbtn done';btn.innerHTML=ICO_OK+s[d.n]+' Kacheln offline';}
@@ -1208,10 +1319,23 @@ function renderCosts(){
     if(inp.value===''||isNaN(v)){delete SPENT[inp.dataset.k];}else{SPENT[inp.dataset.k]=v;}
     Store.set('spent',SPENT);updateCmp();};});
 
-  var sum=sumT+sumE+(withFood?220*people*9:0);
+  var hotelMAD=Math.round(HOTEL_EUR*EURMAD), flugMAD=Math.round(FLUG_EUR*EURMAD);
+  var sum=sumT+sumE+(withFood?220*people*9:0)+(withHotel?hotelMAD:0)+(withFlug?flugMAD:0);
   $("#tot").innerHTML=sum.toLocaleString('de-DE')+'<span>MAD</span>';
-  $("#toteur").textContent='rund '+Math.round(sum/11).toLocaleString('de-DE')+' €'+
-    (withFood?' · inklusive Essen':' · ohne Essen und Hotel');
+
+  // Untertitel benennt, was gerade drinsteckt — sonst raet man beim Ablesen
+  var drin=[];
+  if(withFood)drin.push('Essen');
+  if(withHotel)drin.push('Hotel');
+  if(withFlug)drin.push('Flug');
+  $("#toteur").textContent='rund '+Math.round(sum/EURMAD).toLocaleString('de-DE')+' € · '+
+    (drin.length?'mit '+drin.join(', '):'nur Transport und Eintritte');
+
+  var lh=$("#lbHotel"),lf=$("#lbFlug");
+  if(lh)lh.textContent=HOTEL_EUR.toLocaleString('de-DE',{minimumFractionDigits:2})+' € für beide, acht Nächte — '+hotelMAD.toLocaleString('de-DE')+' MAD';
+  if(lf)lf.textContent=FLUG_EUR.toLocaleString('de-DE')+' € — '+flugMAD.toLocaleString('de-DE')+' MAD';
+  $("#tglHotel").className='tgl'+(withHotel?' on':'');
+  $("#tglFlug").className='tgl'+(withFlug?' on':'');
   var maBox=$("#mabtn");
   if(maBox){
     var opts=[];for(var m=0;m<=people;m++)opts.push(m);
@@ -1267,6 +1391,8 @@ window.addEventListener('resize',moveInd);
 window.addEventListener('orientationchange',function(){setTimeout(moveInd,150);});
 
 $("#tglFood").onclick=function(){withFood=!withFood;Store.set('food',withFood);renderCosts();};
+$("#tglHotel").onclick=function(){withHotel=!withHotel;Store.set('hotel',withHotel);renderCosts();};
+$("#tglFlug").onclick=function(){withFlug=!withFlug;Store.set('flug',withFlug);renderCosts();};
 
 (function(){
   var ios=/iPad|iPhone|iPod/.test(navigator.userAgent),got=false;
@@ -1416,7 +1542,9 @@ function boot(){
 
 Store.get('ppl').then(function(v){people=v||2;return Store.get('busMA');})
 .then(function(v){busMA=(v===null||v===undefined)?1:v;return Store.get('food');})
-.then(function(v){withFood=!!v;return Store.get('overrides');})
+.then(function(v){withFood=!!v;return Store.get('hotel');})
+.then(function(v){withHotel=!!v;return Store.get('flug');})
+.then(function(v){withFlug=!!v;return Store.get('overrides');})
 .then(function(v){OV=v||{};return Store.get('rnotes');})
 .then(function(v){RN=v||{};return Store.get('spent');})
 .then(function(v){SPENT=v||{};return Store.get('notified');})

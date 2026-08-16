@@ -38,7 +38,9 @@ global.localStorage = { getItem: k=>store[k]||null, setItem:(k,v)=>store[k]=v };
 global.requestAnimationFrame = f=>f(); global.setTimeout = f=>f(); global.clearTimeout = ()=>{};
 global.IntersectionObserver = class { observe(){} }; global.Response = class { constructor(b){this.b=b} };
 const drawn = { markers: [], tiles: null, polyline: null };
+let mapClick = null;   // Klick-Handler, den buildMap registriert
 global.L = { map: () => ({ remove(){}, fitBounds(){}, setView(){},
+    on(ev, fn){ if (ev === 'click') mapClick = fn; },
     getBounds:()=>({getWest:()=>-5.94,getEast:()=>-5.76,getNorth:()=>35.80,getSouth:()=>35.75}),
     getZoom:()=>13, invalidateSize(){} }),
   tileLayer: u => { drawn.tiles = u; return {addTo(){}} },
@@ -179,6 +181,27 @@ console.log('\nBustarif gemischt');
   ok('mehr Ausweise als Personen wird gedeckelt', /2× 80 \+ 0× 130/.test(els['#tblT'].innerHTML));
   eval("busMA=1;renderCosts();");
 
+console.log('\nHotel- und Flugschalter');
+  eval("people=2;busMA=1;withFood=false;withHotel=false;withFlug=false;renderCosts();");
+  const basis = parseInt(els['#tot'].innerHTML.replace(/[^\d]/g,''),10);
+  ok('ohne Schalter: nur Transport und Eintritte',
+     /nur Transport und Eintritte/.test(els['#toteur'].textContent), els['#toteur'].textContent);
+  eval("withHotel=true;renderCosts();");
+  const mitHotel = parseInt(els['#tot'].innerHTML.replace(/[^\d]/g,''),10);
+  ok('Hotel addiert 433,31 € in MAD', mitHotel-basis===Math.round(433.31*11), `${mitHotel-basis}`);
+  eval("withFlug=true;renderCosts();");
+  const mitBeidem = parseInt(els['#tot'].innerHTML.replace(/[^\d]/g,''),10);
+  ok('Flug addiert 255 € in MAD', mitBeidem-mitHotel===Math.round(255*11), `${mitBeidem-mitHotel}`);
+  ok('Untertitel nennt beide', /mit Hotel, Flug/.test(els['#toteur'].textContent), els['#toteur'].textContent);
+  eval("withFood=true;renderCosts();");
+  ok('Untertitel nennt alle drei', /mit Essen, Hotel, Flug/.test(els['#toteur'].textContent));
+  ok('Schalterbeschriftung zeigt Euro und MAD',
+     /433,31 €/.test(els['#lbHotel'].textContent) && /4.766 MAD/.test(els['#lbHotel'].textContent),
+     els['#lbHotel'].textContent);
+  ok('Wechselkurs nur an einer Stelle',
+     (src.match(/sum\/11|\/ 11\b/g)||[]).length===0 && /var EURMAD=11/.test(src));
+  eval("withFood=false;withHotel=false;withFlug=false;renderCosts();");
+
 console.log('\nKostenmodell');
   ok('Essensbudget passt zu den geplanten Lokalen', /withFood\?220\*people\*9/.test(src));
   ok('kein Hammam-Posten mehr', !COSTS_E.some(c=>/Hammam/.test(c.n)));
@@ -214,6 +237,34 @@ console.log('\nBearbeitungsmodus');
      && TRIP[0].items[0].h==='Landung in Tanger');
   eval("setOv(0,0,'h','Landung in Tanger');");
   ok('Ruecksetzen leert Override', (store['tng_overrides']||'{}')==='{}');
+
+console.log('\nOrt bearbeiten');
+  const K = idxOf(2,'Cap Spartel');
+  ok('Koordinaten aus Text', JSON.stringify(eval('parseLatLng("35.7914, -5.8220")'))==='{"lat":35.7914,"lng":-5.822}');
+  ok('Koordinaten aus Maps-Link', JSON.stringify(eval('parseLatLng("https://www.google.com/maps/@35.79153,-5.92567,17z")'))==='{"lat":35.79153,"lng":-5.92567}');
+  ok('Unsinn wird abgelehnt', eval('parseLatLng("Cafe Hafa")')===null && eval('parseLatLng("999.9, 0.1")')===null);
+  eval(`setOv(2,${K},'q','Cap Spartel Leuchtturm');`);
+  ok('Ortsname landet im Override und im Item',
+     eval(`item(2,${K})`).loc.q==='Cap Spartel Leuchtturm'
+     && TRIP[2].items[K].loc.q==='Cap Spartel', TRIP[2].items[K].loc.q);
+  eval(`setCoords(2,${K},{lat:35.80000,lng:-5.90000});`);
+  ok('Koordinaten ueberschreiben nur die Kopie',
+     eval(`item(2,${K})`).loc.lat===35.8 && TRIP[2].items[K].loc.lat===35.79153);
+  eval(`setOv(2,${K},'url','https://maps.app.goo.gl/TEST');`);
+  ok('eigener Link wirkt auf den Knopf',
+     eval(`mapHref(item(2,${K}).loc)`)==='https://maps.app.goo.gl/TEST');
+  // Kartentipp
+  eval('EDIT=true;active=2;pinTarget='+K+';renderDay();');
+  ok('Bearbeitungsfelder fuer den Ort vorhanden',
+     /class="ed-q"/.test(els['#p-tage'].innerHTML) && /class="ed-c"/.test(els['#p-tage'].innerHTML)
+     && /class="ed-u"/.test(els['#p-tage'].innerHTML));
+  ok('Knopf zeigt scharfgeschalteten Zustand', /ed-pin armed/.test(els['#p-tage'].innerHTML));
+  if (mapClick) mapClick({latlng:{lat:35.5,lng:-6.0}});
+  ok('Kartentipp schreibt die Position', eval(`item(2,${K})`).loc.lat===35.5);
+  ok('Tipp entwaffnet den Knopf', eval('pinTarget')===null);
+  eval(`delete OV['2_${K}'];EDIT=false;renderDay();`);
+  ok('Zuruecksetzen stellt das Original her',
+     eval(`item(2,${K})`).loc.q==='Cap Spartel' && eval(`item(2,${K})`).loc.lat===35.79153);
 
 console.log('\nTageskachel-Autoscroll');
   log.strip.length=0;
