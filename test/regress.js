@@ -454,24 +454,22 @@ console.log('\nJetzt-Zeile');
   global.Date = RD;
 
 console.log('\nApp-Huelle');
+  ok('Body ist eine Spalte, die Huelle scrollt darin',
+     /body\{[^}]*display:flex;flex-direction:column/.test(src)
+     && /#shell\{flex:1 1 auto;min-height:0;overflow-y:auto/.test(src));
+  ok('Leiste steht im Fluss, nicht mehr position:fixed',
+     /\.tabs\{position:relative;flex:0 0 auto/.test(src) && !/\.tabs\{position:fixed/.test(src));
+  ok('Hoehe folgt dem sichtbaren Viewport', /height:100vh;height:100dvh/.test(src));
   ok('Systemzone unten wird nicht doppelt gerechnet',
      /padding:5px 6px max\(6px,var\(--sb\)\)/.test(src) && !/calc\(7px \+ var\(--sb\)\)/.test(src));
-  ok('Huelle laesst genau die Leistenhoehe frei',
-     /#shell\{padding-bottom:calc\(62px \+ max\(6px,var\(--sb\)\)\)\}/.test(src));
-
-  ok('Body scrollt nicht, die Huelle schon',
-     /html,body\{[^}]*overflow:hidden/.test(src) && /#shell\{position:fixed[^}]*overflow-y:auto/.test(src));
+  ok('Summenbox darf umbrechen', /\.tagsum\{display:flex;flex-wrap:wrap/.test(src));
   ok('Markup liegt in der Huelle',
      /<body>\s*<div id="shell">/.test(src) && /<\/div><!-- \/shell -->/.test(src));
-  ok('Reiterleiste bleibt ausserhalb der Huelle',
+  ok('Reiterleiste steht nach der Huelle',
      src.indexOf('</div><!-- /shell -->') < src.indexOf('<nav class="tabs"'));
   ok('kein Pinch-Zoom', /touch-action:pan-y/.test(src) && /user-scalable=no/.test(src));
   ok('kein Gummiband', /overscroll-behavior:none/.test(src) && /overscroll-behavior-y:contain/.test(src));
-  ok('Eingabefelder koennen schrumpfen',
-     /input,textarea,select\{min-width:0;max-width:100%\}/.test(src));
-  ok('Flex-Zeilen mit Eingaben abgesichert',
-     ['.addex #exTxt','.ed-preis .ed-v','.maptools p','.editbar p','.srow span','.tagsum span']
-       .every(sel => src.indexOf(sel)!==-1));
+  ok('Eingabefelder koennen schrumpfen', /input,textarea,select\{min-width:0;max-width:100%\}/.test(src));
   ok('Medien laufen nicht ueber', /img,svg,iframe,video\{max-width:100%\}/.test(src));
   ok('Tabwechsel scrollt die Huelle, nicht das Fenster',
      /\$\("#shell"\)[\s\S]{0,80}scrollTo/.test(src) && !/window\.scrollTo\(\{top:0/.test(src));
