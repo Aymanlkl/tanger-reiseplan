@@ -691,8 +691,21 @@ console.log('\nApp-Huelle');
   ok('Bodenfreiheit laesst das letzte Element frei stehen',
      (()=>{const m=src.match(/#shell\{padding-bottom:calc\((\d+)px \+ max\(6px,var\(--sb\)\) \+ (\d+)px\)\}/);
            return !!m && (+m[1] + +m[2]) >= 88})());
-  ok('Leiste loest die Systemzone selbst auf',
-     /\.tabs\{[^}]*padding:0 14px calc\(env\(safe-area-inset-bottom,0px\) \+ 6px\)/.test(src));
+  ok('Leiste liest die korrigierte Systemzone',
+     /\.tabs\{[^}]*padding:0 14px calc\(var\(--sb\) \+ 6px\)/.test(src));
+
+  // Eine Quelle der Wahrheit. Mischt irgendein Element rohes env() mit dem
+  // korrigierten var(--sb), faellt genau dieses Element aus der Korrektur —
+  // so schwebte die Pille 40px ueber dem Rand, waehrend --sb schon 0 sagte.
+  // Roh darf env() nur an der Token-Definition und in den Mess-Sonden stehen.
+  ok('rohes env() nur an Definition und Mess-Sonden',
+     (()=>{const css = (src.match(/<style>([\s\S]*?)<\/style>/)||['',''])[1];
+           const cssRoh = (css.match(/env\(safe-area/g)||[]).length;
+           const def    = (css.match(/--s[bt]:env\(safe-area/g)||[]).length;
+           const js     = src.slice(src.lastIndexOf('<script>'));
+           const jsRoh  = (js.match(/env\(safe-area/g)||[]).length;
+           const sonde  = (js.match(/padding-(top|bottom):env\(safe-area/g)||[]).length;
+           return cssRoh === def && cssRoh === 2 && jsRoh === sonde;})());
   ok('Systemzone unten wird nicht doppelt gerechnet', !/calc\(7px \+ var\(--sb\)\)/.test(src));
   ok('Summenbox darf umbrechen', /\.tagsum\{display:flex;flex-wrap:wrap/.test(src));
   ok('Markup liegt in der Huelle',
