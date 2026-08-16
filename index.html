@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tanger · 2.–10. September</title>
 <meta name="theme-color" content="#10222B">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -304,6 +304,8 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line);
   box-shadow:0 -1px 0 var(--line);
   display:flex;padding:5px 6px max(6px,var(--sb))}
+.tabs::after{content:"";position:absolute;left:0;right:0;top:100%;height:140px;
+  background:var(--paper);pointer-events:none}
 .tabind{position:absolute;bottom:max(3px,calc(var(--sb) - 6px));left:0;width:0;height:2.5px;border-radius:2px;
   background:var(--saffron-deep);pointer-events:none}
 .tabind.ready{transition:left .3s var(--ease),width .3s var(--ease)}
@@ -716,7 +718,8 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
 
     <div class="card"><div class="card-h"><div class="meta">Version</div><h3>Stand der App</h3></div>
       <div class="card-b"><p class="dochint" id="buildinfo">wird geprüft …</p>
-        <button class="sbtn" id="forcereload">Neu laden erzwingen</button></div></div>
+        <button class="sbtn" id="forcereload">Neu laden erzwingen</button>
+        <table class="cost" id="diag" style="margin-top:14px"></table></div></div>
 
     <div class="card"><div class="card-h"><div class="meta">Vor dem Abflug</div><h3>Karten offline laden</h3>
       <p>Im WLAN herunterladen. Unterwegs sind die Gebiete dann ohne Netz nutzbar.</p></div>
@@ -2308,7 +2311,7 @@ function wireDocs(){
 
 function boot(){
   wantNowScroll=true;                     // beim Start zur laufenden Zeile
-  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();wireCheckAdd();renderGebiete();renderStorage();applyTheme();loadWx();
+  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();wireCheckAdd();renderGebiete();renderStorage();applyTheme();loadWx();setTimeout(renderDiag,300);
   centerTile(false);
   checkReminders();syncReminders();registerSync();
 }
@@ -2370,6 +2373,38 @@ document.addEventListener('visibilitychange',function(){
 // Auf dem iPhone laedt eine installierte PWA beim Zurueckholen aus dem
 // App-Switcher nicht neu — sie zeigt einfach die alte Seite weiter. Deshalb
 // fragt die App selbst nach und bietet das Neuladen an.
+/* Misst, was das Geraet tatsaechlich meldet. Ohne diese Zahlen ist jede
+   Aussage ueber die Leistenposition geraten. */
+function renderDiag(){
+  var t=$("#diag");if(!t||!document.body||!window.getComputedStyle)return;
+  var probe=document.createElement('div');
+  probe.style.cssText='position:fixed;left:0;bottom:0;width:0;height:0;'+
+    'padding-bottom:env(safe-area-inset-bottom,0px);padding-top:env(safe-area-inset-top,0px);visibility:hidden';
+  document.body.appendChild(probe);
+  var cs=window.getComputedStyle(probe);
+  var sbTop=cs.paddingTop, sbBot=cs.paddingBottom;
+  document.body.removeChild(probe);
+
+  var tabs=$("#tabs"), r=tabs?tabs.getBoundingClientRect():null;
+  var vv=window.visualViewport;
+  var zeilen=[
+   ['Fenster innen',      window.innerHeight+' px'],
+   ['Dokumenthöhe',       document.documentElement.clientHeight+' px'],
+   ['Sichtbarer Viewport',vv?Math.round(vv.height)+' px':'nicht verfügbar'],
+   ['Bildschirm',         screen.height+' px · '+(window.devicePixelRatio||1)+'x'],
+   ['Systemzone oben',    sbTop],
+   ['Systemzone unten',   sbBot],
+   ['Leiste Unterkante',  r?Math.round(r.bottom)+' px':'—'],
+   ['Abstand zum Rand',   r?Math.round(window.innerHeight-r.bottom)+' px':'—'],
+   ['Standalone',         (window.navigator.standalone===true?'ja':
+                           (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches?'ja':'nein'))]
+  ];
+  t.innerHTML=zeilen.map(function(z){
+    var auffaellig=(z[0]==='Abstand zum Rand'&&r&&Math.abs(window.innerHeight-r.bottom)>2);
+    return '<tr><td>'+z[0]+'</td><td'+(auffaellig?' style="color:var(--alert)"':'')+'>'+z[1]+'</td></tr>';
+  }).join('');
+}
+
 function zeigeVersion(){
   var el=$("#buildinfo");if(!el)return;
   if(!navigator.serviceWorker||!navigator.serviceWorker.controller){
@@ -2397,7 +2432,7 @@ function updateBanner(reg,neu){
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
     navigator.serviceWorker.register('sw.js').then(function(reg){
-      zeigeVersion();
+      zeigeVersion();renderDiag();
       reg.addEventListener('updatefound',function(){
         var neu=reg.installing;if(!neu)return;
         neu.addEventListener('statechange',function(){

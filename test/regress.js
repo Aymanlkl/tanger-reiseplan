@@ -31,11 +31,19 @@ global.document = { querySelector: get, querySelectorAll: s => {
     if (s === '#p-tage .ttl') return (els['#p-tage'].innerHTML.match(/class="ttl" data-d="(\d+)"/g)||[])
       .map(x => { const e = El('ttl'); e.dataset.d = x.match(/data-d="(\d+)"/)[1]; return e });
     return [] }, createElement: El, addEventListener(){},
-  documentElement: { _theme:null, setAttribute(k,v){ this._theme=v }, getAttribute(){ return this._theme } } };
+  documentElement: { _theme:null, setAttribute(k,v){ this._theme=v }, getAttribute(){ return this._theme },
+    clientHeight: 900 },
+  body: { appendChild(){}, removeChild(){} } };
 // Kein echter Netzzugriff im Test
 global.fetch = () => Promise.reject(new Error('kein Netz im Test'));
 global.navigator.geolocation = { watchPosition(){ return 1 }, clearWatch(){} };
 global.window = { addEventListener(){}, scrollTo(){}, matchMedia:()=>({matches:false}), location:{origin:'x'} };
+global.screen = { height: 956 };
+global.window.getComputedStyle = () => ({ paddingTop:'62px', paddingBottom:'34px' });
+global.window.innerHeight = 956;
+global.window.visualViewport = { height: 956, offsetTop: 0 };
+global.window.devicePixelRatio = 3;
+global.window.navigator = { standalone: true };
 global.window.Notification = global.Notification = { permission:'default', requestPermission:()=>Promise.resolve('granted') };
 global.navigator = { userAgent:'node' };
 global.localStorage = { getItem: k=>store[k]||null, setItem:(k,v)=>store[k]=v };
@@ -453,6 +461,18 @@ console.log('\nJetzt-Zeile');
   ok('Tageswechsel springt nicht', log.now.length===0);
   global.Date = RD;
 
+console.log('\nViewport und Diagnose');
+  ok('viewport-fit=cover ohne konkurrierende Angaben',
+     /viewport-fit=cover/.test(src) && !/maximum-scale/.test(src) && !/user-scalable=no/.test(src));
+  ok('Zoomsperre laeuft ueber touch-action', /touch-action:pan-y/.test(src));
+  ok('Streifen unter der Leiste bekommt die Seitenfarbe',
+     /\.tabs::after\{content:"";position:absolute;left:0;right:0;top:100%/.test(src));
+  ok('Diagnosetabelle vorhanden', /id="diag"/.test(src) && /function renderDiag/.test(src));
+  ok('Diagnose misst die Leistenunterkante gegen den Fensterrand',
+     /Abstand zum Rand/.test(src) && /window\.innerHeight-r\.bottom/.test(src));
+  ok('Diagnose bricht ohne DOM sauber ab', /if\(!t\|\|!document\.body\|\|!window\.getComputedStyle\)return/.test(src));
+
+
 console.log('\nVersion und Update');
   ok('Service Worker beantwortet Versionsfrage',
      /d\.q === 'version'/.test(require('fs').readFileSync('/Users/aymaneloukili/Downloads/Tanger/sw.js','utf8')));
@@ -482,7 +502,9 @@ console.log('\nApp-Huelle');
      /<body>\s*<div id="shell">/.test(src) && /<\/div><!-- \/shell -->/.test(src));
   ok('Reiterleiste liegt ausserhalb der Huelle',
      src.indexOf('</div><!-- /shell -->') < src.indexOf('<nav class="tabs"'));
-  ok('kein Pinch-Zoom', /touch-action:pan-y/.test(src) && /user-scalable=no/.test(src));
+  // user-scalable=no ist raus: es hat auf iOS das viewport-fit=cover ausgehebelt.
+  // Die Zoomsperre laeuft jetzt allein ueber touch-action, das ist ohnehin wirksamer.
+  ok('kein Pinch-Zoom', /touch-action:pan-y/.test(src));
   ok('kein Gummiband', /overscroll-behavior:none/.test(src) && /overscroll-behavior-y:contain/.test(src));
   ok('Eingabefelder koennen schrumpfen', /input,textarea,select\{min-width:0;max-width:100%\}/.test(src));
   ok('Medien laufen nicht ueber', /img,svg,iframe,video\{max-width:100%\}/.test(src));
