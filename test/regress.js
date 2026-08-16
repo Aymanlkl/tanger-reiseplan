@@ -661,6 +661,16 @@ console.log('\nViewport und Diagnose');
   ok('Knoepfe liegen in der Pille',
      /<nav class="tabs" id="tabs">\s*<div class="tabpill"/.test(src)
      && /<i class="tabind" id="tabind"><\/i>\s*<\/div>\s*<\/nav>/.test(src));
+  // Fenster kleiner als Schirm heisst: der Rest liegt ausserhalb und ist mit
+  // CSS nicht erreichbar. Der Hinweis sagt, was dann wirklich hilft.
+  ok('Hinweis erscheint, wenn Fenster kleiner als Schirm',
+     (()=>{window.innerHeight=894;eval('diagHinweis();');
+           return els['#diaghint'].hidden===false
+             && /62 px/.test(els['#diaghint'].innerHTML)
+             && /Home-Bildschirm/.test(els['#diaghint'].innerHTML)})());
+  ok('Hinweis bleibt weg, wenn das Fenster passt',
+     (()=>{window.innerHeight=956;eval('diagHinweis();');
+           return els['#diaghint'].hidden===true})());
   ok('Diagnosetabelle vorhanden', /id="diag"/.test(src) && /function renderDiag/.test(src));
   ok('Diagnose misst die Leistenunterkante gegen den Fensterrand',
      /Abstand zum Rand/.test(src) && /window\.innerHeight-r\.bottom/.test(src));

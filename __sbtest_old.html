@@ -301,7 +301,7 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 .verdict div strong{font-size:14px}
 
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:70;display:flex;
-  pointer-events:none;padding:0 14px calc(var(--sb) + 6px)}
+  pointer-events:none;padding:0 14px calc(env(safe-area-inset-bottom,0px) + 6px)}
 .tabpill{pointer-events:auto;position:relative;flex:1;display:flex;
   padding:5px 6px;border-radius:19px;background:rgba(250,248,244,.82);
   -webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);
@@ -809,7 +809,7 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
     <div class="card"><div class="card-h"><div class="meta">Version</div><h3>Stand der App</h3></div>
       <div class="card-b"><p class="dochint" id="buildinfo">wird geprüft …</p>
         <button class="sbtn" id="forcereload">Neu laden erzwingen</button>
-        <table class="cost" id="diag" style="margin-top:14px"></table><p class="dochint" id="diaghint" hidden></p></div></div>
+        <table class="cost" id="diag" style="margin-top:14px"></table></div></div>
 
     <div class="card"><div class="card-h"><div class="meta">Vor dem Abflug</div><h3>Karten offline laden</h3>
       <p>Im WLAN herunterladen. Unterwegs sind die Gebiete dann ohne Netz nutzbar.</p></div>
@@ -2711,7 +2711,7 @@ function wireDocs(){
 
 function boot(){
   wantNowScroll=true;                     // beim Start zur laufenden Zeile
-  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();wireCheckAdd();korrigiereSicherheitsabstand();renderTickets();renderGebiete();renderStorage();applyTheme();loadWx();setTimeout(function(){renderDiag();diagHinweis();},300);
+  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();wireCheckAdd();korrigiereSicherheitsabstand();renderTickets();renderGebiete();renderStorage();applyTheme();loadWx();setTimeout(renderDiag,300);
   centerTile(false);
   checkReminders();syncReminders();registerSync();
 }
@@ -2823,21 +2823,6 @@ function korrigiereSicherheitsabstand(){
 
 /* Misst, was das Geraet tatsaechlich meldet. Ohne diese Zahlen ist jede
    Aussage ueber die Leistenposition geraten. */
-/* Ist das Fenster kleiner als der Schirm, liegt der Rest ausserhalb jeder
-   Webseite — mit CSS nicht erreichbar. iOS legt den Fensterzuschnitt beim
-   Anlegen des Symbols fest und behaelt ihn; nur neu anlegen aendert das. */
-function diagHinweis(){
-  var el=$("#diaghint");if(!el)return;
-  var fehlt=Math.max(0,(screen.height||0)-(window.innerHeight||0));
-  if(fehlt<=2){el.hidden=true;return;}
-  el.hidden=false;
-  el.innerHTML='<b>'+fehlt+' px Bildschirm liegen außerhalb des Fensters.</b> '+
-    'Das ist der Streifen unter der Leiste — dort kann die Seite nicht zeichnen. '+
-    'iOS legt den Fensterzuschnitt fest, wenn das Symbol auf den Home-Bildschirm kommt, '+
-    'und behält ihn danach. Neu laden ändert daran nichts: Symbol löschen und über '+
-    'Teilen → Zum Home-Bildschirm neu anlegen.';
-}
-
 function renderDiag(){
   var t=$("#diag");if(!t||!document.body||!window.getComputedStyle)return;
   var probe=document.createElement('div');
@@ -2915,5 +2900,6 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+<script>setTimeout(function(){document.documentElement.style.setProperty("--sb","80px");},1600);</script>
 </body>
 </html>
