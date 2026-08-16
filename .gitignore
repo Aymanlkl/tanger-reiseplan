@@ -1,1 +1,6 @@
 .DS_Store
+
+# Vergleichsdateien aus Gegenproben — nie einchecken.
+__sbtest*
+*.orig
+*.rej

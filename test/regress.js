@@ -721,6 +721,14 @@ console.log('\nApp-Huelle');
            const sonde  = (js.match(/padding-(top|bottom):env\(safe-area/g)||[]).length;
            return cssRoh === def && cssRoh === 2 && jsRoh === sonde;})());
   ok('Systemzone unten wird nicht doppelt gerechnet', !/calc\(7px \+ var\(--sb\)\)/.test(src));
+  // Der Indikator sitzt in der Pille, nicht mehr im Band. Die Pille enthaelt
+  // die Systemzone nicht — ein Abzug davon schiebt den Strich ueber die Symbole.
+  ok('Indikator rechnet nicht mit der Systemzone',
+     /\.tabind\{position:absolute;bottom:\d+px;/.test(src)
+     && !/\.tabind\{[^}]*var\(--sb\)/.test(src));
+  ok('Indikator liegt in der Pille',
+     src.indexOf('<i class="tabind"') > src.indexOf('<div class="tabpill"')
+     && src.indexOf('<i class="tabind"') < src.indexOf('</nav>'));
   ok('Summenbox darf umbrechen', /\.tagsum\{display:flex;flex-wrap:wrap/.test(src));
   ok('Markup liegt in der Huelle',
      /<body>\s*<div id="shell">/.test(src) && /<\/div><!-- \/shell -->/.test(src));
