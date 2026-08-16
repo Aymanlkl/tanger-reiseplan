@@ -172,28 +172,50 @@ console.log('\nFotos und Stadtkarte');
      && /id="dltiles"/.test(els['#p-tage'].innerHTML));
 
 console.log('\nFahrkarten');
-  ok('beide Zugpunkte fuehren zur Fahrkarte',
+  ok('Rabat: beide Zugpunkte fuehren zur Fahrkarte',
      (()=>{const t=TRIP[5].items.filter(i=>i.tk);
-           return t.length===2 && t[0].tk==='hin' && t[1].tk==='rueck';})());
+           return t.length===2 && t[0].tk==='rabat-hin' && t[1].tk==='rabat-rueck';})());
+  ok('Asilah: beide Zugpunkte fuehren zur Fahrkarte',
+     (()=>{const t=TRIP[4].items.filter(i=>i.tk);
+           return t.length===2 && t[0].tk==='asilah-hin' && t[1].tk==='asilah-rueck';})());
   ok('Knopf steht im Tagesplan',
      (()=>{eval('active=5;EDIT=false;renderDay();');
            return (els['#p-tage'].innerHTML.match(/class="tkl"/g)||[]).length===2;})());
-  ok('Hinfahrt zeigt beide Fahrgaeste',
-     (()=>{eval("zeigeTicketFuer('hin');");
+  ok('Knopf steht auch an Tag 5',
+     (()=>{eval('active=4;EDIT=false;renderDay();');
+           return (els['#p-tage'].innerHTML.match(/class="tkl"/g)||[]).length===2;})());
+  ok('Hinfahrt Rabat zeigt beide Fahrgaeste',
+     (()=>{eval("zeigeTicketFuer('rabat-hin');");
            return eval('qrListe.length')===2
              && eval('qrListe.map(function(t){return t.wer;}).join(",")')==='Aymane,Oksana';})());
-  ok('Rueckfahrt zeigt die Rueckfahrkarten',
-     (()=>{eval("zeigeTicketFuer('rueck');");
-           return eval('qrListe.every(function(t){return t.ri===\'Rückfahrt\';})');})());
+  ok('Rueckfahrt Rabat zeigt die Rueckfahrkarten',
+     (()=>{eval("zeigeTicketFuer('rabat-rueck');");
+           return eval('qrListe.length')===2
+             && eval("qrListe.every(function(t){return t.ri==='R\u00fcckfahrt'&&t.s==='rabat';})");})());
+  ok('Asilah liefert eigene Karten, nicht die von Rabat',
+     (()=>{eval("zeigeTicketFuer('asilah-rueck');");
+           return eval('qrListe.length')===2
+             && eval("qrListe.every(function(t){return t.s==='asilah'&&t.k.indexOf('as-')===0;})");})());
+  ok('unbekannte Strecke oeffnet nichts',
+     (()=>{eval("zeigeTicketFuer('rabat-hin');const vorher=qrListe;zeigeTicketFuer('fes-hin');");
+           return eval("qrListe.every(function(t){return t.s==='rabat';})");})());
   ok('Blaettern wechselt den Fahrgast',
-     (()=>{eval("zeigeTicketFuer('hin');zeigeListe(qrListe,1);");
+     (()=>{eval("zeigeTicketFuer('rabat-hin');zeigeListe(qrListe,1);");
            return eval('qrIdx')===1;})());
   eval('schliesseTicket();');
 
-  ok('vier Slots, beide Personen, beide Richtungen',
-     eval('TICKETS.length')===4
-     && eval("TICKETS.filter(function(t){return t.wer==='Aymane';}).length")===2
-     && eval("TICKETS.filter(function(t){return t.ri==='Rückfahrt';}).length")===2);
+  ok('acht Slots, zwei Strecken, beide Personen, beide Richtungen',
+     eval('TICKETS.length')===8
+     && eval("TICKETS.filter(function(t){return t.s==='rabat';}).length")===4
+     && eval("TICKETS.filter(function(t){return t.s==='asilah';}).length")===4
+     && eval("TICKETS.filter(function(t){return t.wer==='Aymane';}).length")===4
+     && eval("TICKETS.filter(function(t){return t.ri==='R\u00fcckfahrt';}).length")===4);
+  // Unter diesen Schluesseln liegen die schon abgelegten Bilder im Cache.
+  ok('Rabat behaelt seine alten Schluessel',
+     eval("TICKETS.filter(function(t){return t.s==='rabat';}).map(function(t){return t.k;}).join(',')")
+       === 'hin-a,hin-o,rueck-a,rueck-o');
+  ok('jeder Schluessel kommt genau einmal vor',
+     eval("new Set(TICKETS.map(function(t){return t.k;})).size")===8);
   ok('Wagen und Platz stimmen mit den PDFs',
      eval("TICKETS.filter(function(t){return t.k==='hin-a';})[0].d").indexOf('Wagen 6 · Platz 22')>=0
      && eval("TICKETS.filter(function(t){return t.k==='rueck-o';})[0].d").indexOf('Wagen 5 · Platz 23')>=0);

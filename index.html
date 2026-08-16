@@ -552,6 +552,12 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 .tkl{display:inline-flex;align-items:center;gap:5px;padding:4px 9px 4px 7px;border-radius:6px;
   background:var(--ink);color:#fff;font-size:12px;font-weight:600}
 .tkl svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tkseg{display:flex;gap:6px;margin-bottom:4px}
+.tkseg button{flex:1;padding:8px 6px;border-radius:8px;background:var(--line-2);color:var(--muted);
+  font-size:13px;font-weight:600;cursor:pointer;transition:background .18s,color .18s}
+.tkseg button.an{background:var(--ink);color:#fff}
+.tkseg i{display:block;font-family:var(--m);font-size:10px;font-weight:600;font-style:normal;
+  opacity:.7;margin-top:2px}
 .tkrow{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line-2)}
 .tkrow:first-child{border-top:0}
 .tkrow>div{flex:1;min-width:0}
@@ -731,7 +737,7 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
       <div class="note warn"><b>Guides in der Medina:</b> Am Petit Socco wirst du angesprochen. Freundlich, aber klar ablehnen — „Non merci, ça va". Wenn du einen Guide willst, buch ihn über die Rezeption, ca. 300 MAD für einen halben Tag.</div></div></div>
 
     <div class="card"><div class="card-h"><div class="meta">Bei der Kontrolle</div><h3>Zugtickets zeigen</h3>
-      <p>QR-Codes aus den PDFs hier ablegen. Sie bleiben auf diesem Handy — beim Schaffner reicht ein Tipp.</p></div>
+      <p>Rabat und Asilah getrennt. Die Codes bleiben auf diesem Handy — beim Schaffner reicht ein Tipp.</p></div>
       <div class="card-b" id="tickets"></div></div>
 
     <div class="card show"><div class="card-h"><div class="meta">Dem Fahrer zeigen</div><h3>Bring mich hierhin</h3></div>
@@ -871,7 +877,7 @@ notes:[{k:"plan",t:"<b>Ohne Bus:</b> Alles per Petit Taxi, ca. 100–120 MAD fü
 items:[
 {t:"08:00",h:"Frühstück im Hotel",p:"Frühstücken, dann zum Bahnhof — der Zug fährt um 10 Uhr.",cn:"im Zimmerpreis",eat:1,loc:{q:"Hôtel Mamora, Tanger",lat:35.78536,lng:-5.80971},info:"Die Dachterrasse über dem Hafen liegt morgens noch im Schatten und ist der ruhigste Ort im Haus. Guter Moment, um den Tag durchzugehen — vom Frühstückstisch sind es zwei Minuten bis zum Petit Socco.",snack:1},
 {t:"09:20",h:"Taxi zum Bahnhof Tanger Ville",p:"",v:15,loc:{q:"Gare de Tanger Ville",lat:35.77153,lng:-5.78622},info:"Der moderne Hauptbahnhof östlich des Zentrums, Ausgangspunkt für Al Boraq und die Regionalzüge. Tickets am Schalter oder Automaten; zum Bahnsteig geht es durch eine Sicherheitskontrolle."},
-{t:"10:05",h:"Zug nach Asilah",p:"Direkt, 36 Minuten. Ankunft 10:41.",v:30,pp:1,loc:{q:"Gare d'Asilah",lat:35.48238,lng:-6.02353},rail:{a:"Tanger Ville",b:"Asilah"},info:"Direktverbindung, zweite Klasse, 30 DH pro Person. Der Bahnhof von Asilah liegt gut zwei Kilometer außerhalb an der Landstraße, nicht in der Altstadt — vom Bahnsteig nehmt ihr ein Petit Taxi in die Medina, wenige Minuten für rund 10 DH.",fix:{go:"09:20",was:"Taxi zum Bahnhof"}},
+{t:"10:05",h:"Zug nach Asilah",p:"Direkt, 36 Minuten. Ankunft 10:41.",v:30,pp:1,loc:{q:"Gare d'Asilah",lat:35.48238,lng:-6.02353},rail:{a:"Tanger Ville",b:"Asilah"},info:"Direktverbindung, zweite Klasse, 30 DH pro Person. Der Bahnhof von Asilah liegt gut zwei Kilometer außerhalb an der Landstraße, nicht in der Altstadt — vom Bahnsteig nehmt ihr ein Petit Taxi in die Medina, wenige Minuten für rund 10 DH.",fix:{go:"09:20",was:"Taxi zum Bahnhof"},tk:"asilah-hin"},
 {t:"11:00",h:"Medina von Asilah",p:"Durch Bab Al Homar hinein, dann treiben lassen.",f:1,loc:{q:"Medina of Asilah",lat:35.46553,lng:-6.03817},info:"Eine kleine, auffallend saubere Altstadt hinter portugiesischen Mauern. Weiß gekalkte Häuser mit blauen Sockeln, und an vielen Wänden große Wandbilder, die beim jährlichen Kunstfestival entstehen. In einer Stunde durchquert, aber zum Bummeln gemacht."},
 {t:"11:40",h:"Wandbilder-Rundgang & Galerie Monassilah",p:"Kreuz und quer durch die Gassen der Medina.",f:1,loc:{q:"Galerie Monassilah, Assilah",lat:35.46537,lng:-6.03949},info:"Seit 1978 kommen jeden Sommer Künstler nach Asilah und bemalen beim Kulturfestival die weiß gekalkten Mauern der Medina. Die Bilder bleiben bis zum nächsten Jahr, dann wird übermalt — was ihr seht, gibt es so nur in dieser Saison. In OpenStreetMap sind sieben Wandbilder einzeln verzeichnet, verteilt zwischen 60 und 280 Metern: Gesichter, Hände, blaue Kalligrafie, eine Katze mit einem Fisch. Die Galerie Monassilah liegt mittendrin."},
 {t:"12:20",h:"Palais Rassouni",p:"Der Palast auf der Seemauer, 190 m weiter.",v:20,pp:1,cn:"Richtwert, Preis vor Ort",loc:{q:"Palais Rassouni, Assilah",lat:35.46573,lng:-6.04024},info:"Moulay Ahmed er Raisuni ließ ihn um 1909 direkt an die Seemauer setzen — Räuberhauptmann, Entführer und zeitweise Pascha von Asilah, eine der schillerndsten Figuren Nordmarokkos. Innen ein Empfangssaal mit Fenstern aufs offene Meer; die Stadt erzählt sich, Gefangene seien von der Terrasse in die Brandung geworfen worden. Heute gehört das Haus zum Kulturzentrum Hassan II. Ob offen ist, hängt vom Programm ab — von der Mauer aus ist der Bau ohnehin am eindrucksvollsten."},
@@ -883,14 +889,14 @@ items:[
 {t:"17:15",h:"Promenade & Galerien",p:"Letzte Runde am Wasser, bevor der Zug fährt.",v:30,pp:1,loc:{q:"Corniche d'Asilah",lat:35.45999,lng:-6.03663},info:"Die Uferpromenade mit Blick auf den Atlantik. Asilah ist seit Jahrzehnten eine Künstlerstadt; in den Gassen dahinter liegen kleine Galerien und Ateliers, in die man einfach hineingehen kann."},
 {t:"18:45",h:"Tee & Kleinigkeit an der Seemauer",p:"Kein volles Essen — das kommt später in Tanger.",v:40,pp:1,eat:1,snack:1,loc:{q:"Bab el Bahr, Assilah",lat:35.46625,lng:-6.03779},info:"Die Lokale entlang der Mauer schauen nach Westen auf den offenen Atlantik. Minztee, Gebäck, ein paar gegrillte Sardinen — genug, um bis Tanger durchzuhalten, ohne den Abend schon zu beenden."},
 {t:"19:45",h:"Sonnenuntergang über dem Atlantik",p:"Von der Seemauer aus.",f:1,fix:{go:"19:20",was:"Platz auf der Mauer suchen"},loc:{q:"Portugiesische Stadtmauer, Assilah",lat:35.46537,lng:-6.03949},info:"Der Grund, warum es der späte Zug wird. Asilah ist weiß gekalkt, und in der letzten halben Stunde vor Sonnenuntergang nimmt die Mauer die Farbe an — erst gelb, dann orange. Der Atlantik liegt direkt davor, es steht nichts im Weg. Untergang am 6. September um 19:45, dunkel gegen 20:15."},
-{t:"21:23",h:"Zug zurück — letzter Zug",p:"Abfahrt 21:23, Ankunft Tanger Ville 22:00.",v:30,pp:1,k:"wichtig",loc:{q:"Gare d'Asilah",lat:35.48238,lng:-6.02353},rail:{a:"Asilah",b:"Tanger Ville"},info:"Danach fährt nichts mehr. Der davor liegende Zug geht um 18:04 — der wäre eineinhalb Stunden vor Sonnenuntergang weg, deshalb dieser hier. Rechnet den Weg zum Bahnhof ein: gut zwei Kilometer aus der Medina heraus, das ist eine eigene Taxifahrt. Wer ihn verpasst, braucht ein Grand Taxi über 46 Kilometer bei Nacht.",fix:{go:"20:45",was:"Taxi zum Bahnhof Asilah"}},
+{t:"21:23",h:"Zug zurück — letzter Zug",p:"Abfahrt 21:23, Ankunft Tanger Ville 22:00.",v:30,pp:1,k:"wichtig",loc:{q:"Gare d'Asilah",lat:35.48238,lng:-6.02353},rail:{a:"Asilah",b:"Tanger Ville"},info:"Danach fährt nichts mehr. Der davor liegende Zug geht um 18:04 — der wäre eineinhalb Stunden vor Sonnenuntergang weg, deshalb dieser hier. Rechnet den Weg zum Bahnhof ein: gut zwei Kilometer aus der Medina heraus, das ist eine eigene Taxifahrt. Wer ihn verpasst, braucht ein Grand Taxi über 46 Kilometer bei Nacht.",fix:{go:"20:45",was:"Taxi zum Bahnhof Asilah"},tk:"asilah-rueck"},
 {t:"22:10",h:"Puerto Marina",p:"Fisch, 1,1 km vom Bahnhof — direkt nach der Ankunft.",v:150,pp:1,eat:1,loc:{q:"Puerto Marina, Avenue Beethoven, Tanger",lat:35.77394,lng:-5.79784},info:"Fischlokal nahe der Marina an der Avenue Beethoven, zehn Minuten mit dem Petit Taxi vom Bahnhof. Spät, aber in Marokko völlig normal — und nach der Kleinigkeit in Asilah ist jetzt Platz für ein richtiges Essen. OSM führt es als Bar mit Küche: lockere Runde, keine weißen Tischdecken."}],
 notes:[{k:"warn",t:"<b>Der 21:23 ist der letzte Zug.</b> Danach fährt nichts mehr ab Asilah. Der Bahnhof liegt gut zwei Kilometer außerhalb der Medina — Petit Taxi einplanen und um 20:45 losfahren. Wer ihn verpasst, braucht ein Grand Taxi über 46 Kilometer."},{k:"tip",t:"Zugzeiten am Vortag am Bahnhof oder auf oncf-voyages.ma prüfen. Die Regionalzüge fahren etwa alle zwei Stunden."}]},
 
 {n:6,date:"2026-09-07",wd:"Mo",dd:"07",tag:"Rabat",title:"Die Hauptstadt mit dem Al Boraq",sub:"Der einzige Tag, der früh startet. Montag bewusst gewählt: dienstags sind Rabats Museen geschlossen.",
 items:[
 {t:"07:20",h:"Taxi zum Bahnhof",p:"",v:15,loc:{q:"Gare de Tanger Ville",lat:35.77153,lng:-5.78622},info:"Früher Start zum Hauptbahnhof. Um diese Zeit ist die Medina noch leer, deshalb das Taxi am Vorabend an der Rezeption bestellen."},
-{t:"08:00",h:"Al Boraq nach Rabat",p:"Zug 2009, Wagen 6, Plätze 22 und 24. Ankunft 09:22.",v:219,pp:1,cn:"gebucht, Dossier KVDYJH",rail:{a:"Tanger Ville",b:"Rabat Agdal"},info:"Afrikas einziger Hochgeschwindigkeitszug, 320 km/h, eine Stunde 22 Minuten für 250 Kilometer. Gebucht auf Dossier KVDYJH: Zug 2009, Wagen 6, Plätze 22 und 24. Bei der Kontrolle wird neben dem QR-Code ein gültiger Ausweis verlangt — Pass einstecken. Wenn ihr die Tickets ausdruckt: den QR-Code nicht knicken, auf dem Handy reicht das PDF.",fix:{go:"07:20",was:"Taxi zum Bahnhof"},tk:"hin"},
+{t:"08:00",h:"Al Boraq nach Rabat",p:"Zug 2009, Wagen 6, Plätze 22 und 24. Ankunft 09:22.",v:219,pp:1,cn:"gebucht, Dossier KVDYJH",rail:{a:"Tanger Ville",b:"Rabat Agdal"},info:"Afrikas einziger Hochgeschwindigkeitszug, 320 km/h, eine Stunde 22 Minuten für 250 Kilometer. Gebucht auf Dossier KVDYJH: Zug 2009, Wagen 6, Plätze 22 und 24. Bei der Kontrolle wird neben dem QR-Code ein gültiger Ausweis verlangt — Pass einstecken. Wenn ihr die Tickets ausdruckt: den QR-Code nicht knicken, auf dem Handy reicht das PDF.",fix:{go:"07:20",was:"Taxi zum Bahnhof"},tk:"rabat-hin"},
 {t:"09:22",h:"Ankunft Rabat Agdal",p:"Tram oder Taxi in die Altstadt.",v:6,pp:1,cn:"Tram",loc:{q:"Gare Rabat Agdal",lat:34.0011,lng:-6.85744},info:"Moderner Bahnhof im Viertel Agdal, Endpunkt des Al Boraq. Von hier bringen dich Tram oder Taxi in rund einer Viertelstunde in die Altstadt."},
 {t:"09:50",h:"Kasbah des Oudayas",p:"Blau-weiße Gassen hinter dem großen Almohadentor Bab Oudaïa.",f:1,loc:{q:"Kasbah des Oudayas, Rabat",lat:34.03166,lng:-6.83585},info:"Eine Festungsanlage aus dem 12. Jahrhundert an der Mündung des Bouregreg. Innen ein Viertel aus blau-weiß gestrichenen Gassen, dazu ein andalusischer Garten und das Café Maure auf der Terrasse mit Blick auf Salé. Der Eintritt ist frei, man geht durch das große Tor einfach hinein."},
 {t:"10:30",h:"Jardin Andalou & Café Maure",p:"Im Kasbah-Gelände, gleich hinter dem Tor.",v:20,pp:1,eat:1,snack:1,loc:{q:"Café Maure, Kasbah des Oudayas, Rabat",lat:34.03118,lng:-6.83486},info:"Der andalusische Garten wurde in den 1920er Jahren innerhalb der Kasbah-Mauern angelegt — Orangenbäume, Zypressen, Bougainvillea und sehr viele Katzen. Am unteren Ende führt eine Treppe zum Café Maure, dessen Terrassen über dem Bouregreg liegen, gegenüber die weiße Medina von Salé. Es gibt Minztee und Mandelgebäck, sonst nichts."},
@@ -905,7 +911,7 @@ items:[
 {t:"19:20",h:"Bab Rouah",p:"Das Tor der Winde, 900 m vom Palast.",f:1,loc:{q:"Bab Rouah, Rabat",lat:34.01281,lng:-6.83757},info:"Um 1197 unter Yacoub al-Mansour gebaut, eines der großen Almohadentore des Maghreb. Über dem Bogen liegen Muschelnischen und geometrischer Steinschnitt, der Durchgang knickt mehrfach ab — gebaut, um einen Angriff zu bremsen. Innen ist heute ein Ausstellungsraum; von außen ist es das eindrucksvollere Stück."},
 {t:"19:45",h:"Hassan-Turm & Mausoleum",p:"Nach Sonnenuntergang, die Anlage ist beleuchtet.",f:1,loc:{q:"Tour Hassan, Rabat",lat:34.02415,lng:-6.8228},info:"Das Minarett einer Moschee, die 1195 unvollendet blieb, davor ein Feld aus über 200 abgebrochenen Säulen. Gegenüber liegt das Mausoleum Mohammed V. mit Wachen in traditioneller Tracht; der Innenraum mit dem Zedernholzdach ist frei zugänglich."},
 {t:"20:20",h:"Taxi zum Bahnhof Rabat Agdal",p:"Rund 4 km vom Hassan-Turm, gut eine Viertelstunde.",loc:{q:"Gare Rabat Agdal",lat:34.0011,lng:-6.85744},info:"Puffer mit Absicht: Vom Hassan-Turm sind es gut vier Kilometer quer durch die Stadt, und die Rückfahrkarten sind nicht umtauschbar. Abends ist die Avenue Mohammed V frei, aber rechnet lieber mit zwanzig Minuten als mit zehn."},
-{t:"20:56",h:"Rückzug ab Rabat Agdal",p:"Zug 1057, Wagen 5, Plätze 21 und 23. Ankunft Tanger 22:17.",cn:"im Hinfahrpreis",loc:{q:"Gare Rabat Agdal",lat:34.0011,lng:-6.85744},rail:{a:"Rabat Agdal",b:"Tanger Ville"},info:"Abfahrt 20:56 ab Rabat Agdal, Ankunft Tanger Ville 22:17. Wichtig: Beide Rückfahrkarten sind NON FLEX — weder umtauschbar noch erstattungsfähig. Wer diesen Zug verpasst, hat kein Ticket mehr, sondern kauft ein neues zum Tagespreis. Deshalb steht das Taxi schon um 20:20 im Plan.",k:"wichtig",fix:{go:"20:20",was:"Taxi zum Bahnhof Agdal"},tk:"rueck"},
+{t:"20:56",h:"Rückzug ab Rabat Agdal",p:"Zug 1057, Wagen 5, Plätze 21 und 23. Ankunft Tanger 22:17.",cn:"im Hinfahrpreis",loc:{q:"Gare Rabat Agdal",lat:34.0011,lng:-6.85744},rail:{a:"Rabat Agdal",b:"Tanger Ville"},info:"Abfahrt 20:56 ab Rabat Agdal, Ankunft Tanger Ville 22:17. Wichtig: Beide Rückfahrkarten sind NON FLEX — weder umtauschbar noch erstattungsfähig. Wer diesen Zug verpasst, hat kein Ticket mehr, sondern kauft ein neues zum Tagespreis. Deshalb steht das Taxi schon um 20:20 im Plan.",k:"wichtig",fix:{go:"20:20",was:"Taxi zum Bahnhof Agdal"},tk:"rabat-rueck"},
 {t:"22:17",h:"Ankunft Tanger",p:"Taxi in die Medina. Heute wurde in Rabat gegessen."}],
 notes:[{k:"warn",t:"<b>Die Rückfahrt ist nicht umtauschbar.</b> Beide Tickets für den 20:56-Zug sind NON FLEX — verpasst heißt verfallen. Am Hassan-Turm spätestens um 20:20 ins Taxi. Dossier <b>KVDYJH</b>: hin Zug 2009, Wagen 6, Plätze 22 und 24 · zurück Zug 1057, Wagen 5, Plätze 21 und 23. Bei der Kontrolle wird ein gültiger Ausweis verlangt."}]},
 
@@ -2296,12 +2302,20 @@ function registerSync(){
 // Die Codes liegen ausschliesslich im Browser dieses Geraets. Nichts davon
 // geht ins Repo, nichts wird hochgeladen.
 var TK_CACHE='tanger-tickets-v1';
+var STRECKEN=[{id:'rabat',n:'Rabat'},{id:'asilah',n:'Asilah'}];
+/* Die Schluessel der Rabat-Karten bleiben unveraendert (hin-a … rueck-o) —
+   unter ihnen liegen die bereits abgelegten Bilder im Cache. */
 var TICKETS=[
- {k:'hin-a',  wer:'Aymane', ri:'Hinfahrt',  d:'Zug 2009 · Wagen 6 · Platz 22 · 07.09. 08:00'},
- {k:'hin-o',  wer:'Oksana', ri:'Hinfahrt',  d:'Zug 2009 · Wagen 6 · Platz 24 · 07.09. 08:00'},
- {k:'rueck-a',wer:'Aymane', ri:'Rückfahrt', d:'Zug 1057 · Wagen 5 · Platz 21 · 07.09. 20:56'},
- {k:'rueck-o',wer:'Oksana', ri:'Rückfahrt', d:'Zug 1057 · Wagen 5 · Platz 23 · 07.09. 20:56'}
+ {k:'hin-a',    s:'rabat', wer:'Aymane', ri:'Hinfahrt',  d:'Zug 2009 · Wagen 6 · Platz 22 · 07.09. 08:00'},
+ {k:'hin-o',    s:'rabat', wer:'Oksana', ri:'Hinfahrt',  d:'Zug 2009 · Wagen 6 · Platz 24 · 07.09. 08:00'},
+ {k:'rueck-a',  s:'rabat', wer:'Aymane', ri:'Rückfahrt', d:'Zug 1057 · Wagen 5 · Platz 21 · 07.09. 20:56'},
+ {k:'rueck-o',  s:'rabat', wer:'Oksana', ri:'Rückfahrt', d:'Zug 1057 · Wagen 5 · Platz 23 · 07.09. 20:56'},
+ {k:'as-hin-a',  s:'asilah', wer:'Aymane', ri:'Hinfahrt',  d:'Tanger Ville → Asilah · 06.09. 10:05'},
+ {k:'as-hin-o',  s:'asilah', wer:'Oksana', ri:'Hinfahrt',  d:'Tanger Ville → Asilah · 06.09. 10:05'},
+ {k:'as-rueck-a',s:'asilah', wer:'Aymane', ri:'Rückfahrt', d:'Asilah → Tanger Ville · 06.09. 21:23'},
+ {k:'as-rueck-o',s:'asilah', wer:'Oksana', ri:'Rückfahrt', d:'Asilah → Tanger Ville · 06.09. 21:23'}
 ];
+var tkStrecke='rabat';
 function tkPath(k){return 'tickets/'+k;}
 
 function renderTickets(){
@@ -2309,7 +2323,13 @@ function renderTickets(){
   if(!window.caches){box.innerHTML='<p class="dochint">Dieser Browser kann nichts offline ablegen.</p>';return;}
   caches.open(TK_CACHE).then(function(c){return c.keys();}).then(function(keys){
     var da={};keys.forEach(function(r){var m=r.url.split('/tickets/')[1];if(m)da[m]=1;});
-    box.innerHTML=TICKETS.map(function(t){
+    var liste=TICKETS.filter(function(t){return t.s===tkStrecke;});
+    box.innerHTML='<div class="tkseg">'+STRECKEN.map(function(r){
+        var offen=TICKETS.filter(function(t){return t.s===r.id&&da[t.k];}).length;
+        return '<button data-str="'+r.id+'"'+(r.id===tkStrecke?' class="an"':'')+'>'+r.n+
+               '<i>'+offen+'/'+TICKETS.filter(function(t){return t.s===r.id;}).length+'</i></button>';
+      }).join('')+'</div>'+
+    liste.map(function(t){
       var vorhanden=da[t.k];
       return '<div class="tkrow">'+
         (vorhanden?'<img src="'+tkPath(t.k)+'" alt="">':'')+
@@ -2324,6 +2344,8 @@ function renderTickets(){
     '<p class="dochint" style="margin-top:12px">Mach vom PDF einen Bildschirmfoto-Ausschnitt des QR-Codes '+
     'und lege ihn hier ab. Bei der Kontrolle wird zusätzlich ein gültiger Ausweis verlangt.</p>';
 
+    $$("#tickets .tkseg button").forEach(function(b){b.onclick=function(){
+      tkStrecke=b.dataset.str;renderTickets();};});
     $$("#tickets input[type=file]").forEach(function(inp){
       inp.onchange=function(e){
         var f=(e.target.files||[])[0];if(!f)return;
@@ -2346,9 +2368,9 @@ function zeigeTicket(t){zeigeListe([t],0);}
 
 /* Der Schaffner prueft beide Fahrgaeste — deshalb blaettert die Ansicht
    zwischen den Karten derselben Fahrt, statt sie einzeln zu oeffnen. */
-function zeigeTicketFuer(ri){
-  var pre=(ri==='hin')?'hin-':'rueck-';
-  var l=TICKETS.filter(function(t){return t.k.indexOf(pre)===0;});
+function zeigeTicketFuer(tk){
+  var p=(tk||'').split('-'),str=p[0],ri=(p[1]==='hin')?'Hinfahrt':'Rückfahrt';
+  var l=TICKETS.filter(function(t){return t.s===str&&t.ri===ri;});
   if(l.length)zeigeListe(l,0);
 }
 function zeigeListe(l,i){
