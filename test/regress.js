@@ -249,6 +249,37 @@ console.log('\nKartenansicht');
            return da})());
   eval('active=0;renderDay();');
 
+console.log('\nBus-Seite');
+  eval('renderBus();');
+  ok('naechste Abfahrt wird angezeigt', /\d\d:\d\d/.test(els['#busjetzt'].innerHTML));
+  ok('Countdown rechnet in marokkanischer Zeit',
+     /naechsteAbfahrt[\s\S]{0,200}nowMin\(\)/.test(src));
+  ok('nach der letzten Abfahrt sauberer Hinweis',
+     (()=>{const alt = nowMin; eval('nowMin=function(){return 18*60};renderBusJetzt();');
+           const ok_ = /keine Abfahrt mehr/.test(els['#busjetzt'].innerHTML);
+           eval('nowMin=' + alt.toString() + ';renderBusJetzt();');
+           return ok_})());
+  ok('Ticket-Uhr bietet Start an', /Ticket jetzt gekauft/.test(els['#bustk'].innerHTML));
+  ok('Ticketpreis folgt dem Personenmodell',
+     eval('busTicketPreis()') === eval('80*Math.min(busMA,people)+130*(people-busMA)'));
+  ok('beide Linien als Reiter', (els['#bushalte'].innerHTML.match(/data-l="/g)||[]).length === 2);
+  ok('elf Halte auf der Herkules-Linie',
+     eval("BUSLINIEN[0].halte.length") === 11);
+  ok('zwoelf Halte auf der Stadtlinie',
+     eval("BUSLINIEN[1].halte.length") === 12);
+  ok('sieben Abfahrten im Sommerfahrplan', eval("BUSLINIEN[0].ab.length") === 7);
+  // Erfundene Koordinaten haben diesen Plan schon einmal nach Larache verlegt.
+  ok('jede Haltestellen-Koordinate stammt aus dem Reiseplan',
+     (()=>{const imPlan = new Set();
+           TRIP.forEach(d => d.items.forEach(i => { if (i.loc && i.loc.lat)
+             imPlan.add(i.loc.lat.toFixed(4) + ',' + i.loc.lng.toFixed(4)) }));
+           return eval('BUSLINIEN').every(l => l.halte.filter(h => h.lat)
+             .every(h => imPlan.has(h.lat.toFixed(4) + ',' + h.lng.toFixed(4))))})());
+  ok('Halte ohne Koordinate werden als solche gekennzeichnet',
+     /Koordinate nicht gepr\u00fcft/.test(els['#bushalte'].innerHTML));
+  ok('Kiosk-Karte nennt den Ausweis fuer den Marokkaner-Tarif',
+     /Ausweis f\u00fcr Aymane/.test(src) && /80 statt 130/.test(src));
+
 console.log('\nOeffnungszeiten aus der Pruefung');
   const P = (d, t) => TRIP[d].items.find(i => i.h.indexOf(t) === 0);
   // Belegt durch die Mehr-Agenten-Pruefung vom 16.08.2026, jeweils gegengeprueft.

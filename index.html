@@ -622,6 +622,34 @@ function busZeilen(it){
 .pin.an{z-index:400!important}
 .pin.an b{background:var(--ink);transform:scale(1.25)}
 .mvopen{flex:0 0 auto}
+.bjk{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.bjk b{font-family:var(--m);font-size:34px;font-weight:700;letter-spacing:-.02em;color:var(--ink)}
+.bjk span{font-size:14px;color:var(--muted);font-weight:600}
+.bjk.abgelaufen b{color:var(--alert)}
+:root[data-theme="dark"] .bjk b{color:var(--text)}
+.bjw{margin:9px 0 0;font-family:var(--m);font-size:11.5px;color:var(--muted);letter-spacing:.02em}
+.tkbar{height:5px;border-radius:3px;background:var(--line-2);margin:11px 0 0;overflow:hidden}
+.tkbar i{display:block;height:100%;background:var(--saffron);border-radius:3px}
+.kiosk{list-style:none;margin:0;padding:0}
+.kiosk li{padding:11px 0 11px 26px;border-top:1px solid var(--line-2);position:relative}
+.kiosk li:first-child{border-top:0}
+.kiosk li::before{content:"";position:absolute;left:2px;top:15px;width:12px;height:7px;
+  border-left:2.4px solid var(--sea);border-bottom:2.4px solid var(--sea);transform:rotate(-45deg)}
+.kiosk b{display:block;font-size:14px;margin-bottom:2px}
+.kiosk span{font-size:12.5px;color:var(--muted);line-height:1.45}
+#busmap{height:200px;background:#E8E4DB;border-top:1px solid var(--line-2)}
+.haltel{list-style:none;margin:10px 0 0;padding:0}
+.haltel li{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line-2)}
+.haltel li:first-child{border-top:0}
+.haltel li>div{flex:1;min-width:0}
+.hn{flex:0 0 24px;height:24px;border-radius:50%;display:grid;place-items:center;
+  font-family:var(--m);font-size:11px;font-weight:700;background:var(--line-2);color:var(--faint)}
+.haltel li.geo .hn{background:var(--saffron);color:#1A1200}
+.haltel b{display:block;font-size:13.5px}
+.haltel small{display:block;color:var(--muted);font-size:11.5px;margin-top:1px}
+.hplan,.hentf{flex:0 0 auto;font-family:var(--m);font-size:10.5px;font-weight:600;padding:3px 7px;border-radius:5px}
+.hplan{background:var(--saffron-wash);color:var(--saffron-deep)}
+.hentf{background:var(--sea-wash);color:var(--sea)}
 .busbox{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
 .bz{display:inline-flex;align-items:baseline;gap:5px;padding:4px 9px;border-radius:7px;
   font-family:var(--m);font-size:11.5px;font-weight:600}
@@ -697,6 +725,30 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
 
   <section class="panel" id="p-bus">
     <div class="slab"><svg class="st" viewBox="-12 -12 24 24"><path d="M0-11 2.7-7.2 7.2-8.6 5.8-4.2 10.5-2 5.8 0 10.5 2 5.8 4.2 7.2 8.6 2.7 7.2 0 11-2.7 7.2-7.2 8.6-5.8 4.2-10.5 2-5.8 0-10.5-2-5.8-4.2-7.2-8.6-2.7-7.2Z" fill="#E8A317"/></svg><h2>Der Touristenbus</h2><div class="rule"></div></div>
+
+    <div class="card">
+      <div class="card-h"><div class="meta">Jetzt</div><h3>Nächste Abfahrt ab Hafen</h3>
+        <p>Herkules-Linie, marokkanische Zeit. Die Stadtlinie fährt alle 30 bis 60 Minuten, dort lohnt kein Countdown.</p></div>
+      <div class="card-b" id="busjetzt"></div></div>
+
+    <div class="card">
+      <div class="card-h"><div class="meta">Ticket · 48 Stunden</div><h3>Wie lange gilt es noch?</h3></div>
+      <div class="card-b" id="bustk"></div></div>
+
+    <div class="card">
+      <div class="card-h"><div class="meta">Am Kiosk</div><h3>Drei Dinge, sonst nichts</h3></div>
+      <div class="card-b">
+        <ul class="kiosk">
+          <li><b>Ausweis für Aymane</b><span>80 statt 130 MAD. Auch eine Aufenthaltskarte zählt — Oksana zahlt den regulären Tarif.</span></li>
+          <li><b>Fahrplanzettel mitnehmen</b><span>Die Durchfahrtszeiten der einzelnen Halte stehen nirgends online. Nur auf diesem Zettel.</span></li>
+          <li><b>Fragen, ob er heute fährt</b><span>Der Betreiber meldet den Dienst als eingestellt. Der Kiosk weiß es aus erster Hand.</span></li>
+        </ul>
+      </div></div>
+
+    <div class="card">
+      <div class="card-h"><div class="meta">Haltestellen</div><h3>Wo ihr ein- und aussteigt</h3></div>
+      <div id="busmap"></div>
+      <div class="card-b" id="bushalte"></div></div>
 
     <div class="card">
       <div class="card-h"><div class="meta">Entscheidung</div><h3>Ja — wegen einer der zwei Routen</h3>
@@ -2177,6 +2229,9 @@ $$("#tabs button").forEach(function(b){b.onclick=function(){
   moveInd();
   // Leaflet misst im display:none-Panel 0x0 — nach dem Einblenden neu vermessen.
   if(b.dataset.p==='tage'&&mapObj)setTimeout(function(){mapObj.invalidateSize();},60);
+  // Leaflet misst im ausgeblendeten Panel 0x0, und die Uhren sollen frisch sein.
+  if(b.dataset.p==='bus'){renderBusJetzt();renderBusTicket();
+    setTimeout(function(){if(busMap)busMap.invalidateSize();else busKarte();},60);}
   var sh=$("#shell");
   if(sh)sh.scrollTo({top:0,behavior:smoothOk()?'smooth':'auto'});};});
 
@@ -2334,6 +2389,7 @@ function updateEntfernungen(){
     el.textContent=t;
     el.hidden=!t;
   });
+  if($("#bushalte"))renderBusHalte();
   posAufKarte(mapObj,'tag');
   posAufKarte(mvMap,'gross');
   renderPosBtns();
@@ -2346,7 +2402,8 @@ function startPos(){
   }
   if(watchId!==null){
     navigator.geolocation.clearWatch(watchId);watchId=null;POS=null;
-    posAufKarte(mapObj,'tag');posAufKarte(mvMap,'gross');
+    if($("#bushalte"))renderBusHalte();
+  posAufKarte(mapObj,'tag');posAufKarte(mvMap,'gross');
     updateEntfernungen();return;
   }
   watchId=-1;renderPosBtns();
@@ -2365,6 +2422,147 @@ function mvStandort(){
   if(watchId!==null&&POS&&mvMap){mvMap.panTo([POS.lat,POS.lng],{animate:true,duration:.4});return;}
   startPos();
 }
+
+/* ---------- Der Touristenbus ----------
+   Fahrplan vom Betreiber, geprueft am 16.08.2026. Koordinaten nur dort,
+   wo sie aus dem Reiseplan schon geprueft sind — die uebrigen Halte stehen
+   mit Adresse da. Erfundene Koordinaten haben diesen Plan schon einmal
+   nach Larache verlegt. */
+var BUSLINIEN=[
+ {id:'h',n:'Grottes d\'Hercule',dauer:'2 Std.',takt:'stündlich',
+  ab:['11:00','12:00','13:00','14:00','15:00','16:00','17:00'],
+  halte:[
+   {n:1,t:'Kioske Port',a:'Ave Mohammed VI',lat:35.78912,lng:-5.80454,tag:3,zeit:'11:00'},
+   {n:2,t:'Socco Alto',a:'Boulevard Moulay Rachid'},
+   {n:3,t:'Parc Perdicaris',a:'Route de Rmilat',lat:35.78558,lng:-5.89462,tag:3,zeit:'11:25'},
+   {n:4,t:'Donabo Garden',a:'Route de Cap Spartel'},
+   {n:5,t:'Cap Spartel',a:'Cap Spartel',lat:35.79153,lng:-5.92567,tag:3,zeit:'12:50'},
+   {n:6,t:'Grottes d\'Hercule',a:'Route des Grottes',lat:35.7598,lng:-5.93915,tag:3,zeit:'14:00',wende:1},
+   {n:7,t:'Cap Spartel retour',a:'Rückweg'},
+   {n:8,t:'Donabo retour',a:'Rückweg'},
+   {n:9,t:'Parc Perdicaris',a:'Rückweg'},
+   {n:10,t:'Golf',a:'Royal Golf de Tanger'},
+   {n:11,t:'Socco Alto',a:'Rückweg zum Hafen'}]},
+ {id:'v',n:'Tanger Ville',dauer:'1 Std.',takt:'alle 30–60 Min · 9 bis 18 Uhr',
+  ab:null,
+  halte:[
+   {n:1,t:'Port',a:'Ave Mohammed VI',lat:35.78912,lng:-5.80454,tag:4,zeit:'09:00'},
+   {n:2,t:'Place 9 Avril',a:'Grand Socco',lat:35.7843,lng:-5.81309},
+   {n:3,t:'Palais Moulay Hafid',a:'Rue Sanhaja',lat:35.78616,lng:-5.82062,tag:4,zeit:'09:25'},
+   {n:4,t:'Nécropoles Punicoromaines',a:'Rue Sanhaja'},
+   {n:5,t:'Palais Moulay Hafid 2',a:'Rue Sanhaja'},
+   {n:6,t:'Mosquée Mohammed V',a:'Rue de Belgique'},
+   {n:7,t:'Place Faro',a:'Boulevard Pasteur',lat:35.78086,lng:-5.81179,tag:4,zeit:'11:45'},
+   {n:8,t:'Sahet el Oumane',a:'Place des Nations'},
+   {n:9,t:'Tanger City Mall',a:'Route de Malabata'},
+   {n:10,t:'Villa Harris',a:'Route de Malabata',lat:35.78274,lng:-5.76393,tag:4,zeit:'14:15'},
+   {n:11,t:'Monopolio',a:'Route de Malabata'},
+   {n:12,t:'Marina',a:'Tanja Marina Bay',lat:35.78397,lng:-5.79646,tag:4,zeit:'17:45'}]}
+];
+var busLinie='h', busMap=null;
+
+/* Naechste Abfahrt ab Hafen, in marokkanischer Zeit. */
+function naechsteAbfahrt(){
+  var L=BUSLINIEN[0],jetzt=nowMin();
+  for(var i=0;i<L.ab.length;i++){
+    var pt=L.ab[i].split(':'),m=+pt[0]*60+ +pt[1];
+    if(m>=jetzt)return {zeit:L.ab[i],rest:m-jetzt,weitere:L.ab.slice(i+1)};
+  }
+  return null;
+}
+
+function renderBusJetzt(){
+  var box=$("#busjetzt");if(!box)return;
+  var n=naechsteAbfahrt();
+  if(!n){
+    box.innerHTML='<div class="bjk"><b>Heute keine Abfahrt mehr</b>'+
+      '<span>Die letzte ging um 17:00. Morgen wieder ab 11:00.</span></div>';
+    return;
+  }
+  var h=Math.floor(n.rest/60),m=n.rest%60;
+  var rest=n.rest===0?'jetzt':(h?h+' Std. '+m+' Min':m+' Min');
+  box.innerHTML='<div class="bjk"><b>'+n.zeit+'</b><span>in '+rest+'</span></div>'+
+    (n.weitere.length?'<p class="bjw">Danach '+n.weitere.join(' · ')+'</p>'
+      :'<p class="bjw">Das ist die letzte Abfahrt heute.</p>');
+}
+
+/* Das Ticket gilt 48 Stunden ab Kauf. Der Kniff im Plan — Freitagmorgen
+   kaufen, deckt Tag 3 und Tag 4 — wird damit nachpruefbar statt behauptet. */
+var TKSTART=null;
+function busTicketPreis(){var ma=Math.min(busMA,people);return 80*ma+130*(people-ma);}
+
+function renderBusTicket(){
+  var box=$("#bustk");if(!box)return;
+  var preis='<p class="bjw">'+(people===2&&busMA===1
+    ? 'Aymane 80 + Oksana 130 = '+busTicketPreis()+' MAD'
+    : busTicketPreis()+' MAD für '+people+(people===1?' Person':' Personen'))+' · 48 Stunden</p>';
+  if(!TKSTART){
+    box.innerHTML='<p class="dochint">Sobald ihr das Ticket am Kiosk habt, hier starten — '+
+      'dann läuft die Uhr mit und du siehst, ob Tag 4 noch abgedeckt ist.</p>'+
+      '<button class="dlbtn" id="tkstart">'+ICO_OK+'Ticket jetzt gekauft</button>'+preis;
+    var b=$("#tkstart");
+    if(b)b.onclick=function(){
+      TKSTART=Date.now();Store.set('tkstart',TKSTART);renderBusTicket();};
+    return;
+  }
+  var endeMs=TKSTART+48*3600*1000, restMs=endeMs-Date.now();
+  var ende=new Date(endeMs), tage=['So','Mo','Di','Mi','Do','Fr','Sa'];
+  var endTxt=tage[ende.getDay()]+' '+('0'+ende.getHours()).slice(-2)+':'+('0'+ende.getMinutes()).slice(-2);
+  if(restMs<=0){
+    box.innerHTML='<div class="bjk abgelaufen"><b>Abgelaufen</b><span>seit '+endTxt+'</span></div>'+
+      '<button class="dlbtn" id="tkreset">Neu starten</button>';
+  }else{
+    var h=Math.floor(restMs/3600000),m=Math.floor(restMs%3600000/60000);
+    var anteil=Math.max(0,Math.min(100,Math.round(restMs/(48*36000))));
+    box.innerHTML='<div class="bjk"><b>'+h+' Std. '+m+' Min</b><span>noch gültig, bis '+endTxt+'</span></div>'+
+      '<div class="tkbar"><i style="width:'+anteil+'%"></i></div>'+preis+
+      '<button class="dlbtn" id="tkreset">Zurücksetzen</button>';
+  }
+  var r=$("#tkreset");
+  if(r)r.onclick=function(){TKSTART=null;Store.set('tkstart',null);renderBusTicket();};
+}
+
+/* Haltestellen mit Entfernung, wo die Koordinate aus dem Reiseplan geprueft ist.
+   Halte ohne Koordinate werden als solche gekennzeichnet, nicht geschaetzt. */
+function renderBusHalte(){
+  var box=$("#bushalte");if(!box)return;
+  var L=BUSLINIEN.filter(function(x){return x.id===busLinie;})[0];
+  box.innerHTML='<div class="tkseg">'+BUSLINIEN.map(function(x){
+      return '<button data-l="'+x.id+'"'+(x.id===busLinie?' class="an"':'')+'>'+x.n+
+             '<i>'+x.halte.length+' Halte · '+x.dauer+'</i></button>';
+    }).join('')+'</div>'+
+    '<ol class="haltel">'+L.halte.map(function(h){
+      var e=(h.lat&&POS)?entfText({lat:h.lat,lng:h.lng}):'';
+      return '<li'+(h.lat?' class="geo"':'')+'><span class="hn">'+h.n+'</span>'+
+        '<div><b>'+esc(h.t)+'</b><small>'+esc(h.a)+(h.lat?'':' · Koordinate nicht geprüft')+'</small></div>'+
+        (h.tag?'<span class="hplan">Tag '+h.tag+' · '+h.zeit+'</span>':'')+
+        (e?'<span class="hentf">'+e+'</span>':'')+'</li>';
+    }).join('')+'</ol>'+
+    '<p class="dochint">Ausgefüllte Nummern haben eine geprüfte Koordinate und erscheinen auf der Karte. '+
+    'Bei den übrigen kenne ich nur die Straße — die schätze ich nicht.</p>';
+  $$("#bushalte .tkseg button").forEach(function(b){b.onclick=function(){
+    busLinie=b.dataset.l;renderBusHalte();busKarte();};});
+}
+
+function busKarte(){
+  var el=$("#busmap");if(!el||typeof L==='undefined')return;
+  if(busMap){busMap.remove();busMap=null;}
+  var lin=BUSLINIEN.filter(function(x){return x.id===busLinie;})[0];
+  var mit=lin.halte.filter(function(h){return h.lat;});
+  if(!mit.length)return;
+  var ll=mit.map(function(h){return [h.lat,h.lng];});
+  busMap=L.map(el,{scrollWheelZoom:false,zoomControl:false});
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {maxZoom:18,attribution:'&copy; OpenStreetMap'}).addTo(busMap);
+  L.polyline(ll,{color:'#10222B',weight:2,opacity:.45,dashArray:'5 6'}).addTo(busMap);
+  mit.forEach(function(h,i){
+    L.marker(ll[i],{icon:L.divIcon({className:'pin',html:'<b>'+h.n+'</b>',
+      iconSize:[24,24],iconAnchor:[12,12]}),title:h.t}).addTo(busMap);
+  });
+  busMap.fitBounds(L.latLngBounds(ll).pad(.2));
+}
+
+function renderBus(){renderBusJetzt();renderBusTicket();renderBusHalte();busKarte();}
 
 /* ---------- Kachelpakete je Gebiet ---------- */
 function renderGebiete(){
@@ -2756,7 +2954,7 @@ function wireDocs(){
 
 function boot(){
   wantNowScroll=true;                     // beim Start zur laufenden Zeile
-  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();wireCheckAdd();korrigiereSicherheitsabstand();renderTickets();renderGebiete();renderStorage();applyTheme();loadWx();setTimeout(function(){renderDiag();diagHinweis();},300);
+  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();wireCheckAdd();korrigiereSicherheitsabstand();renderBus();renderTickets();renderGebiete();renderStorage();applyTheme();loadWx();setTimeout(function(){renderDiag();diagHinweis();},300);
   centerTile(false);
   checkReminders();syncReminders();registerSync();
 }
@@ -2774,7 +2972,8 @@ Store.get('ppl').then(function(v){people=v||2;return Store.get('busMA');})
 .then(function(v){OWN=Array.isArray(v)?v:[];return Store.get('added');})
 .then(function(v){ADD=(v&&typeof v==='object')?v:{};return Store.get('dark');})
 .then(function(v){DARK=!!v;return Store.get('notified');})
-.then(function(v){NOTIF=v||{};boot();})
+.then(function(v){NOTIF=v||{};return Store.get('tkstart');})
+.then(function(v){TKSTART=v||null;boot();})
 .catch(function(){boot();});
 
 /* Rueckkehr in die App: nur neu rendern und springen, wenn die Zeit wirklich
