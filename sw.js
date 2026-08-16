@@ -1,5 +1,5 @@
 /* Tanger Reiseplan — offline service worker */
-var CACHE = 'tanger-v28';
+var CACHE = 'tanger-v29';
 var TILES = 'tanger-maps-v1';   // Kartenkacheln, von der App gefuellt
 var DATA  = 'tanger-data-v1';   // Erinnerungsliste fuer periodicSync
 var DOCS  = 'tanger-docs-v1';   // vom Nutzer hinterlegte Dateien, bleiben lokal
@@ -115,6 +115,13 @@ self.addEventListener('fetch', function (e) {
       });
     })
   );
+});
+
+/* ---------- Versionsauskunft und Sofort-Update ---------- */
+self.addEventListener('message', function (e) {
+  var d = e.data || {};
+  if (d.q === 'version' && e.ports && e.ports[0]) e.ports[0].postMessage(CACHE);
+  if (d.q === 'skipWaiting') self.skipWaiting();
 });
 
 /* ---------- Erinnerungen ---------- */

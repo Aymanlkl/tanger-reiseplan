@@ -529,6 +529,13 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 .stbar i.voll{background:var(--alert)}
 .stsum{font-size:12.5px;color:var(--muted);margin:0 0 6px;line-height:1.5}
 
+.updbar{position:fixed;left:12px;right:12px;bottom:calc(70px + max(6px,var(--sb)));z-index:90;
+  display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:var(--r-s);
+  background:var(--ink);color:#fff;box-shadow:0 6px 22px -8px rgba(16,34,43,.6)}
+.updbar span{flex:1;min-width:0;font-size:13.5px;font-weight:600}
+.updbar button{flex:0 0 auto;padding:8px 13px;border-radius:7px;background:var(--saffron);
+  color:#1A1200;font-size:12.5px;font-weight:700}
+
 .dochint{margin:0 0 12px;font-size:12.5px;color:var(--muted);line-height:1.5}
 .showbox{border:2px solid var(--ink);border-radius:var(--r-s);overflow:hidden}
 .showbox .ar{background:var(--ink);color:#fff;padding:15px 14px;font-size:21px;line-height:1.75;
@@ -708,6 +715,10 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
 
     <div class="card"><div class="card-h"><div class="meta">Vorhersage</div><h3>Wetter für die Reisetage</h3></div>
       <div class="card-b" id="wxbox"></div></div>
+
+    <div class="card"><div class="card-h"><div class="meta">Version</div><h3>Stand der App</h3></div>
+      <div class="card-b"><p class="dochint" id="buildinfo">wird geprüft …</p>
+        <button class="sbtn" id="forcereload">Neu laden erzwingen</button></div></div>
 
     <div class="card"><div class="card-h"><div class="meta">Vor dem Abflug</div><h3>Karten offline laden</h3>
       <p>Im WLAN herunterladen. Unterwegs sind die Gebiete dann ohne Netz nutzbar.</p></div>
@@ -1894,6 +1905,16 @@ window.addEventListener('orientationchange',function(){setTimeout(moveInd,150);}
 $("#tglFood").onclick=function(){withFood=!withFood;Store.set('food',withFood);renderCosts();};
 $("#tglHotel").onclick=function(){withHotel=!withHotel;Store.set('hotel',withHotel);renderCosts();};
 $("#tglFlug").onclick=function(){withFlug=!withFlug;Store.set('flug',withFlug);renderCosts();};
+var fr=$("#forcereload");
+if(fr)fr.onclick=function(){
+  fr.textContent='Lädt …';
+  if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations){
+    navigator.serviceWorker.getRegistrations().then(function(rs){
+      return Promise.all(rs.map(function(r){return r.update();}));
+    }).catch(function(){}).then(function(){location.reload(true);});
+  }else location.reload(true);
+};
+
 $("#tglPark").onclick=function(){withPark=!withPark;Store.set('park',withPark);renderCosts();};
 $("#tglTheme").onclick=function(){DARK=!DARK;Store.set('dark',DARK);applyTheme();};
 
@@ -2347,9 +2368,51 @@ document.addEventListener('visibilitychange',function(){
   }
 })();
 
+/* ---------- Updates sichtbar machen ---------- */
+// Auf dem iPhone laedt eine installierte PWA beim Zurueckholen aus dem
+// App-Switcher nicht neu — sie zeigt einfach die alte Seite weiter. Deshalb
+// fragt die App selbst nach und bietet das Neuladen an.
+function zeigeVersion(){
+  var el=$("#buildinfo");if(!el)return;
+  if(!navigator.serviceWorker||!navigator.serviceWorker.controller){
+    el.textContent='Stand unbekannt — noch nicht offline eingerichtet';return;}
+  try{
+    var ch=new MessageChannel();
+    ch.port1.onmessage=function(ev){el.textContent='Stand: '+ev.data;};
+    navigator.serviceWorker.controller.postMessage({q:'version'},[ch.port2]);
+  }catch(e){el.textContent='Stand nicht abrufbar';}
+}
+
+function updateBanner(reg,neu){
+  if($("#updbar"))return;
+  var d=document.createElement('div');
+  d.id='updbar';d.className='updbar';
+  d.innerHTML='<span>Neue Fassung verfügbar</span><button>Jetzt laden</button>';
+  document.body.appendChild(d);
+  d.querySelector('button').onclick=function(){
+    d.querySelector('button').textContent='Lädt …';
+    if(neu)neu.postMessage({q:'skipWaiting'});
+    setTimeout(function(){location.reload();},400);
+  };
+}
+
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
-    navigator.serviceWorker.register('sw.js').catch(function(){});
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      zeigeVersion();
+      reg.addEventListener('updatefound',function(){
+        var neu=reg.installing;if(!neu)return;
+        neu.addEventListener('statechange',function(){
+          if(neu.state==='installed'&&navigator.serviceWorker.controller)updateBanner(reg,neu);
+        });
+      });
+      // Solange die App offen ist, alle fuenf Minuten nachsehen
+      setInterval(function(){reg.update().catch(function(){});},300000);
+      // Und beim Zurueckholen aus dem Hintergrund
+      document.addEventListener('visibilitychange',function(){
+        if(!document.hidden)reg.update().catch(function(){});
+      });
+    }).catch(function(){});
   });
 }
 </script>

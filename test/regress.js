@@ -453,6 +453,20 @@ console.log('\nJetzt-Zeile');
   ok('Tageswechsel springt nicht', log.now.length===0);
   global.Date = RD;
 
+console.log('\nVersion und Update');
+  ok('Service Worker beantwortet Versionsfrage',
+     /d\.q === 'version'/.test(require('fs').readFileSync('/Users/aymaneloukili/Downloads/Tanger/sw.js','utf8')));
+  ok('Service Worker kann sofort uebernehmen',
+     /d\.q === 'skipWaiting'/.test(require('fs').readFileSync('/Users/aymaneloukili/Downloads/Tanger/sw.js','utf8')));
+  ok('App fragt die Version ab und zeigt sie', /id="buildinfo"/.test(src) && /q:'version'/.test(src));
+  ok('Banner bei neuer Fassung', /function updateBanner/.test(src) && /Neue Fassung verfügbar/.test(src));
+  ok('sucht regelmaessig nach Updates',
+     /reg\.update\(\)/.test(src) && /setInterval\(function\(\)\{reg\.update/.test(src));
+  ok('sucht auch beim Zurueckholen aus dem Hintergrund',
+     /if\(!document\.hidden\)reg\.update/.test(src));
+  ok('Knopf zum Erzwingen vorhanden', /id="forcereload"/.test(src));
+
+
 console.log('\nApp-Huelle');
   ok('Body ist eine Spalte, die Huelle scrollt darin',
      /body\{[^}]*display:flex;flex-direction:column/.test(src)
