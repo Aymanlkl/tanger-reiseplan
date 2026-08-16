@@ -159,6 +159,26 @@ console.log('\nFotos und Stadtkarte');
   ok('Standortknopf an der Karte', /id="dlpos"/.test(els['#p-tage'].innerHTML)
      && /id="dltiles"/.test(els['#p-tage'].innerHTML));
 
+console.log('\nFahrkarten');
+  ok('vier Slots, beide Personen, beide Richtungen',
+     eval('TICKETS.length')===4
+     && eval("TICKETS.filter(function(t){return t.wer==='Aymane';}).length")===2
+     && eval("TICKETS.filter(function(t){return t.ri==='Rückfahrt';}).length")===2);
+  ok('Wagen und Platz stimmen mit den PDFs',
+     eval("TICKETS.filter(function(t){return t.k==='hin-a';})[0].d").indexOf('Wagen 6 · Platz 22')>=0
+     && eval("TICKETS.filter(function(t){return t.k==='rueck-o';})[0].d").indexOf('Wagen 5 · Platz 23')>=0);
+  ok('Pfad liegt im eigenen Bereich', eval("tkPath('hin-a')")==='tickets/hin-a');
+  ok('eigener Cache, in der Aufbewahrungsliste',
+     /var TKTS  = 'tanger-tickets-v1'/.test(require('fs').readFileSync('/Users/aymaneloukili/Downloads/Tanger/sw.js','utf8'))
+     && /KEEP  = \[CACHE, TILES, DATA, DOCS, FOTOS, TKTS\]/.test(require('fs').readFileSync('/Users/aymaneloukili/Downloads/Tanger/sw.js','utf8')));
+  ok('Service Worker liefert Fahrkarten nur lokal',
+     /url\.pathname\.indexOf\('\/tickets\/'\) !== -1 \? TKTS/.test(require('fs').readFileSync('/Users/aymaneloukili/Downloads/Tanger/sw.js','utf8')));
+  ok('Vollbildansicht vorhanden', /id="qrview"/.test(src) && /function zeigeTicket/.test(src));
+  ok('keine Fahrkarte im Repo',
+     !require('fs').readdirSync('/Users/aymaneloukili/Downloads/Tanger')
+       .some(f=>/qr|ticket|billet/i.test(f)));
+
+
 console.log('\nDokumentenablage');
   ok('Pfad wird sauber kodiert',
      eval('docPath("Zug Ticket.pdf")')==='docs/Zug%20Ticket.pdf');
@@ -387,8 +407,9 @@ console.log('\nSpeicher');
   ok('ohne Cache-API sauberer Hinweis', /legt nichts offline ab/.test(els['#stbox'].innerHTML)
      || els['#stbox'].innerHTML==='', els['#stbox'].innerHTML.slice(0,50));
   ok('Groessenformat lesbar', eval('mb(5242880)')==='5.0 MB' && eval('mb(52428800)')==='50 MB');
-  ok('drei Speicherbereiche definiert', eval('CACHE_INFO.length')===3
-     && eval('CACHE_INFO.map(function(c){return c.k;}).join(",")')==='tanger-maps-v1,tanger-fotos-v1,tanger-docs-v1');
+  ok('vier Speicherbereiche definiert', eval('CACHE_INFO.length')===4
+     && eval('CACHE_INFO.map(function(c){return c.k;}).join(",")')
+        ==='tanger-maps-v1,tanger-fotos-v1,tanger-docs-v1,tanger-tickets-v1');
 
 console.log('\nNotizen');
   eval("RN={'1_11':{r:4,t:'Toller Minztee'}};active=1;renderDay();");   // Tag 2, Café Hafa

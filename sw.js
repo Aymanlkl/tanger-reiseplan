@@ -1,10 +1,11 @@
 /* Tanger Reiseplan — offline service worker */
-var CACHE = 'tanger-v31';
+var CACHE = 'tanger-v32';
 var TILES = 'tanger-maps-v1';   // Kartenkacheln, von der App gefuellt
 var DATA  = 'tanger-data-v1';   // Erinnerungsliste fuer periodicSync
 var DOCS  = 'tanger-docs-v1';   // vom Nutzer hinterlegte Dateien, bleiben lokal
 var FOTOS = 'tanger-fotos-v1';  // Fotos je Reisetag, ebenfalls lokal
-var KEEP  = [CACHE, TILES, DATA, DOCS, FOTOS];
+var TKTS  = 'tanger-tickets-v1'; // QR-Codes der Fahrkarten, streng lokal
+var KEEP  = [CACHE, TILES, DATA, DOCS, FOTOS, TKTS];
 
 var TILE_HOSTS = ['tile.openstreetmap.org', 'a.tile.openstreetmap.org',
                   'b.tile.openstreetmap.org', 'c.tile.openstreetmap.org'];
@@ -77,7 +78,8 @@ self.addEventListener('fetch', function (e) {
 
   // Eigene Dateien und Fotos: ausschliesslich aus dem lokalen Cache, nie aus dem Netz.
   var eigen = url.pathname.indexOf('/docs/') !== -1 ? DOCS
-            : url.pathname.indexOf('/fotos/') !== -1 ? FOTOS : null;
+            : url.pathname.indexOf('/fotos/') !== -1 ? FOTOS
+            : url.pathname.indexOf('/tickets/') !== -1 ? TKTS : null;
   if (eigen) {
     e.respondWith(
       caches.open(eigen).then(function (c) { return c.match(req); }).then(function (hit) {

@@ -537,6 +537,27 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
   color:#1A1200;font-size:12.5px;font-weight:700}
 
 .dochint{margin:0 0 12px;font-size:12.5px;color:var(--muted);line-height:1.5}
+/* Vollbild fuer die Kontrolle: weisser Grund, damit der Scanner den Code
+   auch bei halber Helligkeit sicher liest. */
+.qrview{position:fixed;inset:0;z-index:120;background:#fff;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:16px;padding:24px}
+.qrview[hidden]{display:none}
+.qrview img{width:min(86vw,86vh);max-width:420px;object-fit:contain;image-rendering:crisp-edges}
+.qrview p{margin:0;text-align:center;font-family:var(--m);font-size:13px;line-height:1.6;color:#17262E}
+.qrview button{padding:12px 22px;border-radius:10px;background:#17262E;color:#fff;font-size:14px;font-weight:600}
+.tkrow{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line-2)}
+.tkrow:first-child{border-top:0}
+.tkrow>div{flex:1;min-width:0}
+.tkrow b{display:block;font-size:13.5px}
+.tkrow small{display:block;color:var(--muted);font-size:11.5px;font-family:var(--m);margin-top:2px}
+.tkrow img{width:42px;height:42px;border-radius:6px;object-fit:cover;background:var(--line-2)}
+.tkbtn{flex:0 0 auto;padding:7px 12px;border-radius:7px;background:var(--ink);color:#fff;
+  font-size:12px;font-weight:600;cursor:pointer}
+.tkbtn.leer{background:var(--line-2);color:var(--muted)}
+.tkdel{flex:0 0 26px;height:26px;border-radius:7px;background:var(--line-2);color:var(--muted);
+  display:grid;place-items:center}
+.tkdel svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.6;stroke-linecap:round}
+
 .showbox{border:2px solid var(--ink);border-radius:var(--r-s);overflow:hidden}
 .showbox .ar{background:var(--ink);color:#fff;padding:15px 14px;font-size:21px;line-height:1.75;
   text-align:center;direction:rtl}
@@ -702,6 +723,10 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
       </table>
       <div class="note warn"><b>Guides in der Medina:</b> Am Petit Socco wirst du angesprochen. Freundlich, aber klar ablehnen — „Non merci, ça va". Wenn du einen Guide willst, buch ihn über die Rezeption, ca. 300 MAD für einen halben Tag.</div></div></div>
 
+    <div class="card"><div class="card-h"><div class="meta">Bei der Kontrolle</div><h3>Zugtickets zeigen</h3>
+      <p>QR-Codes aus den PDFs hier ablegen. Sie bleiben auf diesem Handy — beim Schaffner reicht ein Tipp.</p></div>
+      <div class="card-b" id="tickets"></div></div>
+
     <div class="card show"><div class="card-h"><div class="meta">Dem Fahrer zeigen</div><h3>Bring mich hierhin</h3></div>
       <div class="card-b">
         <div class="showbox">
@@ -762,6 +787,12 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
   <button data-p="info"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5h.01"/></svg><span>Info</span></button>
   <i class="tabind" id="tabind"></i>
 </nav>
+
+<div class="qrview" id="qrview" hidden>
+  <img id="qrimg" alt="Fahrkarte">
+  <p id="qrcap"></p>
+  <button id="qrclose">Schließen</button>
+</div>
 
 <div class="sheet-bg" id="sheetbg" hidden></div>
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetttl"></div>
@@ -1608,7 +1639,7 @@ function closeSheet(){
   sh.classList.remove('on');bg.classList.remove('on');
   setTimeout(function(){sh.hidden=true;bg.hidden=true;},300);
 }
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeSheet();schliesseTicket();}});
 
 /* ---------- Abrechnung: geplant gegen tatsaechlich ---------- */
 function extraSum(){
@@ -1906,6 +1937,11 @@ window.addEventListener('orientationchange',function(){setTimeout(moveInd,150);}
 $("#tglFood").onclick=function(){withFood=!withFood;Store.set('food',withFood);renderCosts();};
 $("#tglHotel").onclick=function(){withHotel=!withHotel;Store.set('hotel',withHotel);renderCosts();};
 $("#tglFlug").onclick=function(){withFlug=!withFlug;Store.set('flug',withFlug);renderCosts();};
+var qc=$("#qrclose");
+if(qc)qc.onclick=schliesseTicket;
+var qv=$("#qrview");
+if(qv)qv.onclick=function(e){if(e.target===qv)schliesseTicket();};
+
 var fr=$("#forcereload");
 if(fr)fr.onclick=function(){
   fr.textContent='Lädt …';
@@ -2045,7 +2081,8 @@ function renderGebiete(){
 var CACHE_INFO=[
  {k:'tanger-maps-v1', n:'Kartenkacheln', h:'Offline gespeicherte Karte'},
  {k:'tanger-fotos-v1',n:'Fotos',         h:'Deine Aufnahmen je Reisetag'},
- {k:'tanger-docs-v1', n:'Dokumente',     h:'Tickets, Buchungen, was du hinterlegt hast'}
+ {k:'tanger-docs-v1', n:'Dokumente',     h:'Buchungen, was du hinterlegt hast'},
+ {k:'tanger-tickets-v1',n:'Fahrkarten',  h:'QR-Codes für die Kontrolle'}
 ];
 function mb(b){return (b/1048576).toFixed(b<10485760?1:0)+' MB';}
 
@@ -2237,6 +2274,63 @@ function registerSync(){
   }).catch(function(){});
 }
 
+/* ---------- Fahrkarten fuer die Kontrolle ---------- */
+// Die Codes liegen ausschliesslich im Browser dieses Geraets. Nichts davon
+// geht ins Repo, nichts wird hochgeladen.
+var TK_CACHE='tanger-tickets-v1';
+var TICKETS=[
+ {k:'hin-a',  wer:'Aymane', ri:'Hinfahrt',  d:'Zug 2009 · Wagen 6 · Platz 22 · 07.09. 08:00'},
+ {k:'hin-o',  wer:'Oksana', ri:'Hinfahrt',  d:'Zug 2009 · Wagen 6 · Platz 24 · 07.09. 08:00'},
+ {k:'rueck-a',wer:'Aymane', ri:'Rückfahrt', d:'Zug 1057 · Wagen 5 · Platz 21 · 07.09. 20:56'},
+ {k:'rueck-o',wer:'Oksana', ri:'Rückfahrt', d:'Zug 1057 · Wagen 5 · Platz 23 · 07.09. 20:56'}
+];
+function tkPath(k){return 'tickets/'+k;}
+
+function renderTickets(){
+  var box=$("#tickets");if(!box)return;
+  if(!window.caches){box.innerHTML='<p class="dochint">Dieser Browser kann nichts offline ablegen.</p>';return;}
+  caches.open(TK_CACHE).then(function(c){return c.keys();}).then(function(keys){
+    var da={};keys.forEach(function(r){var m=r.url.split('/tickets/')[1];if(m)da[m]=1;});
+    box.innerHTML=TICKETS.map(function(t){
+      var vorhanden=da[t.k];
+      return '<div class="tkrow">'+
+        (vorhanden?'<img src="'+tkPath(t.k)+'" alt="">':'')+
+        '<div><b>'+t.wer+' · '+t.ri+'</b><small>'+t.d+'</small></div>'+
+        (vorhanden
+          ? '<button class="tkbtn" data-zeig="'+t.k+'">Zeigen</button>'+
+            '<button class="tkdel" data-weg="'+t.k+'" aria-label="Entfernen">'+ICO_X+'</button>'
+          : '<label class="tkbtn leer" for="tkf-'+t.k+'">Ablegen</label>'+
+            '<input type="file" id="tkf-'+t.k+'" accept="image/*" hidden data-neu="'+t.k+'">')+
+        '</div>';
+    }).join('')+
+    '<p class="dochint" style="margin-top:12px">Mach vom PDF einen Bildschirmfoto-Ausschnitt des QR-Codes '+
+    'und lege ihn hier ab. Bei der Kontrolle wird zusätzlich ein gültiger Ausweis verlangt.</p>';
+
+    $$("#tickets input[type=file]").forEach(function(inp){
+      inp.onchange=function(e){
+        var f=(e.target.files||[])[0];if(!f)return;
+        caches.open(TK_CACHE).then(function(c){
+          return c.put(tkPath(inp.dataset.neu),new Response(f,{headers:{'Content-Type':f.type||'image/png'}}));
+        }).then(function(){e.target.value='';renderTickets();}).catch(function(){});
+      };});
+    $$("#tickets .tkbtn[data-zeig]").forEach(function(b){b.onclick=function(){
+      var t=TICKETS.filter(function(x){return x.k===b.dataset.zeig;})[0];
+      zeigeTicket(t);};});
+    $$("#tickets .tkdel").forEach(function(b){b.onclick=function(){
+      caches.open(TK_CACHE).then(function(c){return c.delete(tkPath(b.dataset.weg));})
+        .then(renderTickets).catch(function(){});};});
+  }).catch(function(){});
+}
+
+function zeigeTicket(t){
+  var v=$("#qrview"),img=$("#qrimg"),cap=$("#qrcap");
+  if(!v||!t)return;
+  img.src=tkPath(t.k);
+  cap.innerHTML=esc(t.wer)+' · '+esc(t.ri)+'<br>'+esc(t.d)+'<br>Dossier KVDYJH';
+  v.hidden=false;
+}
+function schliesseTicket(){var v=$("#qrview");if(v)v.hidden=true;}
+
 /* ---------- Fotos je Tag, ebenfalls nur lokal ---------- */
 var FOTO_CACHE='tanger-fotos-v1';
 function fotoPath(tag,n){return 'fotos/'+tag+'/'+encodeURIComponent(n);}
@@ -2311,7 +2405,7 @@ function wireDocs(){
 
 function boot(){
   wantNowScroll=true;                     // beim Start zur laufenden Zeile
-  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();wireCheckAdd();renderGebiete();renderStorage();applyTheme();loadWx();setTimeout(renderDiag,300);
+  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();wireCheckAdd();renderTickets();renderGebiete();renderStorage();applyTheme();loadWx();setTimeout(renderDiag,300);
   centerTile(false);
   checkReminders();syncReminders();registerSync();
 }
