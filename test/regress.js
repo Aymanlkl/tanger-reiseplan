@@ -54,6 +54,7 @@ global.L = { map: () => ({ remove(){}, fitBounds(){}, setView(){},
 try { eval(code); } catch (e) { console.log('LAUFZEITFEHLER:', e.message); process.exit(1) }
 setImmediate(() => { try { run() } catch (e) { console.log('FEHLER:', e.message, e.stack); process.exit(1) } });
 
+const spaeter = [];
 function run() {
 const idxOf = (d, t) => TRIP[d].items.findIndex(i => i.h === t);
 
@@ -267,6 +268,34 @@ console.log('\nAusgaben');
   ok('ueber Budget', els['#cmpT'].className.includes('over') && /\+125 MAD/.test(els['#cmpT'].innerHTML));
   eval("SPENT={};");
 
+console.log('\nNotizen und Checkliste');
+  eval("RN={};active=1;renderDay();");
+  const html2 = els['#p-tage'].innerHTML;
+  ok('jeder Punkt hat ein Notizfeld',
+     (html2.match(/class="notebtn/g)||[]).length===TRIP[1].items.length,
+     `${(html2.match(/class="notebtn/g)||[]).length} von ${TRIP[1].items.length}`);
+  ok('Notiz auch bei Punkten ohne Essen',
+     (()=>{const n=TRIP[1].items.findIndex(i=>!i.eat); return n>=0 && new RegExp('id="rn'+n+'"').test(html2);})());
+  eval("saveNote(1,3,{t:'Museum war zu'});");
+  ok('Notiz speichert und meldet sich zurueck', eval('hasNote(1,3)')===true && RN['1_3'].t==='Museum war zu');
+  eval("saveNote(1,3,{t:''});");
+  ok('leere Notiz raeumt den Eintrag ab', eval('hasNote(1,3)')===false && RN['1_3']===undefined);
+  // renderCheck liest den Speicher, ist also asynchron — spaeter pruefen
+  eval("OWN=[{id:1,t:'Ladekabel'},{id:2,t:'Sonnenbrille'}];renderCheck();");
+  spaeter.push(() => {
+    ok('eigene Eintraege erscheinen', /Ladekabel/.test(els['#chklist'].innerHTML)
+       && /selbst ergänzt/.test(els['#chklist'].innerHTML), els['#chklist'].innerHTML.slice(0,70));
+    ok('eigene Eintraege haben eigene Schluessel', /data-k="o1"/.test(els['#chklist'].innerHTML));
+    ok('feste Eintraege behalten ihren Index', /data-k="0"/.test(els['#chklist'].innerHTML));
+  });
+
+console.log('\nSpeicher');
+  ok('ohne Cache-API sauberer Hinweis', /legt nichts offline ab/.test(els['#stbox'].innerHTML)
+     || els['#stbox'].innerHTML==='', els['#stbox'].innerHTML.slice(0,50));
+  ok('Groessenformat lesbar', eval('mb(5242880)')==='5.0 MB' && eval('mb(52428800)')==='50 MB');
+  ok('drei Speicherbereiche definiert', eval('CACHE_INFO.length')===3
+     && eval('CACHE_INFO.map(function(c){return c.k;}).join(",")')==='tanger-maps-v1,tanger-fotos-v1,tanger-docs-v1');
+
 console.log('\nNotizen');
   eval("RN={'1_11':{r:4,t:'Toller Minztee'}};active=1;renderDay();");   // Tag 2, Café Hafa
   const d2 = els['#p-tage'].innerHTML;
@@ -361,6 +390,9 @@ console.log('\nGlocke');
     ok(`Zustand ${p}`, soll, b.className);
   });
 
-console.log(`\n${PASS} bestanden, ${FAIL} fehlgeschlagen`);
-process.exit(FAIL ? 1 : 0);
+setImmediate(() => {
+  spaeter.forEach(f => f());
+  console.log(`\n${PASS} bestanden, ${FAIL} fehlgeschlagen`);
+  process.exit(FAIL ? 1 : 0);
+});
 }

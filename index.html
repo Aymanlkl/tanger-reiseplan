@@ -383,6 +383,9 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 .addex #exTxt{flex:1}
 .addex #exVal{width:82px;font-family:var(--m);text-align:right}
 .addex input:focus{outline:none;border-color:var(--saffron);background:var(--card)}
+.chkown{display:flex;align-items:flex-start;gap:8px;border-top:1px solid var(--line-2)}
+.chkown .chk{flex:1;border-top:0}
+.chkown .docdel{flex:0 0 26px;height:26px;margin-top:12px}
 .addex button{flex:0 0 auto;padding:8px 14px;border-radius:6px;background:var(--ink);color:#fff;
   font-size:13px;font-weight:600}
 .bilrow td{border-top:2px solid var(--ink)!important;padding-top:11px!important;font-weight:700}
@@ -423,6 +426,10 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 .srow b{flex:0 0 92px;font-family:var(--m);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
   color:var(--faint);font-weight:600;padding-top:2px}
 .srow span{flex:1;color:var(--muted)}
+.srow textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:7px 9px;background:var(--card);
+  font-family:var(--f);font-size:13px;line-height:1.45;color:var(--text);resize:vertical;
+  -webkit-appearance:none;appearance:none;transition:border-color .18s var(--ease)}
+.srow textarea:focus{outline:none;border-color:var(--saffron)}
 .srow i{font-style:normal;color:var(--faint)}
 .schips{padding:11px 0 2px;border-top:1px solid var(--line-2)}
 .sheet-acts{display:flex;flex-direction:column;gap:8px;margin-top:15px}
@@ -450,6 +457,19 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
   display:grid;place-items:center;transition:background .18s var(--ease),color .18s var(--ease)}
 .docdel:active{background:var(--alert-wash);color:var(--alert)}
 .docdel svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.6;stroke-linecap:round}
+.strow{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line-2)}
+.strow:first-child{border-top:0}
+.strow div{flex:1;min-width:0}
+.strow b{display:block;font-size:13.5px;font-weight:600}
+.strow small{display:block;color:var(--muted);font-size:12px;margin-top:1px}
+.strow .del{flex:0 0 auto;padding:6px 11px;border-radius:6px;background:var(--line-2);color:var(--muted);
+  font-size:11.5px;font-weight:600;transition:background .18s var(--ease),color .18s var(--ease)}
+.strow .del.armed{background:var(--alert);color:#fff}
+.stbar{height:6px;border-radius:4px;background:var(--line-2);overflow:hidden;margin:2px 0 13px}
+.stbar i{display:block;height:100%;background:var(--sea);border-radius:4px;transition:width .5s var(--ease)}
+.stbar i.voll{background:var(--alert)}
+.stsum{font-size:12.5px;color:var(--muted);margin:0 0 6px;line-height:1.5}
+
 .dochint{margin:0 0 12px;font-size:12.5px;color:var(--muted);line-height:1.5}
 .showbox{border:2px solid var(--ink);border-radius:var(--r-s);overflow:hidden}
 .showbox .ar{background:var(--ink);color:#fff;padding:15px 14px;font-size:21px;line-height:1.75;
@@ -598,7 +618,11 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
     </div>
 
     <div class="card"><div class="card-h"><div class="meta">Abhaken</div><h3>Checkliste</h3><p>Bleibt gespeichert, auch wenn du die Seite schließt.</p></div>
-      <div class="card-b" id="chklist"></div></div>
+      <div class="card-b"><div id="chklist"></div>
+        <div class="addex">
+          <input id="ckTxt" placeholder="Eigener Eintrag, z. B. Ladekabel">
+          <button id="ckAdd">Dazu</button>
+        </div></div></div>
 
     <div class="card"><div class="card-h"><div class="meta">Französisch &amp; Darija</div><h3>Die zehn Sätze, die reichen</h3></div>
       <div class="card-b" id="phrases"></div></div>
@@ -627,6 +651,10 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
 
     <div class="card"><div class="card-h"><div class="meta">Vorhersage</div><h3>Wetter für die Reisetage</h3></div>
       <div class="card-b" id="wxbox"></div></div>
+
+    <div class="card"><div class="card-h"><div class="meta">Platz auf dem Gerät</div><h3>Speicher</h3>
+      <p>Karten, Fotos und Dokumente liegen im Browser dieses Handys.</p></div>
+      <div class="card-b" id="stbox"></div></div>
 
     <div class="card"><div class="card-h"><div class="meta">Darstellung</div><h3>Ansicht</h3></div>
       <div class="card-b"><button class="tgl" id="tglTheme"><div class="sw"></div>
@@ -910,7 +938,7 @@ var ICO_TARGET='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle 
 var ICO_BELL_OFF='<svg viewBox="0 0 24 24"><path d="M18 8.5a6 6 0 0 0-8.9-5.2M6.2 6.3A6 6 0 0 0 6 8.5c0 5-2 6.5-2 6.5h12"/><path d="M13.7 19a2 2 0 0 1-3.4 0M3 3l18 18"/></svg>';
 
 /* ---------- Overrides: Aenderungen liegen neben TRIP, nie darin ---------- */
-var OV={},RN={},SPENT={},NOTIF={},EXTRA=[],WX=null,DARK=false,EDIT=false,mapObj=null,pinTarget=null;
+var OV={},RN={},SPENT={},NOTIF={},EXTRA=[],OWN=[],WX=null,DARK=false,EDIT=false,mapObj=null,pinTarget=null;
 function ik(di,ii){return di+'_'+ii;}
 
 /* Zusammengefuehrtes Item: Original + gespeicherte Aenderung.
@@ -1081,11 +1109,19 @@ function scrollToNow(){
 
 function hasNote(di,ii){var v=RN[ik(di,ii)];return !!(v&&(v.r||v.t));}
 
+function saveNote(di,ii,patch){
+  var k=ik(di,ii),v=RN[k]||{};
+  if(patch.r!==undefined)v.r=patch.r;
+  if(patch.t!==undefined)v.t=patch.t;
+  if(!v.r&&!v.t)delete RN[k]; else RN[k]=v;
+  Store.set('rnotes',RN);
+}
+
 function notePanel(di,ii){
   var v=RN[ik(di,ii)]||{},s,stars='';
   for(s=1;s<=5;s++)stars+='<button class="star'+(s<=(v.r||0)?' on':'')+'" data-s="'+s+'" aria-label="'+s+' Sterne">★</button>';
   return '<div class="rnote" id="rn'+ii+'" hidden><div class="stars" data-i="'+ii+'">'+stars+'</div>'+
-    '<textarea data-i="'+ii+'" rows="2" placeholder="Wie war es? Was hast du gegessen?">'+esc(v.t||'')+'</textarea></div>';
+    '<textarea data-i="'+ii+'" rows="2" placeholder="Wie war es? Was ist dir aufgefallen?">'+esc(v.t||'')+'</textarea></div>';
 }
 
 function renderDay(){
@@ -1129,7 +1165,7 @@ function renderDay(){
     var acts='';
     if(it.loc)acts+='<a class="mapl" href="'+mapHref(it.loc)+
       '" target="_blank" rel="noopener">'+PIN+'Auf Karte öffnen</a>';
-    if(it.eat)acts+='<button class="notebtn'+(hasNote(active,i)?' has':'')+'" data-i="'+i+'">'+ICO_NOTE+
+    acts+='<button class="notebtn'+(hasNote(active,i)?' has':'')+'" data-i="'+i+'">'+ICO_NOTE+
       (hasNote(active,i)?'Notiz ansehen':'Notiz')+'</button>';
     if(acts)acts='<div class="acts">'+acts+'</div>';
 
@@ -1139,7 +1175,7 @@ function renderDay(){
 
     return '<li'+(i===nowIdx?' class="now-row"':'')+'><div class="time">'+esc(it.t)+'</div><div class="body">'+
       title+(it.p?'<p>'+esc(it.p)+'</p>':'')+ch+extra+acts+
-      (it.eat?notePanel(active,i):'')+'</div></li>';}).join('');
+      notePanel(active,i)+'</div></li>';}).join('');
 
   var notes=(d.notes||[]).map(function(n){return '<div class="note '+n.k+'">'+n.t+'</div>';}).join('');
   if(merged.some(function(it){return it.rail;}))
@@ -1223,18 +1259,12 @@ function wireNotes(){
   $$("#p-tage .notebtn").forEach(function(b){b.onclick=function(){
     var p=$("#rn"+b.dataset.i);if(p)p.hidden=!p.hidden;};});
 
-  var save=function(di,ii,patch){
-    var k=ik(di,ii),v=RN[k]||{};
-    if(patch.r!==undefined)v.r=patch.r;
-    if(patch.t!==undefined)v.t=patch.t;
-    RN[k]=v;Store.set('rnotes',RN);
-  };
   $$("#p-tage .stars").forEach(function(box){
     var ii=+box.dataset.i;
     $$("#rn"+ii+" .star").forEach(function(s){s.onclick=function(){
       var val=+s.dataset.s,cur=(RN[ik(active,ii)]||{}).r||0;
       if(val===cur)val=0;                                  // nochmal tippen = Bewertung loeschen
-      save(active,ii,{r:val});
+      saveNote(active,ii,{r:val});
       $$("#rn"+ii+" .star").forEach(function(x){x.classList.toggle('on',+x.dataset.s<=val);});
       var nb=$('#p-tage .notebtn[data-i="'+ii+'"]');if(nb)nb.classList.toggle('has',hasNote(active,ii));
     };});
@@ -1244,7 +1274,7 @@ function wireNotes(){
     ta.oninput=function(){
       clearTimeout(tm);
       tm=setTimeout(function(){
-        save(active,+ta.dataset.i,{t:ta.value});
+        saveNote(active,+ta.dataset.i,{t:ta.value});
         var nb=$('#p-tage .notebtn[data-i="'+ta.dataset.i+'"]');
         if(nb)nb.classList.toggle('has',hasNote(active,+ta.dataset.i));
       },400);
@@ -1308,6 +1338,8 @@ function openSheet(di,ii){
     rows+
     (chips?'<div class="schips">'+chips+'</div>':'')+
     (hw?'<div class="note warn small"><b>'+esc(hw)+'</b></div>':'')+
+    '<div class="srow"><b>Notiz</b><span><textarea id="sheetnote" rows="2" '+
+      'placeholder="Wie war es? Was ist dir aufgefallen?">'+esc((RN[ik(di,ii)]||{}).t||'')+'</textarea></span></div>'+
     '<div class="sheet-acts">'+
     (it.loc?'<a class="sbtn prim" href="'+mapHref(it.loc)+
       '" target="_blank" rel="noopener">'+PIN+'In Google Maps öffnen</a>':'')+
@@ -1319,6 +1351,11 @@ function openSheet(di,ii){
   // keinen Zustandswechsel, den der Browser animieren koennte.
   requestAnimationFrame(function(){bg.classList.add('on');sh.classList.add('on');});
 
+  var sn=$("#sheetnote"),snT=null;
+  if(sn)sn.oninput=function(){
+    clearTimeout(snT);
+    snT=setTimeout(function(){saveNote(di,ii,{t:sn.value});},400);
+  };
   $("#sheetx").onclick=closeSheet;
   bg.onclick=closeSheet;
   var z=$("#sheetzoom");
@@ -1537,16 +1574,40 @@ function renderCosts(){
   $("#tglFood").className='tgl'+(withFood?' on':'');
 }
 
+/* Eigene Eintraege bekommen eine eigene id, damit der Hakenzustand nicht
+   verrutscht, wenn einer geloescht wird. Die festen behalten ihren Index. */
 function renderCheck(){
   Store.get('check').then(function(saved){
     saved=saved||{};
-    $("#chklist").innerHTML=CHECK.map(function(c,i){
-      return '<button class="chk'+(saved[i]?' on':'')+'" data-i="'+i+'"><div class="box"></div><div class="txt">'+
-        esc(c.t)+'<small>'+esc(c.s)+'</small></div></button>';}).join('');
+    var fest=CHECK.map(function(c,i){
+      return '<button class="chk'+(saved[i]?' on':'')+'" data-k="'+i+'"><div class="box"></div><div class="txt">'+
+        esc(c.t)+(c.s?'<small>'+esc(c.s)+'</small>':'')+'</div></button>';}).join('');
+    var eigen=OWN.map(function(c){
+      var k='o'+c.id;
+      return '<div class="chkown"><button class="chk'+(saved[k]?' on':'')+'" data-k="'+k+'"><div class="box"></div>'+
+        '<div class="txt">'+esc(c.t)+'<small>selbst ergänzt</small></div></button>'+
+        '<button class="docdel" data-id="'+c.id+'" aria-label="Entfernen">'+ICO_X+'</button></div>';}).join('');
+    $("#chklist").innerHTML=fest+eigen;
     $$("#chklist .chk").forEach(function(b){b.onclick=function(){
       b.classList.toggle('on');
-      Store.get('check').then(function(s){s=s||{};s[b.dataset.i]=b.classList.contains('on');Store.set('check',s);});};});
+      Store.get('check').then(function(s){s=s||{};s[b.dataset.k]=b.classList.contains('on');Store.set('check',s);});};});
+    $$("#chklist .docdel").forEach(function(b){b.onclick=function(){
+      var id=+b.dataset.id;
+      OWN=OWN.filter(function(c){return c.id!==id;});
+      Store.set('checkOwn',OWN);
+      Store.get('check').then(function(s){s=s||{};delete s['o'+id];Store.set('check',s);renderCheck();});};});
   });
+}
+function wireCheckAdd(){
+  var btn=$("#ckAdd");if(!btn)return;
+  btn.onclick=function(){
+    var el=$("#ckTxt"),t=(el.value||'').trim();
+    if(!t){el.focus();return;}
+    var max=0;OWN.forEach(function(c){if(c.id>max)max=c.id;});
+    OWN.push({id:max+1,t:t});
+    Store.set('checkOwn',OWN);
+    el.value='';renderCheck();
+  };
 }
 
 $("#phrases").innerHTML=PHRASES.map(function(p){
@@ -1599,6 +1660,53 @@ $("#tglTheme").onclick=function(){DARK=!DARK;Store.set('dark',DARK);applyTheme()
       ? 'Tippe unten auf <b>Teilen</b> und dann auf <b>Zum Home-Bildschirm</b>. Danach startet der Plan wie eine App.'
       : 'Öffne das Browser-Menü und wähle <b>Zum Startbildschirm hinzufügen</b>. Danach startet der Plan wie eine App.';},900);
 })();
+
+/* ---------- Speicherplatz ---------- */
+var CACHE_INFO=[
+ {k:'tanger-maps-v1', n:'Kartenkacheln', h:'Offline gespeicherte Karte'},
+ {k:'tanger-fotos-v1',n:'Fotos',         h:'Deine Aufnahmen je Reisetag'},
+ {k:'tanger-docs-v1', n:'Dokumente',     h:'Tickets, Buchungen, was du hinterlegt hast'}
+];
+function mb(b){return (b/1048576).toFixed(b<10485760?1:0)+' MB';}
+
+function renderStorage(){
+  var box=$("#stbox");if(!box)return;
+  if(!window.caches){box.innerHTML='<p class="dochint">Dieser Browser legt nichts offline ab.</p>';return;}
+  var zaehl={};
+  Promise.all(CACHE_INFO.map(function(c){
+    return caches.open(c.k).then(function(ch){return ch.keys();})
+      .then(function(keys){zaehl[c.k]=keys.length;}).catch(function(){zaehl[c.k]=0;});
+  })).then(function(){
+    return (navigator.storage&&navigator.storage.estimate)?navigator.storage.estimate():null;
+  }).then(function(est){
+    var kopf='';
+    if(est&&est.quota){
+      var pct=Math.min(100,Math.round(est.usage/est.quota*100));
+      kopf='<p class="stsum"><b>'+mb(est.usage)+'</b> von rund '+mb(est.quota)+' belegt — '+pct+' %</p>'+
+        '<div class="stbar"><i class="'+(pct>80?'voll':'')+'" style="width:'+Math.max(pct,1)+'%"></i></div>'+
+        (pct>80?'<p class="dochint">Der Browser räumt bei Platzmangel selbst auf — dann sind zuerst die Kacheln weg. Vor der Reise besser aufräumen.</p>':'');
+    }
+    box.innerHTML=kopf+CACHE_INFO.map(function(c){
+      var n=zaehl[c.k]||0;
+      return '<div class="strow"><div><b>'+c.n+'</b><small>'+c.h+' · '+
+        (n?n+(c.k.indexOf('maps')>0?' Kacheln':' Dateien'):'nichts gespeichert')+'</small></div>'+
+        (n?'<button class="del" data-k="'+c.k+'">Löschen</button>':'')+'</div>';}).join('');
+
+    // Zweistufig, damit nichts mit einem Fehltipp verschwindet
+    $$("#stbox .del").forEach(function(b){b.onclick=function(){
+      if(!b.classList.contains('armed')){
+        $$("#stbox .del").forEach(function(x){x.classList.remove('armed');x.textContent='Löschen';});
+        b.classList.add('armed');b.textContent='Wirklich löschen';
+        setTimeout(function(){if(b.classList.contains('armed')){b.classList.remove('armed');b.textContent='Löschen';}},4000);
+        return;
+      }
+      caches.delete(b.dataset.k).then(function(){
+        if(b.dataset.k.indexOf('maps')>0)Store.set('tiles',{});
+        renderStorage();renderDocs();renderFotos();
+      }).catch(function(){});
+    };});
+  }).catch(function(){box.innerHTML='<p class="dochint">Speicherstand nicht abrufbar.</p>';});
+}
 
 /* ---------- Dunkle Ansicht ---------- */
 function applyTheme(){
@@ -1823,7 +1931,7 @@ function wireDocs(){
 
 function boot(){
   wantNowScroll=true;                     // beim Start zur laufenden Zeile
-  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();applyTheme();loadWx();
+  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();wireCheckAdd();renderStorage();applyTheme();loadWx();
   centerTile(false);
   checkReminders();syncReminders();registerSync();
 }
@@ -1837,7 +1945,8 @@ Store.get('ppl').then(function(v){people=v||2;return Store.get('busMA');})
 .then(function(v){OV=v||{};return Store.get('rnotes');})
 .then(function(v){RN=v||{};return Store.get('spent');})
 .then(function(v){SPENT=v||{};return Store.get('extra');})
-.then(function(v){EXTRA=Array.isArray(v)?v:[];return Store.get('dark');})
+.then(function(v){EXTRA=Array.isArray(v)?v:[];return Store.get('checkOwn');})
+.then(function(v){OWN=Array.isArray(v)?v:[];return Store.get('dark');})
 .then(function(v){DARK=!!v;return Store.get('notified');})
 .then(function(v){NOTIF=v||{};boot();})
 .catch(function(){boot();});
