@@ -89,7 +89,7 @@ console.log('\nDatenintegritaet');
   let loc=0, coord=0, info=0, hours=0, rail=0, eat=0;
   TRIP.forEach(d => d.items.forEach(i => { if(i.loc){loc++; if(i.loc.lat){coord++; if(i.info)info++}}
     if(i.hours)hours++; if(i.rail)rail++; if(i.eat)eat++ }));
-  ok('90 Orte, 89 mit Koordinaten', loc===90 && coord===89, `${loc}/${coord}`);
+  ok('94 Orte, 93 mit Koordinaten', loc===94 && coord===93, `${loc}/${coord}`);
   ok('jeder Ort mit Koordinaten beschrieben',
      !TRIP.some(d=>d.items.some(i=>i.loc&&i.loc.lat&&!i.info)), `${info}`);
   ok('hours 8 · rail 4 · eat 26', hours===8&&rail===4&&eat===26, `${hours}/${rail}/${eat}`);
@@ -152,7 +152,7 @@ console.log('\nitem(): alle Felder werden durchgereicht');
   ok('hours durchgereicht', !!zus.hours);
 
 console.log('\nKarte');
-  const erwartet = [7,14,9,9,16,15,8,10,1];
+  const erwartet = [7,14,13,9,16,15,8,10,1];
   let mapOk = true;
   TRIP.forEach((d,i) => { drawn.markers.length=0; eval('active='+i+';renderDay();');
     const h = els['#p-tage'].innerHTML;
@@ -248,6 +248,33 @@ console.log('\nKartenansicht');
            eval("closeMapView();POS=null;posAufKarte(mapObj,'tag');");
            return da})());
   eval('active=0;renderDay();');
+
+console.log('\nBuslinien');
+  // Zahlen vom Betreiber, geprueft am 16.08.2026: Sommer sieben Abfahrten ab
+  // 11 Uhr, Runde zwei Stunden. Der Plan stand vorher auf 10 Uhr — den gibt es nicht.
+  const t3 = TRIP[2].items;
+  ok('erste Abfahrt um 11:00', t3.some(i => i.t === '11:00' && /Herkules-Linie/.test(i.h)));
+  ok('keine Abfahrt um 10:00', !t3.some(i => i.t === '10:00'));
+  ok('Wartezeiten sind eigene Punkte',
+     t3.filter(i => /^Warten/.test(i.h)).length === 2);
+  ok('jede Wartezeit nennt die Haltestelle',
+     t3.filter(i => /^Warten/.test(i.h)).every(i => /Perdicaris|Cap Spartel/.test(i.h)));
+  ok('Ein- und Ausstieg stehen im Text',
+     t3.filter(i => /Einsteigen|Aussteigen/.test(i.p||'')).length >= 4);
+  ok('Achakkar als Fussweg, nicht als Haltestelle',
+     /zu Fu\u00df/.test(t3.find(i => /Achakkar/.test(i.h)).p));
+
+  // Der Bus faehrt die Halte in fester Reihenfolge 1..12 ab.
+  const t4 = TRIP[3].items.filter(i => i.loc && i.loc.lat);
+  const rang = { 'Palais Moulay Hafid': 3, 'Place Faro': 7, 'Villa Harris': 10, 'Tanja Marina': 12 };
+  const folge = t4.map(i => Object.keys(rang).find(k => i.h.indexOf(k) === 0)).filter(Boolean).map(k => rang[k]);
+  ok('Tag 4 folgt der Fahrtrichtung der Linie',
+     folge.every((v, i) => i === 0 || v > folge[i-1]), folge.join(','));
+
+  ok('Bus-Tab nennt die stuendlichen Abfahrten',
+     /11, 12, 13, 14, 15, 16 und 17 Uhr/.test(src));
+  ok('Bus-Tab nennt die Einstellung mit Pruefdatum',
+     /temporarily suspended/.test(src) && /16\. August 2026/.test(src));
 
 console.log('\nFahrkarten');
   ok('Rabat: beide Zugpunkte fuehren zur Fahrkarte',
@@ -603,7 +630,7 @@ console.log('\nJetzt-Zeile');
   global.Date = class extends RD { constructor(...a){ super(...a.length?a:['2026-09-04T13:30:00Z']) } };
   global.Date.now = () => new RD('2026-09-04T13:30:00Z').getTime();
   eval('active=2;');
-  ok('laufender Punkt erkannt', eval('currentNowIdx()')===7,
+  ok('laufender Punkt erkannt', eval('currentNowIdx()')===8,
      `Index ${eval('currentNowIdx()')}, nowMin ${eval('nowMin()')}`);
   ok('nowMin rechnet in Marokko-Zeit', eval('nowMin()')===870, `${eval('nowMin()')}`);
   log.now.length=0; eval('wantNowScroll=true;renderDay();');
@@ -766,7 +793,7 @@ console.log('\nZeitzone, Standort, Fixpunkte');
   ok('ohne Standort keine Angabe', eval(`entfText({lat:35.79,lng:-5.82})`)==='');
 
   const fixe = TRIP.reduce((a,d)=>a+d.items.filter(i=>i.fix).length,0);
-  ok('acht Fixpunkte markiert', fixe===8, `${fixe}`);
+  ok('neun Fixpunkte markiert', fixe===9, `${fixe}`);
   ok('jeder Fixpunkt hat eine Aufbruchszeit vor der Abfahrt',
      TRIP.every(d=>d.items.filter(i=>i.fix).every(i=>i.fix.go < i.t)));
   ok('Countdown nur am heutigen Tag', eval('naechsterFix(5)')===null);
