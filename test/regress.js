@@ -269,6 +269,47 @@ console.log('\nRabat: alles in seiner Oeffnungszeit');
   ok('Abendessen bleibt vor der Rueckfahrt',
      R('Fr\u00fches Abendessen').t < R('R\u00fcckzug').t);
 
+console.log('\nFahrtbegleitung');
+  // Uhr und Datum stellen — und hinterher zurueckgeben, sonst kippen
+  // spaetere Tests, die auf der echten Zeitrechnung stehen.
+  eval("var _today=today,_nowMin=nowMin;");
+  eval("active=2;today=function(){return '2026-09-04'};nowMin=function(){return 12*60+40};");
+  eval('renderBus();');
+  ok('Standortknopf auf der Bus-Seite', !!els['#buspos']);
+  ok('naechster Halt ist der noch anstehende',
+     (()=>{const n = eval('naechsterHalt()');
+           return n && n.zeit === '12:50' && n.art === 'aus'})());
+  // 3,3 km entfernt: noch kein Alarm.
+  eval("POS={lat:35.7856,lng:-5.8946,acc:20};pruefeHalt();");
+  ok('weit weg: Karte zeigt Entfernung, kein Alarm',
+     els['#busfahrt'].hidden === false
+     && !/Gleich aussteigen/.test(els['#busfahrt'].innerHTML));
+  // 200 m vor Cap Spartel: Alarm.
+  eval("POS={lat:35.7933,lng:-5.9257,acc:20};pruefeHalt();");
+  ok('nah dran: Karte schlaegt um',
+     /class="fahrt nah"/.test(els['#busfahrt'].outerHTML || '')
+     || /Gleich aussteigen/.test(els['#busfahrt'].innerHTML));
+  ok('Meldung feuert nur einmal je Halt',
+     (()=>{const v1 = Object.keys(eval('busGemeldet')).length;
+           eval('pruefeHalt();pruefeHalt();');
+           return Object.keys(eval('busGemeldet')).length === v1})());
+  ok('ohne Standort keine Fahrtkarte',
+     (()=>{eval('POS=null;pruefeHalt();');return els['#busfahrt'].hidden === true})());
+  ok('Einstiege haengen an der Uhr, nicht am Standort',
+     /function planeEinstiege[\s\S]{0,400}maZeit/.test(src)
+     && !/function planeEinstiege[\s\S]{0,400}meter\(/.test(src));
+
+  // Weg: nur auf dem Geraet, und Punkte unter 25 m werden verworfen.
+  eval("WEG={};POS={lat:35.7800,lng:-5.8100,acc:10};wegPunkt();");
+  eval("POS={lat:35.78005,lng:-5.81005,acc:10};wegPunkt();");
+  ok('Punkte unter 25 m werden verworfen', eval("WEG['2026-09-04'].length") === 1);
+  eval("POS={lat:35.7820,lng:-5.8120,acc:10};wegPunkt();");
+  ok('echte Bewegung wird aufgezeichnet', eval("WEG['2026-09-04'].length") === 2);
+  ok('Tagesstrecke wird gerechnet', eval("Math.round(wegMeter('2026-09-04'))") > 100);
+  ok('Weg wird lokal abgelegt, nicht gesendet',
+     /Store\.set\('weg',WEG\)/.test(src) && !/fetch\([^)]*weg/.test(src));
+  eval("POS=null;today=_today;nowMin=_nowMin;");
+
 console.log('\nBus-Seite');
   eval('renderBus();');
   ok('naechste Abfahrt wird angezeigt', /\d\d:\d\d/.test(els['#busjetzt'].innerHTML));
@@ -289,14 +330,33 @@ console.log('\nBus-Seite');
      eval("BUSLINIEN[1].halte.length") === 12);
   ok('sieben Abfahrten im Sommerfahrplan', eval("BUSLINIEN[0].ab.length") === 7);
   // Erfundene Koordinaten haben diesen Plan schon einmal nach Larache verlegt.
-  ok('jede Haltestellen-Koordinate stammt aus dem Reiseplan',
+  // Deshalb: ungekennzeichnet darf nur sein, was aus dem Reiseplan stammt.
+  ok('ungekennzeichnete Koordinaten stammen aus dem Reiseplan',
      (()=>{const imPlan = new Set();
            TRIP.forEach(d => d.items.forEach(i => { if (i.loc && i.loc.lat)
              imPlan.add(i.loc.lat.toFixed(4) + ',' + i.loc.lng.toFixed(4)) }));
-           return eval('BUSLINIEN').every(l => l.halte.filter(h => h.lat)
+           return eval('BUSLINIEN').every(l => l.halte.filter(h => h.lat && !h.ca)
              .every(h => imPlan.has(h.lat.toFixed(4) + ',' + h.lng.toFixed(4))))})());
-  ok('Halte ohne Koordinate werden als solche gekennzeichnet',
-     /Koordinate nicht gepr\u00fcft/.test(els['#bushalte'].innerHTML));
+  ok('ungefaehre Halte sind als solche markiert',
+     /ungef\u00e4hr/.test(els['#bushalte'].innerHTML)
+     && eval("BUSLINIEN.reduce((a,l)=>a+l.halte.filter(h=>h.ca).length,0)") === 13);
+  ok('jeder Halt hat jetzt eine Position',
+     eval("BUSLINIEN.every(l=>l.halte.every(h=>typeof h.lat==='number'))"));
+  // Rueckweg-Halte liegen an ihrem Hinweg-Zwilling, nicht irgendwo.
+  ok('Rueckweg-Halte liegen an ihrem Zwilling',
+     (()=>{const h = eval('BUSLINIEN[0].halte');
+           const paar = [[5,7],[4,8],[3,9],[2,11]];
+           return paar.every(([a,b]) => {
+             const A = h.find(x=>x.n===a), B = h.find(x=>x.n===b);
+             return Math.abs(A.lat-B.lat)<0.0005 && Math.abs(A.lng-B.lng)<0.0005 })})());
+  // Donabo liegt zwischen Perdicaris und Cap Spartel, nicht daneben.
+  ok('Donabo liegt auf der Strecke',
+     (()=>{const h = eval('BUSLINIEN[0].halte');
+           const p = h.find(x=>x.n===3), c = h.find(x=>x.n===5), d = h.find(x=>x.n===4);
+           return d.lat > Math.min(p.lat,c.lat) && d.lat < Math.max(p.lat,c.lat)
+               && d.lng > Math.min(p.lng,c.lng) && d.lng < Math.max(p.lng,c.lng)})());
+  ok('alle Halte liegen im Grossraum Tanger',
+     eval("BUSLINIEN.every(l=>l.halte.every(h=>h.lat>35.70&&h.lat<35.83&&h.lng>-6.00&&h.lng<-5.72))"));
   ok('Kiosk-Karte nennt den Ausweis fuer den Marokkaner-Tarif',
      /Ausweis f\u00fcr Aymane/.test(src) && /80 statt 130/.test(src));
 

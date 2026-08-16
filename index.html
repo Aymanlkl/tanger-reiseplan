@@ -619,9 +619,23 @@ function busZeilen(it){
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .mv-card .pr{display:inline-block;margin-top:7px;font-family:var(--m);font-size:10.5px;font-weight:600;
   background:var(--saffron-wash);color:var(--saffron-deep);padding:3px 7px;border-radius:5px}
+.pin.ca b{background:var(--saffron-wash);color:var(--saffron-deep);border-style:dashed}
 .pin.an{z-index:400!important}
 .pin.an b{background:var(--ink);transform:scale(1.25)}
 .mvopen{flex:0 0 auto}
+.fahrt{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 13px;margin-bottom:12px;
+  border-radius:var(--r-s);background:var(--sea-wash);border:1px solid var(--sea)}
+.fahrt[hidden]{display:none}
+.fahrt.nah{background:var(--alert-wash);border-color:var(--alert)}
+.fahrt .fk{flex:1;min-width:0}
+.fahrt .fk span{display:block;font-family:var(--m);font-size:10px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--sea);margin-bottom:2px}
+.fahrt.nah .fk span{color:var(--alert)}
+.fahrt .fk b{display:block;font-size:14.5px}
+.fahrt .fm b{font-family:var(--m);font-size:20px;font-weight:700}
+.fahrt .fm span{margin-left:4px;font-size:15px}
+.fahrt .fz{font-family:var(--m);font-size:12px;font-weight:600;color:var(--muted)}
+.fahrt .fhin{flex:0 0 100%;margin:2px 0 0;font-size:12.5px;font-weight:600;color:var(--alert)}
 .bjk{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
 .bjk b{font-family:var(--m);font-size:34px;font-weight:700;letter-spacing:-.02em;color:var(--ink)}
 .bjk span{font-size:14px;color:var(--muted);font-weight:600}
@@ -645,6 +659,8 @@ function busZeilen(it){
 .hn{flex:0 0 24px;height:24px;border-radius:50%;display:grid;place-items:center;
   font-family:var(--m);font-size:11px;font-weight:700;background:var(--line-2);color:var(--faint)}
 .haltel li.geo .hn{background:var(--saffron);color:#1A1200}
+.haltel li.ca .hn{background:var(--saffron-wash);color:var(--saffron-deep);
+  box-shadow:inset 0 0 0 1.5px var(--saffron)}
 .haltel b{display:block;font-size:13.5px}
 .haltel small{display:block;color:var(--muted);font-size:11.5px;margin-top:1px}
 .hplan,.hentf{flex:0 0 auto;font-family:var(--m);font-size:10.5px;font-weight:600;padding:3px 7px;border-radius:5px}
@@ -729,7 +745,12 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
     <div class="card">
       <div class="card-h"><div class="meta">Jetzt</div><h3>Nächste Abfahrt ab Hafen</h3>
         <p>Herkules-Linie, marokkanische Zeit. Die Stadtlinie fährt alle 30 bis 60 Minuten, dort lohnt kein Countdown.</p></div>
-      <div class="card-b" id="busjetzt"></div></div>
+      <div class="card-b" id="busjetzt">
+        <div class="fahrt" id="busfahrt" hidden></div></div></div>
+
+    <div class="card">
+      <div class="card-h"><div class="meta">Heute</div><h3>Dein Weg</h3></div>
+      <div class="card-b" id="wegbox"></div></div>
 
     <div class="card">
       <div class="card-h"><div class="meta">Ticket · 48 Stunden</div><h3>Wie lange gilt es noch?</h3></div>
@@ -746,7 +767,10 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
       </div></div>
 
     <div class="card">
-      <div class="card-h"><div class="meta">Haltestellen</div><h3>Wo ihr ein- und aussteigt</h3></div>
+      <div class="card-h"><div class="meta">Haltestellen</div><h3>Wo ihr ein- und aussteigt</h3>
+        <p>Mit Ortung siehst du laufend, wie weit der nächste Halt noch ist — und bekommst eine Meldung, bevor du raus musst.</p></div>
+      <div class="maptools"><button class="dlbtn" id="buspos"></button>
+        <p>Läuft nur, solange du sie eingeschaltet lässt. Die Positionen bleiben auf diesem Handy.</p></div>
       <div id="busmap"></div>
       <div class="card-b" id="bushalte"></div></div>
 
@@ -2230,7 +2254,8 @@ $$("#tabs button").forEach(function(b){b.onclick=function(){
   // Leaflet misst im display:none-Panel 0x0 — nach dem Einblenden neu vermessen.
   if(b.dataset.p==='tage'&&mapObj)setTimeout(function(){mapObj.invalidateSize();},60);
   // Leaflet misst im ausgeblendeten Panel 0x0, und die Uhren sollen frisch sein.
-  if(b.dataset.p==='bus'){renderBusJetzt();renderBusTicket();
+  if(b.dataset.p==='bus'){renderBusJetzt();renderBusTicket();renderWeg();pruefeHalt();
+    var bp=$("#buspos");if(bp)bp.onclick=function(){startPos();};renderPosBtns();
     setTimeout(function(){if(busMap)busMap.invalidateSize();else busKarte();},60);}
   var sh=$("#shell");
   if(sh)sh.scrollTo({top:0,behavior:smoothOk()?'smooth':'auto'});};});
@@ -2364,10 +2389,10 @@ function posAufKarte(map,key){
 /* Beide Standortknoepfe zeigen denselben Zustand — es gibt nur eine Ortung. */
 function renderPosBtns(){
   var an=watchId!==null&&!!POS;
-  [$("#dlpos"),$("#mvPos")].forEach(function(b){
+  [$("#dlpos"),$("#mvPos"),$("#buspos")].forEach(function(b){
     if(!b)return;
     b.classList.toggle('done',an);
-    if(b.id==='dlpos')b.innerHTML=ICO_HIER+(an?'Standort an':(watchId!==null?'Suche …':'Standort'));
+    if(b.id!=='mvPos')b.innerHTML=ICO_HIER+(an?'Ortung läuft':(watchId!==null?'Suche …':'Standort verfolgen'));
   });
 }
 
@@ -2390,6 +2415,8 @@ function updateEntfernungen(){
     el.hidden=!t;
   });
   if($("#bushalte"))renderBusHalte();
+  wegPunkt();
+  pruefeHalt();
   posAufKarte(mapObj,'tag');
   posAufKarte(mvMap,'gross');
   renderPosBtns();
@@ -2403,6 +2430,8 @@ function startPos(){
   if(watchId!==null){
     navigator.geolocation.clearWatch(watchId);watchId=null;POS=null;
     if($("#bushalte"))renderBusHalte();
+  wegPunkt();
+  pruefeHalt();
   posAufKarte(mapObj,'tag');posAufKarte(mvMap,'gross');
     updateEntfernungen();return;
   }
@@ -2433,30 +2462,30 @@ var BUSLINIEN=[
   ab:['11:00','12:00','13:00','14:00','15:00','16:00','17:00'],
   halte:[
    {n:1,t:'Kioske Port',a:'Ave Mohammed VI',lat:35.78912,lng:-5.80454,tag:3,zeit:'11:00'},
-   {n:2,t:'Socco Alto',a:'Boulevard Moulay Rachid'},
+   {n:2,t:'Socco Alto',a:'Boulevard Moulay Rachid',lat:35.7663,lng:-5.8003,ca:1},
    {n:3,t:'Parc Perdicaris',a:'Route de Rmilat',lat:35.78558,lng:-5.89462,tag:3,zeit:'11:25'},
-   {n:4,t:'Donabo Garden',a:'Route de Cap Spartel'},
+   {n:4,t:'Donabo Garden',a:'Route de Cap Spartel',lat:35.78856,lng:-5.91015,ca:1},
    {n:5,t:'Cap Spartel',a:'Cap Spartel',lat:35.79153,lng:-5.92567,tag:3,zeit:'12:50'},
    {n:6,t:'Grottes d\'Hercule',a:'Route des Grottes',lat:35.7598,lng:-5.93915,tag:3,zeit:'14:00',wende:1},
-   {n:7,t:'Cap Spartel retour',a:'Rückweg'},
-   {n:8,t:'Donabo retour',a:'Rückweg'},
-   {n:9,t:'Parc Perdicaris',a:'Rückweg'},
-   {n:10,t:'Golf',a:'Royal Golf de Tanger'},
-   {n:11,t:'Socco Alto',a:'Rückweg zum Hafen'}]},
+   {n:7,t:'Cap Spartel retour',a:'Rückweg',lat:35.79153,lng:-5.92567,ca:1},
+   {n:8,t:'Donabo retour',a:'Rückweg',lat:35.78856,lng:-5.91015,ca:1},
+   {n:9,t:'Parc Perdicaris',a:'Rückweg',lat:35.78558,lng:-5.89462,ca:1},
+   {n:10,t:'Golf',a:'Royal Golf de Tanger',lat:35.7657,lng:-5.8492,ca:1},
+   {n:11,t:'Socco Alto',a:'Rückweg zum Hafen',lat:35.7663,lng:-5.8003,ca:1}]},
  {id:'v',n:'Tanger Ville',dauer:'1 Std.',takt:'alle 30–60 Min · 9 bis 18 Uhr',
   ab:null,
   halte:[
    {n:1,t:'Port',a:'Ave Mohammed VI',lat:35.78912,lng:-5.80454,tag:4,zeit:'09:00'},
    {n:2,t:'Place 9 Avril',a:'Grand Socco',lat:35.7843,lng:-5.81309},
    {n:3,t:'Palais Moulay Hafid',a:'Rue Sanhaja',lat:35.78616,lng:-5.82062,tag:4,zeit:'09:25'},
-   {n:4,t:'Nécropoles Punicoromaines',a:'Rue Sanhaja'},
-   {n:5,t:'Palais Moulay Hafid 2',a:'Rue Sanhaja'},
-   {n:6,t:'Mosquée Mohammed V',a:'Rue de Belgique'},
+   {n:4,t:'Nécropoles Punicoromaines',a:'Rue Sanhaja',lat:35.7887,lng:-5.8206,ca:1},
+   {n:5,t:'Palais Moulay Hafid 2',a:'Rue Sanhaja',lat:35.78616,lng:-5.82062,ca:1},
+   {n:6,t:'Mosquée Mohammed V',a:'Rue de Belgique',lat:35.7826,lng:-5.8127,ca:1},
    {n:7,t:'Place Faro',a:'Boulevard Pasteur',lat:35.78086,lng:-5.81179,tag:4,zeit:'11:45'},
-   {n:8,t:'Sahet el Oumane',a:'Place des Nations'},
-   {n:9,t:'Tanger City Mall',a:'Route de Malabata'},
+   {n:8,t:'Sahet el Oumane',a:'Place des Nations',lat:35.7796,lng:-5.8090,ca:1},
+   {n:9,t:'Tanger City Mall',a:'Route de Malabata',lat:35.7846,lng:-5.7830,ca:1},
    {n:10,t:'Villa Harris',a:'Route de Malabata',lat:35.78274,lng:-5.76393,tag:4,zeit:'14:15'},
-   {n:11,t:'Monopolio',a:'Route de Malabata'},
+   {n:11,t:'Monopolio',a:'Route de Malabata',lat:35.7827,lng:-5.7723,ca:1},
    {n:12,t:'Marina',a:'Tanja Marina Bay',lat:35.78397,lng:-5.79646,tag:4,zeit:'17:45'}]}
 ];
 var busLinie='h', busMap=null;
@@ -2533,13 +2562,17 @@ function renderBusHalte(){
     }).join('')+'</div>'+
     '<ol class="haltel">'+L.halte.map(function(h){
       var e=(h.lat&&POS)?entfText({lat:h.lat,lng:h.lng}):'';
-      return '<li'+(h.lat?' class="geo"':'')+'><span class="hn">'+h.n+'</span>'+
-        '<div><b>'+esc(h.t)+'</b><small>'+esc(h.a)+(h.lat?'':' · Koordinate nicht geprüft')+'</small></div>'+
+      var art=h.lat?(h.ca?' class="ca"':' class="geo"'):'';
+      return '<li'+art+'><span class="hn">'+h.n+'</span>'+
+        '<div><b>'+esc(h.t)+'</b><small>'+esc(h.a)+
+        (h.lat?(h.ca?' · ungefähr':''):' · Koordinate nicht geprüft')+'</small></div>'+
         (h.tag?'<span class="hplan">Tag '+h.tag+' · '+h.zeit+'</span>':'')+
         (e?'<span class="hentf">'+e+'</span>':'')+'</li>';
     }).join('')+'</ol>'+
-    '<p class="dochint">Ausgefüllte Nummern haben eine geprüfte Koordinate und erscheinen auf der Karte. '+
-    'Bei den übrigen kenne ich nur die Straße — die schätze ich nicht.</p>';
+    '<p class="dochint">Gelb = Koordinate aus dem Reiseplan, geprüft. '+
+    'Blass = ungefähr gesetzt: die Rückweg-Halte liegen gegenüber ihrem Hinweg-Zwilling, '+
+    'Donabo ist auf der Strecke interpoliert, der Rest nach Stadtlage. '+
+    'Für die Orientierung reicht das, zum Navigieren nicht.</p>';
   $$("#bushalte .tkseg button").forEach(function(b){b.onclick=function(){
     busLinie=b.dataset.l;renderBusHalte();busKarte();};});
 }
@@ -2556,13 +2589,135 @@ function busKarte(){
     {maxZoom:18,attribution:'&copy; OpenStreetMap'}).addTo(busMap);
   L.polyline(ll,{color:'#10222B',weight:2,opacity:.45,dashArray:'5 6'}).addTo(busMap);
   mit.forEach(function(h,i){
-    L.marker(ll[i],{icon:L.divIcon({className:'pin',html:'<b>'+h.n+'</b>',
+    L.marker(ll[i],{icon:L.divIcon({className:'pin'+(h.ca?' ca':''),html:'<b>'+h.n+'</b>',
       iconSize:[24,24],iconAnchor:[12,12]}),title:h.t}).addTo(busMap);
   });
   busMap.fitBounds(L.latLngBounds(ll).pad(.2));
 }
 
-function renderBus(){renderBusJetzt();renderBusTicket();renderBusHalte();busKarte();}
+function renderBus(){
+  renderBusJetzt();renderBusTicket();renderBusHalte();busKarte();renderWeg();pruefeHalt();
+  var bp=$("#buspos");
+  if(bp)bp.onclick=function(){startPos();};
+  renderPosBtns();
+}
+
+/* ---------- Fahrtbegleitung ----------
+   Waehrend der Fahrt zaehlt nur eins: Muss ich gleich raus? Dafuer wird die
+   Entfernung zum naechsten geplanten Halt laufend gemessen. Alles bleibt auf
+   dem Geraet — die Positionen gehen nirgendwohin. */
+var BUS_NAH=450;          // ab hier gilt der Halt als erreicht
+var busGemeldet={};       // je Halt nur einmal melden
+
+function busTagPunkte(){
+  var out=[];
+  TRIP.forEach(function(d,di){
+    if(d.date!==today())return;
+    dayItems(di).forEach(function(it){
+      if(it.bus&&it.loc&&it.loc.lat)out.push({it:it,di:di});
+    });
+  });
+  return out;
+}
+
+/* Der naechste Halt, an dem noch etwas ansteht. */
+function naechsterHalt(){
+  var jetzt=nowMin(),tref=null;
+  busTagPunkte().forEach(function(x){
+    var b=x.it.bus,z=b.aus||b.ein;if(!z)return;
+    var pt=z.split(':'),m=+pt[0]*60+ +pt[1];
+    if(m+30>=jetzt&&(!tref||m<tref.min))tref={it:x.it,min:m,zeit:z,art:b.aus?'aus':'ein'};
+  });
+  return tref;
+}
+
+function busMelde(titel,text,tag){
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  var opt={body:text,icon:'icons/icon-192.png',badge:'icons/favicon-32.png',tag:tag,
+           requireInteraction:true,vibrate:[200,100,200]};
+  if(navigator.serviceWorker&&navigator.serviceWorker.ready){
+    navigator.serviceWorker.ready.then(function(reg){reg.showNotification(titel,opt);})
+      .catch(function(){try{new Notification(titel,opt);}catch(e){}});
+  }else{try{new Notification(titel,opt);}catch(e){}}
+}
+
+/* Laeuft bei jeder GPS-Meldung. */
+function pruefeHalt(){
+  var box=$("#busfahrt");
+  var n=naechsterHalt();
+  if(!n||!POS){if(box){box.hidden=true;}return;}
+  var m=meter(POS.lat,POS.lng,n.it.loc.lat,n.it.loc.lng);
+  var nah=m<=BUS_NAH;
+  var txt=m<1000?Math.round(m/10)*10+' m':(m/1000).toFixed(1)+' km';
+  if(box){
+    box.hidden=false;
+    box.className='fahrt'+(nah?' nah':'');
+    box.innerHTML='<div class="fk"><span>'+(n.art==='aus'?'Aussteigen':'Wieder einsteigen')+'</span>'+
+      '<b>'+esc(n.it.h)+'</b></div>'+
+      '<div class="fm"><b>'+txt+'</b><span>'+entfText(n.it.loc).replace(/^[\d.,]+\s*\S+\s*/,'')+'</span></div>'+
+      '<div class="fz">'+n.zeit+'</div>'+
+      (nah?'<p class="fhin">Gleich aussteigen — Sachen zusammensuchen.</p>':'');
+  }
+  var key='aus-'+n.it.kk+'-'+today();
+  if(nah&&n.art==='aus'&&!busGemeldet[key]){
+    busGemeldet[key]=1;Store.set('busmeld',busGemeldet);
+    busMelde('Gleich aussteigen',n.it.h+' · noch '+txt,'bus-aus');
+  }
+}
+
+/* Der Bus faehrt nach Fahrplan, nicht nach Standort — die Einsteige-Erinnerung
+   haengt deshalb an der Uhr, nicht an der Entfernung. */
+function planeEinstiege(){
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  busTagPunkte().forEach(function(x){
+    var b=x.it.bus;if(!b.ein)return;
+    var pt=b.ein.split(':');
+    var wann=maZeit(TRIP[x.di].date,+pt[0],+pt[1])-10*60000;   // zehn Minuten vorher
+    var dt=wann-Date.now(),key='ein-'+x.it.kk+'-'+today();
+    if(busGemeldet[key]||dt<-15*60000)return;
+    var feuer=function(){
+      if(busGemeldet[key])return;
+      busGemeldet[key]=1;Store.set('busmeld',busGemeldet);
+      busMelde('In 10 Minuten kommt der Bus',x.it.h+' · Abfahrt '+b.ein,'bus-ein');
+    };
+    if(dt<=0)feuer();else if(dt<6*3600e3)setTimeout(feuer,dt);
+  });
+}
+
+/* ---------- Wegaufzeichnung ----------
+   Die Positionen bleiben im Browser dieses Geraets, wie Fotos und Fahrkarten
+   auch. Nichts davon geht ins Netz. Punkte unter 25 m Abstand werden
+   verworfen, sonst waechst die Liste im Stand endlos. */
+var WEG={},wegTag=null;
+function wegPunkt(){
+  if(!POS)return;
+  var t=today();
+  if(!WEG[t])WEG[t]=[];
+  var l=WEG[t],letzt=l[l.length-1];
+  if(letzt&&meter(letzt[0],letzt[1],POS.lat,POS.lng)<25)return;
+  l.push([+POS.lat.toFixed(5),+POS.lng.toFixed(5),Date.now()]);
+  if(l.length%10===0)Store.set('weg',WEG);
+  if(wegTag!==t){wegTag=t;Store.set('weg',WEG);}
+  renderWeg();
+}
+function wegMeter(t){
+  var l=WEG[t]||[],sum=0;
+  for(var i=1;i<l.length;i++)sum+=meter(l[i-1][0],l[i-1][1],l[i][0],l[i][1]);
+  return sum;
+}
+function renderWeg(){
+  var el=$("#wegbox");if(!el)return;
+  var t=today(),m=wegMeter(t),n=(WEG[t]||[]).length;
+  if(!n){el.innerHTML='<p class="dochint">Sobald die Ortung läuft, wird der Weg mitgeschrieben — '+
+    'nur auf diesem Handy, wie deine Fotos.</p>';return;}
+  var schritte=Math.round(m/0.72);
+  el.innerHTML='<div class="bjk"><b>'+(m<1000?Math.round(m)+' m':(m/1000).toFixed(1)+' km')+'</b>'+
+    '<span>heute gelaufen · rund '+schritte.toLocaleString('de-DE')+' Schritte</span></div>'+
+    '<p class="bjw">'+n+' Messpunkte · bleibt auf diesem Gerät</p>'+
+    '<button class="dlbtn" id="weglosch">Aufzeichnung löschen</button>';
+  var b=$("#weglosch");
+  if(b)b.onclick=function(){delete WEG[t];Store.set('weg',WEG);renderWeg();};
+}
 
 /* ---------- Kachelpakete je Gebiet ---------- */
 function renderGebiete(){
@@ -2954,7 +3109,7 @@ function wireDocs(){
 
 function boot(){
   wantNowScroll=true;                     // beim Start zur laufenden Zeile
-  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();wireCheckAdd();korrigiereSicherheitsabstand();renderBus();renderTickets();renderGebiete();renderStorage();applyTheme();loadWx();setTimeout(function(){renderDiag();diagHinweis();},300);
+  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();wireCheckAdd();korrigiereSicherheitsabstand();renderBus();planeEinstiege();renderTickets();renderGebiete();renderStorage();applyTheme();loadWx();setTimeout(function(){renderDiag();diagHinweis();},300);
   centerTile(false);
   checkReminders();syncReminders();registerSync();
 }
@@ -2973,7 +3128,9 @@ Store.get('ppl').then(function(v){people=v||2;return Store.get('busMA');})
 .then(function(v){ADD=(v&&typeof v==='object')?v:{};return Store.get('dark');})
 .then(function(v){DARK=!!v;return Store.get('notified');})
 .then(function(v){NOTIF=v||{};return Store.get('tkstart');})
-.then(function(v){TKSTART=v||null;boot();})
+.then(function(v){TKSTART=v||null;return Store.get('weg');})
+.then(function(v){WEG=(v&&typeof v==='object')?v:{};return Store.get('busmeld');})
+.then(function(v){busGemeldet=(v&&typeof v==='object')?v:{};boot();})
 .catch(function(){boot();});
 
 /* Rueckkehr in die App: nur neu rendern und springen, wenn die Zeit wirklich
