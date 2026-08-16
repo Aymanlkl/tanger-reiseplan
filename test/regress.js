@@ -209,14 +209,18 @@ console.log('\nHotel- und Flugschalter');
   const mitBeidem = parseInt(els['#tot'].innerHTML.replace(/[^\d]/g,''),10);
   ok('Flug addiert 255 € in MAD', mitBeidem-mitHotel===Math.round(255*11), `${mitBeidem-mitHotel}`);
   ok('Untertitel nennt beide', /mit Hotel, Flug/.test(els['#toteur'].textContent), els['#toteur'].textContent);
+  eval("withPark=true;renderCosts();");
+  const mitPark = parseInt(els['#tot'].innerHTML.replace(/[^\d]/g,''),10);
+  ok('Parken addiert 101 € in MAD', mitPark-mitBeidem===Math.round(101*11), `${mitPark-mitBeidem}`);
   eval("withFood=true;renderCosts();");
-  ok('Untertitel nennt alle drei', /mit Essen, Hotel, Flug/.test(els['#toteur'].textContent));
+  ok('Untertitel nennt alle vier', /mit Essen, Hotel, Flug, Parken/.test(els['#toteur'].textContent),
+     els['#toteur'].textContent);
   ok('Schalterbeschriftung zeigt Euro und MAD',
      /433,31 €/.test(els['#lbHotel'].textContent) && /4.766 MAD/.test(els['#lbHotel'].textContent),
      els['#lbHotel'].textContent);
   ok('Wechselkurs nur an einer Stelle',
      (src.match(/sum\/11|\/ 11\b/g)||[]).length===0 && /var EURMAD=11/.test(src));
-  eval("withFood=false;withHotel=false;withFlug=false;renderCosts();");
+  eval("withFood=false;withHotel=false;withFlug=false;withPark=false;renderCosts();");
 
 console.log('\nKostenmodell');
   const fpp = eval('foodPerPerson()');

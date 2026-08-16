@@ -560,6 +560,7 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
     <button class="tgl" id="tglFood"><div class="sw"></div><div class="lb">Essen mitrechnen<small id="lbFood"></small></div></button>
     <button class="tgl" id="tglHotel"><div class="sw"></div><div class="lb">Hotel mitrechnen<small id="lbHotel"></small></div></button>
     <button class="tgl" id="tglFlug"><div class="sw"></div><div class="lb">Flug mitrechnen<small id="lbFlug"></small></div></button>
+    <button class="tgl" id="tglPark"><div class="sw"></div><div class="lb">Parken in Weeze mitrechnen<small id="lbPark"></small></div></button>
 
     <div class="card"><div class="card-h"><div class="meta">Bewegung</div><h3>Transport</h3></div>
       <div class="card-b"><table class="cost" id="tblT"></table></div></div>
@@ -858,12 +859,12 @@ function esc(s){return String(s).replace(/[&<>"]/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function today(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
 
-var active=0,people=2,busMA=1,withFood=false,withHotel=false,withFlug=false;
+var active=0,people=2,busMA=1,withFood=false,withHotel=false,withFlug=false,withPark=false;
 
 /* Festkosten in Euro, weil sie in Euro bezahlt wurden. EURMAD ist der einzige
    Ort, an dem der Kurs steht — auch die Umrechnung der Gesamtsumme nutzt ihn. */
 var EURMAD=11;
-var HOTEL_EUR=433.31, FLUG_EUR=255;
+var HOTEL_EUR=433.31, FLUG_EUR=255, PARK_EUR=101;
 
 /* Preis-Chip in eine Zahl lesen. "ca. 130 MAD" -> 130, "25–35 MAD" -> 30,
    Posten ohne Betrag ("im Zimmerpreis", "gebucht") zaehlen null. */
@@ -1497,10 +1498,11 @@ function renderCosts(){
     if(inp.value===''||isNaN(v)){delete SPENT[inp.dataset.k];}else{SPENT[inp.dataset.k]=v;}
     Store.set('spent',SPENT);updateCmp();};});
 
-  var hotelMAD=Math.round(HOTEL_EUR*EURMAD), flugMAD=Math.round(FLUG_EUR*EURMAD);
+  var hotelMAD=Math.round(HOTEL_EUR*EURMAD), flugMAD=Math.round(FLUG_EUR*EURMAD),
+      parkMAD=Math.round(PARK_EUR*EURMAD);
   var fpp=foodPerPerson();
   var foodMAD=fpp.sum*people;
-  var sum=sumT+sumE+(withFood?foodMAD:0)+(withHotel?hotelMAD:0)+(withFlug?flugMAD:0);
+  var sum=sumT+sumE+(withFood?foodMAD:0)+(withHotel?hotelMAD:0)+(withFlug?flugMAD:0)+(withPark?parkMAD:0);
   $("#tot").innerHTML=sum.toLocaleString('de-DE')+'<span>MAD</span>';
 
   // Untertitel benennt, was gerade drinsteckt — sonst raet man beim Ablesen
@@ -1508,6 +1510,7 @@ function renderCosts(){
   if(withFood)drin.push('Essen');
   if(withHotel)drin.push('Hotel');
   if(withFlug)drin.push('Flug');
+  if(withPark)drin.push('Parken');
   $("#toteur").textContent='rund '+Math.round(sum/EURMAD).toLocaleString('de-DE')+' € · '+
     (drin.length?'mit '+drin.join(', '):'nur Transport und Eintritte');
 
@@ -1517,8 +1520,11 @@ function renderCosts(){
   var lh=$("#lbHotel"),lf=$("#lbFlug");
   if(lh)lh.textContent=HOTEL_EUR.toLocaleString('de-DE',{minimumFractionDigits:2})+' € für beide, acht Nächte — '+hotelMAD.toLocaleString('de-DE')+' MAD';
   if(lf)lf.textContent=FLUG_EUR.toLocaleString('de-DE')+' € — '+flugMAD.toLocaleString('de-DE')+' MAD';
+  var lp=$("#lbPark");
+  if(lp)lp.textContent=PARK_EUR.toLocaleString('de-DE')+' € für acht Tage am Flughafen — '+parkMAD.toLocaleString('de-DE')+' MAD';
   $("#tglHotel").className='tgl'+(withHotel?' on':'');
   $("#tglFlug").className='tgl'+(withFlug?' on':'');
+  $("#tglPark").className='tgl'+(withPark?' on':'');
   renderBilanz(sum);          // erst hier — vorher steht sum noch nicht fest
   var maBox=$("#mabtn");
   if(maBox){
@@ -1577,6 +1583,7 @@ window.addEventListener('orientationchange',function(){setTimeout(moveInd,150);}
 $("#tglFood").onclick=function(){withFood=!withFood;Store.set('food',withFood);renderCosts();};
 $("#tglHotel").onclick=function(){withHotel=!withHotel;Store.set('hotel',withHotel);renderCosts();};
 $("#tglFlug").onclick=function(){withFlug=!withFlug;Store.set('flug',withFlug);renderCosts();};
+$("#tglPark").onclick=function(){withPark=!withPark;Store.set('park',withPark);renderCosts();};
 $("#tglTheme").onclick=function(){DARK=!DARK;Store.set('dark',DARK);applyTheme();};
 
 (function(){
@@ -1825,7 +1832,8 @@ Store.get('ppl').then(function(v){people=v||2;return Store.get('busMA');})
 .then(function(v){busMA=(v===null||v===undefined)?1:v;return Store.get('food');})
 .then(function(v){withFood=!!v;return Store.get('hotel');})
 .then(function(v){withHotel=!!v;return Store.get('flug');})
-.then(function(v){withFlug=!!v;return Store.get('overrides');})
+.then(function(v){withFlug=!!v;return Store.get('park');})
+.then(function(v){withPark=!!v;return Store.get('overrides');})
 .then(function(v){OV=v||{};return Store.get('rnotes');})
 .then(function(v){RN=v||{};return Store.get('spent');})
 .then(function(v){SPENT=v||{};return Store.get('extra');})
