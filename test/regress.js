@@ -41,16 +41,21 @@ global.document = { querySelector: get, querySelectorAll: s => {
                 contains(c){return this._s.has(c)} } } };
 // Kein echter Netzzugriff im Test
 global.fetch = () => Promise.reject(new Error('kein Netz im Test'));
-global.navigator.geolocation = { watchPosition(){ return 1 }, clearWatch(){} };
-global.window = { addEventListener(){}, scrollTo(){}, matchMedia:()=>({matches:false}), location:{origin:'x'} };
+// Node bringt selbst ein navigator mit, das nur einen Getter hat — eine
+// Zuweisung an global.navigator verpufft dort still. Deshalb ersetzen.
+// Im Browser ist window.navigator dasselbe Objekt, also hier auch.
+const nav = { userAgent:'node', standalone:true,
+  geolocation:{ watchPosition(){ return 1 }, clearWatch(){} } };
+Object.defineProperty(global, 'navigator',
+  { value: nav, writable:true, configurable:true });
+global.window = { addEventListener(){}, scrollTo(){}, matchMedia:()=>({matches:false}), location:{origin:'x'}, navigator: nav };
 global.screen = { height: 956 };
 global.window.getComputedStyle = () => ({ paddingTop:'62px', paddingBottom:'34px' });
 global.window.innerHeight = 956;
 global.window.visualViewport = { height: 956, offsetTop: 0 };
 global.window.devicePixelRatio = 3;
-global.window.navigator = { standalone: true };
 global.window.Notification = global.Notification = { permission:'default', requestPermission:()=>Promise.resolve('granted') };
-global.navigator = { userAgent:'node' };
+
 global.localStorage = { getItem: k=>store[k]||null, setItem:(k,v)=>store[k]=v };
 global.requestAnimationFrame = f=>f(); global.setTimeout = f=>f(); global.clearTimeout = ()=>{};
 global.IntersectionObserver = class { observe(){} }; global.Response = class { constructor(b){this.b=b} };
@@ -610,10 +615,25 @@ console.log('\nJetzt-Zeile');
 console.log('\nViewport und Diagnose');
   // Der Screenshot hat gezeigt: die Seite laeuft unter die Statusleiste,
   // env(safe-area-inset-top) ist dort noetig und darf nicht genullt werden.
-  ok('oberer Sicherheitsabstand bleibt unangetastet',
-     !/korrigiereSicherheitsabstand/.test(src)
-     && /--st:env\(safe-area-inset-top/.test(src));
   ok('Kopf haelt Abstand zur Statusleiste', /padding:calc\(var\(--st\)/.test(src));
+  ok('rechnet bei Boot, Drehung und Groessenaenderung',
+     /orientationchange[\s\S]{0,120}korrigiereSicherheitsabstand/.test(src)
+     && /addEventListener\('resize',korrigiereSicherheitsabstand\)/.test(src));
+  ok('Messtabelle zeigt Fenster-Y', /Fenster-Y \(screenY\)/.test(src));
+
+  // Verhalten. Zahlen vom Geraet: Schirm 956, Fenster 894, oben 62, unten 34.
+  // Beide Faelle liefern dieselbe Differenz — nur screenY unterscheidet sie.
+  const sa = (h,y,st_,sa_) => { window.innerHeight=h; window.screenY=y;
+    document.documentElement.style._v={}; korrigiereSicherheitsabstand();
+    const v=document.documentElement.style;
+    return v.getPropertyValue('--st')===st_ && v.getPropertyValue('--sb')===sa_ };
+  ok('Fenster bei y=0: unten liegt ausserhalb, oben ueberlagert', sa(894, 0,  '62px','0px'));
+  ok('Fenster bei y=62: oben ueberlagert nichts, unten gilt',      sa(894, 62, '0px','34px'));
+  ok('Fenster deckt den Schirm: beide Abstaende gelten',           sa(956, 0,  '62px','34px'));
+  // Ohne belastbares screenY lieber polstern als die Beschriftungen verdecken.
+  ok('unbekanntes screenY bleibt beim Normalfall',   sa(894, NaN,  '62px','34px'));
+  ok('unplausibles screenY bleibt beim Normalfall',  sa(894, 640,  '62px','34px'));
+  window.innerHeight=956; window.screenY=0;
   // Drei Knoepfe passen nicht nebeneinander — der Hinweis braucht eine eigene Zeile.
   ok('Werkzeugleiste darf umbrechen', /\.maptools\{[^}]*flex-wrap:wrap/.test(src));
   ok('Kartenhinweis nimmt die volle Breite', /\.maptools p\{[^}]*flex:1 0 100%/.test(src));

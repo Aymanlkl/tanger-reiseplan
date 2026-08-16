@@ -2148,7 +2148,9 @@ requestAnimationFrame(function(){
   requestAnimationFrame(function(){$("#tabind").classList.add('ready');});
 });
 window.addEventListener('resize',moveInd);
-window.addEventListener('orientationchange',function(){setTimeout(moveInd,150);});
+window.addEventListener('orientationchange',function(){
+  setTimeout(function(){korrigiereSicherheitsabstand();moveInd();renderDiag();},150);});
+window.addEventListener('resize',korrigiereSicherheitsabstand);
 
 $("#tglFood").onclick=function(){withFood=!withFood;Store.set('food',withFood);renderCosts();};
 $("#tglHotel").onclick=function(){withHotel=!withHotel;Store.set('hotel',withHotel);renderCosts();};
@@ -2707,7 +2709,7 @@ function wireDocs(){
 
 function boot(){
   wantNowScroll=true;                     // beim Start zur laufenden Zeile
-  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();wireCheckAdd();renderTickets();renderGebiete();renderStorage();applyTheme();loadWx();setTimeout(renderDiag,300);
+  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();wireCheckAdd();korrigiereSicherheitsabstand();renderTickets();renderGebiete();renderStorage();applyTheme();loadWx();setTimeout(renderDiag,300);
   centerTile(false);
   checkReminders();syncReminders();registerSync();
 }
@@ -2769,6 +2771,54 @@ document.addEventListener('visibilitychange',function(){
 // Auf dem iPhone laedt eine installierte PWA beim Zurueckholen aus dem
 // App-Switcher nicht neu — sie zeigt einfach die alte Seite weiter. Deshalb
 // fragt die App selbst nach und bietet das Neuladen an.
+/* iOS meldet obere und untere Systemzone auch dann, wenn das Fenster gar
+   nicht den ganzen Schirm bedeckt. Dann wird fuer eine Zone gepolstert, die
+   ausserhalb liegt — sichtbar als Leerraum unter der Leiste.
+
+   Die Zahlen allein entscheiden das nicht: Ob das Fenster oben bei 0 beginnt
+   und unten Hoehe fehlt, oder ob es unter der Statusleiste beginnt und bis
+   zur Unterkante reicht, ergibt in beiden Faellen dieselbe Differenz.
+   Unterscheiden kann das nur, wo das Fenster anfaengt — window.screenY.
+
+   Meldet screenY nichts Brauchbares, bleibt es beim Normalfall. Falsch
+   polstern kostet Platz, falsch nicht polstern legt die Beschriftungen unter
+   den Home-Indikator — deshalb ist der Zweifelsfall der vorsichtige. */
+function korrigiereSicherheitsabstand(){
+  if(!document.body||!window.getComputedStyle)return;
+  var probe=document.createElement('div');
+  probe.style.cssText='position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;'+
+    'padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)';
+  document.body.appendChild(probe);
+  var cs=window.getComputedStyle(probe);
+  var oben=parseFloat(cs.paddingTop)||0, unten=parseFloat(cs.paddingBottom)||0;
+  document.body.removeChild(probe);
+
+  var st=document.documentElement.style;
+  function normal(){st.setProperty('--st',oben+'px');st.setProperty('--sb',unten+'px');}
+
+  var diff=(screen.height||0)-(window.innerHeight||0);
+  var alleine=(navigator.standalone===true)||
+    (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches);
+  if(!alleine||diff<=2){normal();return;}
+
+  var y=window.screenY;
+  if(typeof y!=='number'||!isFinite(y)){normal();return;}
+
+  if(y>2&&y<200){
+    // Fenster beginnt unterhalb der Statusleiste und reicht bis zur Unterkante:
+    // oben ueberlagert nichts, unten liegt die Home-Zone im Fenster.
+    st.setProperty('--st','0px');
+    st.setProperty('--sb',unten+'px');
+  }else if(y===0&&oben>0){
+    // Fenster beginnt bei 0, die Statusleiste liegt darueber. Die fehlende
+    // Hoehe liegt unten ausserhalb — mit ihr die Home-Zone.
+    st.setProperty('--st',oben+'px');
+    st.setProperty('--sb','0px');
+  }else{
+    normal();
+  }
+}
+
 /* Misst, was das Geraet tatsaechlich meldet. Ohne diese Zahlen ist jede
    Aussage ueber die Leistenposition geraten. */
 function renderDiag(){
@@ -2790,6 +2840,8 @@ function renderDiag(){
    ['Bildschirm',         screen.height+' px · '+(window.devicePixelRatio||1)+'x'],
    ['Systemzone oben',    sbTop],
    ['Fenster fehlt zum Schirm', Math.max(0,screen.height-window.innerHeight)+'px'],
+   ['Fenster-Y (screenY)', (typeof window.screenY==='number'&&isFinite(window.screenY))
+                            ? window.screenY+'px' : 'nicht gemeldet'],
    ['Systemzone unten',   sbBot],
    ['Leiste Unterkante',  r?Math.round(r.bottom)+' px':'—'],
    ['Abstand zum Rand',   r?Math.round(window.innerHeight-r.bottom)+' px':'—'],
