@@ -216,7 +216,7 @@ label.fadd svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width
   background:var(--ink);color:#fff;font-family:var(--m);font-size:11.5px;font-weight:600;
   font-variant-numeric:tabular-nums;white-space:nowrap}
 .entf[hidden]{display:none}
-#map .hier b{display:block;width:14px;height:14px;border-radius:50%;background:#2E7D6E;
+.hier b{display:block;width:14px;height:14px;border-radius:50%;background:#2E7D6E;
   border:3px solid #fff;box-shadow:0 1px 5px rgba(16,34,43,.5)}
 
 .mapl{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:4px 9px 4px 7px;
@@ -324,17 +324,20 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 .instl button{margin-top:11px;background:var(--saffron);color:#1A1200;font-weight:700;font-size:13.5px;padding:10px 16px;border-radius:8px;width:100%}
 /* ---------- Karte ---------- */
 #map{height:230px;background:#E8E4DB;border-top:1px solid var(--line-2)}
-#map .pin{background:none;border:0}
-#map .pin b{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;
+.pin{background:none;border:0}
+.pin b{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;
   background:var(--saffron);color:#1A1200;font-family:var(--m);font-size:11px;font-weight:700;
   border:2px solid #fff;box-shadow:0 1px 4px rgba(16,34,43,.4)}
-#map .leaflet-container{font-family:var(--f)}
-#map .leaflet-popup-content{margin:9px 12px;font-size:13px;line-height:1.4}
-#map .leaflet-popup-content b{font-size:13.5px}
-.maptools{display:flex;align-items:center;gap:9px;padding:10px 13px;background:#F7F5F0;
+#map .leaflet-container,#bigmap .leaflet-container{font-family:var(--f)}
+#map .leaflet-popup-content,#bigmap .leaflet-popup-content{margin:9px 12px;font-size:13px;line-height:1.4}
+#map .leaflet-popup-content b,#bigmap .leaflet-popup-content b{font-size:13.5px}
+.maptools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 13px;background:#F7F5F0;
   border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2)}
-.maptools p{margin:0;flex:1;font-size:11.5px;color:var(--muted);line-height:1.4}
-.dlbtn{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;
+/* Der Hinweis bekommt eine eigene Zeile unter den Knoepfen. Steht er als
+   flex:1 daneben, quetschen ihn drei Knoepfe auf null und er bricht
+   Wort fuer Wort um. */
+.maptools p{margin:2px 0 0;flex:1 0 100%;order:2;font-size:11.5px;color:var(--muted);line-height:1.4}
+.dlbtn{flex:0 1 auto;min-width:0;display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;
   background:var(--ink);color:#fff;font-size:12.5px;font-weight:600;
   transition:background .2s var(--ease),opacity .2s var(--ease)}
 .dlbtn:disabled{opacity:.55}
@@ -554,7 +557,7 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
 .tkl svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .mapview{position:fixed;inset:0;z-index:60;background:var(--paper);display:flex;flex-direction:column}
 .mapview[hidden]{display:none}
-.mv-top{position:relative;z-index:2;padding:calc(var(--st) + 10px) 12px 10px;
+.mv-top{position:relative;z-index:900;padding:calc(var(--st) + 10px) 12px 10px;
   background:var(--ink);color:#fff;flex:0 0 auto}
 .mv-head{position:relative;padding-right:40px}
 .mv-head .meta{font-family:var(--m);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
@@ -571,7 +574,7 @@ table.cost td small{display:block;color:var(--faint);font-size:11.5px;font-famil
   transition:background .18s,color .18s}
 .mv-days button.an{background:var(--saffron);color:var(--ink)}
 #bigmap{flex:1 1 auto;min-height:0}
-.mv-cards{position:absolute;left:0;right:0;bottom:calc(56px + max(6px,var(--sb)));z-index:2;
+.mv-cards{position:absolute;left:0;right:0;bottom:calc(56px + max(6px,var(--sb)));z-index:900;
   display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;
   padding:0 calc(50% - 125px) 12px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .mv-cards::-webkit-scrollbar{display:none}
@@ -2127,8 +2130,7 @@ requestAnimationFrame(function(){
   requestAnimationFrame(function(){$("#tabind").classList.add('ready');});
 });
 window.addEventListener('resize',moveInd);
-window.addEventListener('orientationchange',function(){
-  setTimeout(function(){korrigiereSicherheitsabstand();moveInd();renderDiag();},150);});
+window.addEventListener('orientationchange',function(){setTimeout(moveInd,150);});
 
 $("#tglFood").onclick=function(){withFood=!withFood;Store.set('food',withFood);renderCosts();};
 $("#tglHotel").onclick=function(){withHotel=!withHotel;Store.set('hotel',withHotel);renderCosts();};
@@ -2644,7 +2646,7 @@ function wireDocs(){
 
 function boot(){
   wantNowScroll=true;                     // beim Start zur laufenden Zeile
-  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();wireCheckAdd();korrigiereSicherheitsabstand();renderTickets();renderGebiete();renderStorage();applyTheme();loadWx();setTimeout(renderDiag,300);
+  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();wireCheckAdd();renderTickets();renderGebiete();renderStorage();applyTheme();loadWx();setTimeout(renderDiag,300);
   centerTile(false);
   checkReminders();syncReminders();registerSync();
 }
@@ -2706,23 +2708,6 @@ document.addEventListener('visibilitychange',function(){
 // Auf dem iPhone laedt eine installierte PWA beim Zurueckholen aus dem
 // App-Switcher nicht neu — sie zeigt einfach die alte Seite weiter. Deshalb
 // fragt die App selbst nach und bietet das Neuladen an.
-/* Manche iOS-Konfigurationen melden env(safe-area-inset-top), obwohl der
-   Viewport schon unterhalb der Statusleiste beginnt — dann zaehlt jedes
-   padding-top den Abstand doppelt. Gemessen: Bildschirm 956, Fenster 894,
-   Differenz 62 = genau der gemeldete obere Abstand. */
-function korrigiereSicherheitsabstand(){
-  if(!document.body||!window.getComputedStyle)return;
-  var probe=document.createElement('div');
-  probe.style.cssText='position:fixed;left:0;top:0;width:0;height:0;'+
-    'padding-top:env(safe-area-inset-top,0px);visibility:hidden';
-  document.body.appendChild(probe);
-  var oben=parseFloat(window.getComputedStyle(probe).paddingTop)||0;
-  document.body.removeChild(probe);
-  if(!oben)return;
-  var bereitsAbgezogen=(screen.height-window.innerHeight)>=oben-2;
-  document.documentElement.style.setProperty('--st',bereitsAbgezogen?'0px':oben+'px');
-}
-
 /* Misst, was das Geraet tatsaechlich meldet. Ohne diese Zahlen ist jede
    Aussage ueber die Leistenposition geraten. */
 function renderDiag(){
@@ -2742,8 +2727,7 @@ function renderDiag(){
    ['Dokumenthöhe',       document.documentElement.clientHeight+' px'],
    ['Sichtbarer Viewport',vv?Math.round(vv.height)+' px':'nicht verfügbar'],
    ['Bildschirm',         screen.height+' px · '+(window.devicePixelRatio||1)+'x'],
-   ['Systemzone oben',    sbTop+(document.documentElement.style.getPropertyValue('--st')==='0px'
-                            ?' · schon abgezogen':'')],
+   ['Systemzone oben',    sbTop],
    ['Systemzone unten',   sbBot],
    ['Leiste Unterkante',  r?Math.round(r.bottom)+' px':'—'],
    ['Abstand zum Rand',   r?Math.round(window.innerHeight-r.bottom)+' px':'—'],

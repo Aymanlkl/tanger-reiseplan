@@ -188,6 +188,14 @@ console.log('\nKartenansicht');
   ok('erste Karte ist aktiv',   /class="mv-card an"/.test(els['#mvCards'].innerHTML));
   ok('Marker je Ort gesetzt',   eval('mvMarker.length')===14);
   ok('Nummern beginnen bei 1',  />1</.test(els['#mvCards'].innerHTML));
+  // Beide Karten teilen sich die Markeroptik — an #map gebunden blieb sie in der grossen Ansicht aus.
+  ok('Markeroptik gilt fuer beide Karten',
+     /(^|\n)\.pin b\{/.test(src) && !/#map \.pin/.test(src));
+  // Leaflet zeichnet seine Ebenen bis z-index 800.
+  ok('Karussell liegt ueber der Karte',
+     (src.match(/\.mv-cards\{[^}]*z-index:(\d+)/)||[0,0])[1]>800);
+  ok('Kopf liegt ueber der Karte',
+     (src.match(/\.mv-top\{[^}]*z-index:(\d+)/)||[0,0])[1]>800);
   ok('Tagesreiter fuer alle 9 Tage',
      (els['#mvDays'].innerHTML.match(/<button/g)||[]).length===9);
 
@@ -575,23 +583,16 @@ console.log('\nJetzt-Zeile');
   global.Date = RD;
 
 console.log('\nViewport und Diagnose');
-  ok('erkennt doppelt gezaehlten oberen Abstand',
-     /function korrigiereSicherheitsabstand/.test(src)
-     && /screen\.height-window\.innerHeight\)>=oben-2/.test(src));
-  ok('setzt --st auf 0, wenn der Viewport schon darunter beginnt',
-     /setProperty\('--st',bereitsAbgezogen\?'0px'/.test(src));
-  ok('rechnet nach dem Drehen neu', /orientationchange[\s\S]{0,120}korrigiereSicherheitsabstand/.test(src));
+  // Der Screenshot hat gezeigt: die Seite laeuft unter die Statusleiste,
+  // env(safe-area-inset-top) ist dort noetig und darf nicht genullt werden.
+  ok('oberer Sicherheitsabstand bleibt unangetastet',
+     !/korrigiereSicherheitsabstand/.test(src)
+     && /--st:env\(safe-area-inset-top/.test(src));
+  ok('Kopf haelt Abstand zur Statusleiste', /padding:calc\(var\(--st\)/.test(src));
+  // Drei Knoepfe passen nicht nebeneinander — der Hinweis braucht eine eigene Zeile.
+  ok('Werkzeugleiste darf umbrechen', /\.maptools\{[^}]*flex-wrap:wrap/.test(src));
+  ok('Kartenhinweis nimmt die volle Breite', /\.maptools p\{[^}]*flex:1 0 100%/.test(src));
 
-
-  // Verhalten, nicht nur Quelltext. Zahlen vom Geraet aus dem Info-Tab.
-  const stNach = h => { window.innerHeight = h;
-    document.documentElement.style._v = {};
-    korrigiereSicherheitsabstand();
-    return document.documentElement.style.getPropertyValue('--st') };
-  ok('Geraet 894/956: oberer Abstand wird auf 0 gesetzt', stNach(894) === '0px');
-  ok('echtes cover 956/956: 62px bleiben stehen',          stNach(956) === '62px');
-  ok('Grenzfall 895: gilt noch als abgezogen',             stNach(895) === '0px');
-  window.innerHeight = 956;
   ok('viewport-fit=cover ohne konkurrierende Angaben',
      /viewport-fit=cover/.test(src) && !/maximum-scale/.test(src) && !/user-scalable=no/.test(src));
   ok('Zoomsperre laeuft ueber touch-action', /touch-action:pan-y/.test(src));
