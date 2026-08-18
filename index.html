@@ -923,6 +923,14 @@ button:focus-visible,a:focus-visible{outline:2.5px solid var(--saffron);outline-
       <p>Karten, Fotos und Dokumente liegen im Browser dieses Handys.</p></div>
       <div class="card-b" id="stbox"></div></div>
 
+    <div class="card">
+      <div class="card-h"><div class="meta">Damit nichts verlorengeht</div><h3>Dauerhaft &amp; Sicherung</h3>
+        <p>Fahrkarten, Fotos und Dokumente liegen ausschließlich auf diesem Handy — nicht im Repo, das ist öffentlich.</p></div>
+      <div class="card-b">
+        <div id="perstat"></div>
+        <div id="sicherbox" style="margin-top:14px"></div>
+      </div></div>
+
     <div class="card"><div class="card-h"><div class="meta">Darstellung</div><h3>Ansicht</h3></div>
       <div class="card-b"><button class="tgl" id="tglTheme"><div class="sw"></div>
         <div class="lb">Dunkle Ansicht<small>Abends und in der Medina angenehmer für die Augen</small></div></button></div></div>
@@ -2092,7 +2100,7 @@ function saveTiles(btn,dayN,box){
       var h=$("#maphint");
       if(h&&!box)h.textContent='Ausschnitt liegt im Cache — die Karte funktioniert hier auch ohne Netz.';
       Store.get('tiles').then(function(s){s=s||{};s[dayN]=ok;Store.set('tiles',s);
-        renderGebiete();renderStorage();}).catch(function(){});
+        renderGebiete();renderStorage();bitteDauerhaft();renderSicherung();}).catch(function(){});
     };
     var next=function(){
       if(i>=urls.length)return done();
@@ -2749,6 +2757,136 @@ var CACHE_INFO=[
 ];
 function mb(b){return (b/1048576).toFixed(b<10485760?1:0)+' MB';}
 
+/* Ohne diese Bitte raeumt iOS den Speicher irgendwann weg — Safari loescht
+   nach etwa sieben Tagen ohne Benutzung, und bei Platzmangel sowieso. Mit
+   erteilter Zusage bleibt alles, bis es jemand von Hand loescht. */
+function bitteDauerhaft(){
+  var el=$("#perstat");
+  if(!navigator.storage||!navigator.storage.persist){
+    if(el)el.innerHTML='<p class="dochint">Dieser Browser kennt keinen dauerhaften Speicher. '+
+      'Leg regelmäßig eine Sicherung an.</p>';
+    return;
+  }
+  navigator.storage.persisted().then(function(schon){
+    if(schon){
+      if(el)el.innerHTML='<div class="note tip"><b>Dauerhaft gesichert.</b> '+
+        'Das System räumt Fotos, Fahrkarten und Dokumente nicht mehr von selbst weg.</div>';
+      return;
+    }
+    if(el)el.innerHTML='<div class="note warn"><b>Nicht dauerhaft.</b> iOS löscht den Speicher '+
+      'nach etwa einer Woche ohne Benutzung — Fahrkarten und Fotos wären dann weg.</div>'+
+      '<button class="dlbtn" id="perbtn">'+ICO_OK+'Dauerhaft speichern</button>';
+    var b=$("#perbtn");
+    if(b)b.onclick=function(){
+      b.textContent='Frage …';
+      navigator.storage.persist().then(function(ok){
+        if(ok)bitteDauerhaft();
+        else if(el)el.innerHTML='<div class="note warn"><b>Vom System abgelehnt.</b> '+
+          'iOS gibt die Zusage oft erst, wenn die App auf dem Home-Bildschirm liegt und '+
+          'ein paar Mal benutzt wurde. Bis dahin hilft nur die Sicherung unten.</div>';
+      }).catch(function(){});
+    };
+  }).catch(function(){});
+}
+
+/* ---------- Sicherung ----------
+   Eine Datei, die alles enthaelt ausser den Kartenkacheln — die laedt man neu.
+   Sie geht in die Dateien-App und damit in iCloud, wenn du das dort so
+   eingerichtet hast. Nichts davon laeuft ueber das Repo. */
+var SICHER_CACHES=['tanger-tickets-v1','tanger-docs-v1','tanger-fotos-v1'];
+var SICHER_KEYS=['ppl','busMA','food','hotel','flug','park','overrides','rnotes','spent',
+ 'extra','check','checkOwn','added','dark','notified','tiles','tkstart','weg','busmeld'];
+
+function blobZuText(b){
+  return new Promise(function(ok,fehl){
+    var r=new FileReader();
+    r.onload=function(){ok(r.result);};r.onerror=fehl;r.readAsDataURL(b);
+  });
+}
+
+function sicherungBauen(){
+  var daten={stand:'tanger-sicherung-1',zeit:new Date().toISOString(),werte:{},dateien:{}};
+  return Promise.all(SICHER_KEYS.map(function(k){
+    return Store.get(k).then(function(v){if(v!==null&&v!==undefined)daten.werte[k]=v;});
+  })).then(function(){
+    if(!window.caches)return;
+    return Promise.all(SICHER_CACHES.map(function(cn){
+      return caches.open(cn).then(function(c){return c.keys();}).then(function(keys){
+        return Promise.all(keys.map(function(req){
+          return caches.open(cn).then(function(c){return c.match(req);})
+            .then(function(res){return res?res.blob():null;})
+            .then(function(b){
+              if(!b)return;
+              return blobZuText(b).then(function(u){
+                var pfad=req.url.split('/').slice(3).join('/');
+                daten.dateien[cn+'|'+pfad]=u;
+              });
+            });
+        }));
+      }).catch(function(){});
+    }));
+  }).then(function(){return daten;});
+}
+
+function textZuBlob(u){
+  var t=u.split(','),typ=(t[0].match(/:(.*?);/)||[0,'application/octet-stream'])[1];
+  var roh=atob(t[1]),arr=new Uint8Array(roh.length);
+  for(var i=0;i<roh.length;i++)arr[i]=roh.charCodeAt(i);
+  return new Blob([arr],{type:typ});
+}
+
+function sicherungLesen(daten){
+  if(!daten||daten.stand!=='tanger-sicherung-1')return Promise.reject(new Error('Fremdes Format'));
+  Object.keys(daten.werte||{}).forEach(function(k){Store.set(k,daten.werte[k]);});
+  if(!window.caches)return Promise.resolve();
+  var proCache={};
+  Object.keys(daten.dateien||{}).forEach(function(k){
+    var i=k.indexOf('|'),cn=k.slice(0,i),pfad=k.slice(i+1);
+    (proCache[cn]=proCache[cn]||[]).push([pfad,daten.dateien[k]]);
+  });
+  return Promise.all(Object.keys(proCache).map(function(cn){
+    return caches.open(cn).then(function(c){
+      return Promise.all(proCache[cn].map(function(e){
+        var b=textZuBlob(e[1]);
+        return c.put(e[0],new Response(b,{headers:{'Content-Type':b.type}}));
+      }));
+    });
+  }));
+}
+
+function renderSicherung(){
+  var box=$("#sicherbox");if(!box)return;
+  box.innerHTML='<p class="dochint">Eine Datei mit Fahrkarten, Fotos, Dokumenten, Notizen und '+
+    'Ausgaben. Leg sie in die Dateien-App — von dort geht sie in iCloud, wenn du das so '+
+    'eingerichtet hast. Kartenkacheln bleiben draußen, die lädst du neu.</p>'+
+    '<div class="maptools"><button class="dlbtn" id="sichern">'+ICO_DL+'Sicherung erstellen</button>'+
+    '<label class="dlbtn" for="sicherdatei">'+ICO_DOC+'Zurückholen</label>'+
+    '<input type="file" id="sicherdatei" accept="application/json,.json" hidden></div>'+
+    '<p class="dochint" id="sichermeld"></p>';
+  var meld=$("#sichermeld");
+  $("#sichern").onclick=function(){
+    meld.textContent='Sammle …';
+    sicherungBauen().then(function(d){
+      var txt=JSON.stringify(d),b=new Blob([txt],{type:'application/json'});
+      var a=document.createElement('a');
+      a.href=URL.createObjectURL(b);
+      a.download='tanger-sicherung-'+today()+'.json';
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+      setTimeout(function(){URL.revokeObjectURL(a.href);},4000);
+      meld.textContent=Object.keys(d.dateien).length+' Dateien, '+mb(txt.length)+' — gespeichert.';
+    }).catch(function(){meld.textContent='Hat nicht geklappt.';});
+  };
+  $("#sicherdatei").onchange=function(e){
+    var f=(e.target.files||[])[0];if(!f)return;
+    meld.textContent='Lese …';
+    f.text().then(function(t){return sicherungLesen(JSON.parse(t));})
+      .then(function(){meld.textContent='Zurückgeholt. Die Seite lädt neu.';
+        setTimeout(function(){location.reload();},900);})
+      .catch(function(){meld.textContent='Datei nicht lesbar oder falsches Format.';});
+    e.target.value='';
+  };
+}
+
 function renderStorage(){
   var box=$("#stbox");if(!box)return;
   if(!window.caches){box.innerHTML='<p class="dochint">Dieser Browser legt nichts offline ab.</p>';return;}
@@ -3109,7 +3247,7 @@ function wireDocs(){
 
 function boot(){
   wantNowScroll=true;                     // beim Start zur laufenden Zeile
-  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();wireCheckAdd();korrigiereSicherheitsabstand();renderBus();planeEinstiege();renderTickets();renderGebiete();renderStorage();applyTheme();loadWx();setTimeout(function(){renderDiag();diagHinweis();},300);
+  renderNow();renderStrip();renderDay();renderCosts();renderCheck();renderNotif();renderBell();renderDocs();wireDocs();wireExtra();wireCheckAdd();korrigiereSicherheitsabstand();renderBus();planeEinstiege();renderTickets();renderGebiete();renderStorage();bitteDauerhaft();renderSicherung();applyTheme();loadWx();setTimeout(function(){renderDiag();diagHinweis();},300);
   centerTile(false);
   checkReminders();syncReminders();registerSync();
 }

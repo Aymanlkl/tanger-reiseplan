@@ -269,6 +269,32 @@ console.log('\nRabat: alles in seiner Oeffnungszeit');
   ok('Abendessen bleibt vor der Rueckfahrt',
      R('Fr\u00fches Abendessen').t < R('R\u00fcckzug').t);
 
+console.log('\nSicherung und dauerhafter Speicher');
+  ok('Karte fuer dauerhaften Speicher da', !!els['#perstat'] && /function bitteDauerhaft/.test(src));
+  ok('bittet um dauerhaften Speicher',
+     /navigator\.storage\.persist\(\)/.test(src) && /navigator\.storage\.persisted\(\)/.test(src));
+  ok('Sicherung nennt kein Repo und kein Netz',
+     !/fetch\([^)]*sicher/i.test(src) && !/github/i.test(src.slice(src.indexOf('function sicherungBauen'),
+       src.indexOf('function renderStorage'))));
+  // Kartenkacheln gehoeren nicht hinein, die laedt man neu — sonst wird die Datei riesig.
+  ok('Kacheln bleiben aus der Sicherung',
+     eval("SICHER_CACHES.indexOf('tanger-maps-v1')") === -1
+     && eval("SICHER_CACHES.length") === 3);
+  ok('Fahrkarten, Dokumente und Fotos sind drin',
+     ['tickets','docs','fotos'].every(n => eval("SICHER_CACHES").some(c => c.indexOf(n) > -1)));
+  ok('alle gespeicherten Einstellungen sind erfasst',
+     (()=>{const inCode = new Set((src.match(/Store\.set\('([a-zA-Z]+)'/g)||[])
+             .map(m => m.replace(/Store\.set\('/, '').replace(/'/, '')));
+           inCode.delete('notified');
+           return [...inCode].every(k => eval('SICHER_KEYS').indexOf(k) > -1
+             || k === 'weg' || k === 'busmeld')})(),
+     [...new Set((src.match(/Store\.set\('([a-zA-Z]+)'/g)||[]).map(m=>m.replace(/Store\.set\('/,'').replace(/'/,'')))]
+       .filter(k => eval('SICHER_KEYS').indexOf(k) === -1).join(','));
+  ok('Sicherung laesst sich wieder einlesen',
+     /function sicherungLesen/.test(src) && /tanger-sicherung-1/.test(src));
+  ok('fremdes Format wird abgewiesen',
+     /daten\.stand!=='tanger-sicherung-1'\)return Promise\.reject/.test(src));
+
 console.log('\nFahrtbegleitung');
   // Uhr und Datum stellen — und hinterher zurueckgeben, sonst kippen
   // spaetere Tests, die auf der echten Zeitrechnung stehen.
