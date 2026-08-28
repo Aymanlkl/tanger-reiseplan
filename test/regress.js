@@ -89,10 +89,10 @@ console.log('\nDatenintegritaet');
   let loc=0, coord=0, info=0, hours=0, rail=0, eat=0;
   TRIP.forEach(d => d.items.forEach(i => { if(i.loc){loc++; if(i.loc.lat){coord++; if(i.info)info++}}
     if(i.hours)hours++; if(i.rail)rail++; if(i.eat)eat++ }));
-  ok('90 Orte, 89 mit Koordinaten', loc===90 && coord===89, `${loc}/${coord}`);
+  ok('91 Orte, 90 mit Koordinaten', loc===91 && coord===90, `${loc}/${coord}`);
   ok('jeder Ort mit Koordinaten beschrieben',
      !TRIP.some(d=>d.items.some(i=>i.loc&&i.loc.lat&&!i.info)), `${info}`);
-  ok('hours 8 · rail 4 · eat 25', hours===8&&rail===4&&eat===25, `${hours}/${rail}/${eat}`);
+  ok('hours 9 · rail 4 · eat 25', hours===9&&rail===4&&eat===25, `${hours}/${rail}/${eat}`);
   // Echte ONCF-Zeiten. Der frueher eingetragene 18:40 war die Ankunft des
   // 18:04, keine Abfahrt — so ein Fehler darf nicht zurueckkommen.
   const a5 = t => TRIP[4].items.find(i => i.t === t);
@@ -113,9 +113,25 @@ console.log('\nDatenintegritaet');
      TRIP[5].items.some(i=>i.h==='Ankunft Rabat Agdal' && i.t==='09:22')
      && TRIP[5].items.some(i=>i.h==='Rückzug ab Rabat Agdal' && i.t==='20:56')
      && TRIP[5].items.some(i=>i.h==='Ankunft Tanger' && i.t==='22:17'));
+  // Gegessen wird in Rabat, nicht in Tanger — der Zug kommt erst 22:17 an.
   ok('Rabat: Abendessen vor der Rueckfahrt statt in Tanger',
-     TRIP[5].items.some(i=>i.h==='Frühes Abendessen in Rabat')
-     && !TRIP[5].items.some(i=>i.h==='Sushi Pro'));
+     TRIP[5].items.some(i => i.eat && !i.snack && i.t > '17:00' && i.t < '20:00')
+     && !TRIP[5].items.some(i => i.h==='Sushi Pro'));
+  // Beide Lokale sind namentlich gesetzt, nicht mehr "Mittagessen".
+  ok('Rabat: beide Mahlzeiten haben einen Namen und eine Adresse',
+     TRIP[5].items.filter(i => i.eat && !i.snack)
+       .every(i => !/^Mittagessen$|^Abendessen$/.test(i.h) && i.loc && i.loc.lat));
+  // Dar El Medina und Kasr Al Assil haben montags zu — Tag 6 ist Montag.
+  ok('Rabat: Mittagslokal ist montags offen',
+     (()=>{const i = TRIP[5].items.find(x => x.t === '13:45');
+           return i.hours && i.hours.days.indexOf(1) > -1 && i.hours.from <= '13:45'})());
+  // Nach Chellah waere die Medina Umweg: 6,2 km statt 3,4 km bis zum Bahnhof.
+  ok('Rabat: Abendlokal liegt naeher am Bahnhof als an der Medina',
+     (()=>{const ab = TRIP[5].items.find(x => x.t === '18:15');
+           const bf = TRIP[5].items.find(x => /Ankunft Rabat Agdal/.test(x.h));
+           const md = TRIP[5].items.find(x => /Rue des Consuls/.test(x.h));
+           const d = (a,b) => Math.hypot(a.loc.lat-b.loc.lat, a.loc.lng-b.loc.lng);
+           return d(ab,bf) < d(ab,md)})());
   ok('Bahnhofs-Taxi mit Puffer vor dem Zug',
      (()=>{const t=TRIP[5].items.find(i=>i.h==='Taxi zum Bahnhof Rabat Agdal');
            return t && t.t<'20:56' && t.t>='20:00';})());
@@ -170,7 +186,7 @@ console.log('\nitem(): alle Felder werden durchgereicht');
   ok('hours durchgereicht', !!zus.hours);
 
 console.log('\nKarte');
-  const erwartet = [7,14,11,8,15,15,8,10,1];
+  const erwartet = [7,14,11,8,15,16,8,10,1];
   let mapOk = true;
   TRIP.forEach((d,i) => { drawn.markers.length=0; eval('active='+i+';renderDay();');
     const h = els['#p-tage'].innerHTML;
@@ -284,8 +300,10 @@ console.log('\nRabat: alles in seiner Oeffnungszeit');
   ok('beide Zuege und beide Fixpunkte stehen',
      TRIP[5].items.filter(i => i.tk).length === 2
      && TRIP[5].items.filter(i => i.fix).length === 2);
+  // Nicht am Namen festmachen — das Lokal heisst jetzt Maison Beyrouth.
   ok('Abendessen bleibt vor der Rueckfahrt',
-     R('Fr\u00fches Abendessen').t < R('R\u00fcckzug').t);
+     TRIP[5].items.filter(i => i.eat && !i.snack && i.t > '17:00')
+       .every(i => i.t < R('R\u00fcckzug').t));
 
 console.log('\nSicherung und dauerhafter Speicher');
   ok('Karte fuer dauerhaften Speicher da', !!els['#perstat'] && /function bitteDauerhaft/.test(src));
