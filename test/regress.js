@@ -89,10 +89,10 @@ console.log('\nDatenintegritaet');
   let loc=0, coord=0, info=0, hours=0, rail=0, eat=0;
   TRIP.forEach(d => d.items.forEach(i => { if(i.loc){loc++; if(i.loc.lat){coord++; if(i.info)info++}}
     if(i.hours)hours++; if(i.rail)rail++; if(i.eat)eat++ }));
-  ok('91 Orte, 90 mit Koordinaten', loc===91 && coord===90, `${loc}/${coord}`);
+  ok('90 Orte, 89 mit Koordinaten', loc===90 && coord===89, `${loc}/${coord}`);
   ok('jeder Ort mit Koordinaten beschrieben',
      !TRIP.some(d=>d.items.some(i=>i.loc&&i.loc.lat&&!i.info)), `${info}`);
-  ok('hours 8 · rail 4 · eat 26', hours===8&&rail===4&&eat===26, `${hours}/${rail}/${eat}`);
+  ok('hours 8 · rail 4 · eat 25', hours===8&&rail===4&&eat===25, `${hours}/${rail}/${eat}`);
   // Echte ONCF-Zeiten. Der frueher eingetragene 18:40 war die Ankunft des
   // 18:04, keine Abfahrt — so ein Fehler darf nicht zurueckkommen.
   const a5 = t => TRIP[4].items.find(i => i.t === t);
@@ -133,9 +133,27 @@ console.log('\nDatenintegritaet');
      TRIP[5].items.length===18 && !TRIP[5].items.some(i=>i.h==='Museum Mohammed VI'));
   ok('Rabat: alles mit Tuer liegt vor 18:00',
      TRIP[5].items.filter(i=>i.hours).every(i=>i.t<'18:00'));
-  ok('alle 8 Wunsch-Restaurants gesetzt',
-     ['Cappero Resto','99grill','Napolitano','La Boca Negra','Puerto Marina','Sushi Pro','Rio do Texas','Sardinen vom Grill']
+  // Puerto Marina bewusst gestrichen: es waere das zweite Fischlokal an Tag 5
+  // gewesen, und der Tag endete damit um 22:10 vor einem 07:20-Start nach Rabat.
+  ok('alle 7 verbliebenen Wunsch-Restaurants gesetzt',
+     ['Cappero Resto','99grill','Napolitano','La Boca Negra','Sushi Pro','Rio do Texas','Sardinen vom Grill']
        .every(n => TRIP.some(d => d.items.some(i => i.h===n))));
+  ok('Puerto Marina ist raus',
+     !TRIP.some(d => d.items.some(i => /Puerto Marina/.test(i.h))));
+  // Kein Tag hat zweimal Fisch. Beim Namen gepruefte Lokale, nicht per
+  // Stichwort — sonst zaehlt schon der Satz "mittags gab es Fisch" mit.
+  const FISCHLOKAL = ['Meeresfr\u00fcchte','La Boca Negra','Sushi Pro',
+                      'Sp\u00e4te Mahlzeit in Dalia','Sardinen vom Grill'];
+  const fischAmTag = d => d.items.filter(i => i.eat && !i.snack
+    && FISCHLOKAL.some(n => i.h.indexOf(n) === 0)).length;
+  ok('kein Tag mit zwei Fischlokalen',
+     TRIP.every(d => fischAmTag(d) <= 1), TRIP.map(fischAmTag).join(','));
+  ok('Asilah isst abends nicht wieder Fisch',
+     /kein Fischgericht/.test(TRIP[4].items.find(i => /Abendessen an der Seemauer/.test(i.h)).info));
+  // Tag 6 startet um 07:20 — der Abend davor darf nicht bis Mitternacht laufen.
+  ok('Tag 5 endet vor der Nacht nach Rabat',
+     TRIP[4].items[TRIP[4].items.length-1].t <= '21:30',
+     TRIP[4].items[TRIP[4].items.length-1].t);
   ok('alle 15 Sehenswuerdigkeiten drin (ausser Donabo)', [
       'Villa Harris','Perdicaris','Kasbah-Museum','Dar Niaba','Marina Bay','Café Hafa',
       'Borj Dar El Baroud','Merkala','Signpost','La Fuga','Le Mirage','Dar Chams','Rmilat','Bab Bhar'
@@ -152,7 +170,7 @@ console.log('\nitem(): alle Felder werden durchgereicht');
   ok('hours durchgereicht', !!zus.hours);
 
 console.log('\nKarte');
-  const erwartet = [7,14,11,8,16,15,8,10,1];
+  const erwartet = [7,14,11,8,15,15,8,10,1];
   let mapOk = true;
   TRIP.forEach((d,i) => { drawn.markers.length=0; eval('active='+i+';renderDay();');
     const h = els['#p-tage'].innerHTML;
