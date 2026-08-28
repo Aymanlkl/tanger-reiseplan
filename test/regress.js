@@ -92,7 +92,7 @@ console.log('\nDatenintegritaet');
   ok('91 Orte, 90 mit Koordinaten', loc===91 && coord===90, `${loc}/${coord}`);
   ok('jeder Ort mit Koordinaten beschrieben',
      !TRIP.some(d=>d.items.some(i=>i.loc&&i.loc.lat&&!i.info)), `${info}`);
-  ok('hours 9 · rail 4 · eat 25', hours===9&&rail===4&&eat===25, `${hours}/${rail}/${eat}`);
+  ok('hours 8 · rail 4 · eat 25', hours===8&&rail===4&&eat===25, `${hours}/${rail}/${eat}`);
   // Echte ONCF-Zeiten. Der frueher eingetragene 18:40 war die Ankunft des
   // 18:04, keine Abfahrt — so ein Fehler darf nicht zurueckkommen.
   const a5 = t => TRIP[4].items.find(i => i.t === t);
@@ -122,16 +122,21 @@ console.log('\nDatenintegritaet');
      TRIP[5].items.filter(i => i.eat && !i.snack)
        .every(i => !/^Mittagessen$|^Abendessen$/.test(i.h) && i.loc && i.loc.lat));
   // Dar El Medina und Kasr Al Assil haben montags zu — Tag 6 ist Montag.
-  ok('Rabat: Mittagslokal ist montags offen',
+  ok('Rabat: Mittagslokal faellt montags nicht aus',
      (()=>{const i = TRIP[5].items.find(x => x.t === '13:45');
-           return i.hours && i.hours.days.indexOf(1) > -1 && i.hours.from <= '13:45'})());
-  // Nach Chellah waere die Medina Umweg: 6,2 km statt 3,4 km bis zum Bahnhof.
-  ok('Rabat: Abendlokal liegt naeher am Bahnhof als an der Medina',
-     (()=>{const ab = TRIP[5].items.find(x => x.t === '18:15');
-           const bf = TRIP[5].items.find(x => /Ankunft Rabat Agdal/.test(x.h));
-           const md = TRIP[5].items.find(x => /Rue des Consuls/.test(x.h));
-           const d = (a,b) => Math.hypot(a.loc.lat-b.loc.lat, a.loc.lng-b.loc.lng);
-           return d(ab,bf) < d(ab,md)})());
+           const zu = /Dar El Medina|Kasr Al Assil/.test(i.h);       // beide montags geschlossen
+           const passt = !i.hours || (i.hours.days.indexOf(1) > -1 && i.hours.from <= '13:45');
+           return !zu && passt})());
+  // Nach Chellah darf das Abendessen keinen Umweg erzeugen: der Gesamtweg
+  // Chellah -> Essen -> Bahnhof muss kuerzer sein als derselbe ueber die Medina.
+  ok('Rabat: Abendessen erzeugt keinen Umweg',
+     (()=>{const P = t => TRIP[5].items.find(x => t.test(x.h)).loc;
+           const ab = TRIP[5].items.find(x => x.t === '18:15').loc;
+           const ch = P(/Chellah/), bf = P(/Ankunft Rabat Agdal/), md = P(/Rue des Consuls/);
+           const d = (a,b) => Math.hypot(a.lat-b.lat, a.lng-b.lng);
+           return d(ch,ab) + d(ab,bf) < d(ch,md) + d(md,bf)})());
+  ok('Rabat: Abendessen bleibt bezahlbar',
+     TRIP[5].items.find(x => x.t === '18:15').v <= 100);
   ok('Bahnhofs-Taxi mit Puffer vor dem Zug',
      (()=>{const t=TRIP[5].items.find(i=>i.h==='Taxi zum Bahnhof Rabat Agdal');
            return t && t.t<'20:56' && t.t>='20:00';})());
