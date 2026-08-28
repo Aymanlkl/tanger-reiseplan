@@ -164,8 +164,13 @@ console.log('\nDatenintegritaet');
     && FISCHLOKAL.some(n => i.h.indexOf(n) === 0)).length;
   ok('kein Tag mit zwei Fischlokalen',
      TRIP.every(d => fischAmTag(d) <= 1), TRIP.map(fischAmTag).join(','));
+  // Nicht am Namen festmachen — das Lokal kann wechseln, die Regel nicht.
   ok('Asilah isst abends nicht wieder Fisch',
-     /kein Fischgericht/.test(TRIP[4].items.find(i => /Abendessen an der Seemauer/.test(i.h)).info));
+     (()=>{const ab = TRIP[4].items.find(i => i.eat && !i.snack && i.t > '17:00');
+           return !!ab && /kein Fischgericht/.test(ab.info || '')})());
+  ok('Asilah: Abendlokal ist benannt und verortet',
+     (()=>{const ab = TRIP[4].items.find(i => i.eat && !i.snack && i.t > '17:00');
+           return !!ab && !/^Abendessen/.test(ab.h) && ab.loc && ab.loc.lat})());
   // Tag 6 startet um 07:20 — der Abend davor darf nicht bis Mitternacht laufen.
   ok('Tag 5 endet vor der Nacht nach Rabat',
      TRIP[4].items[TRIP[4].items.length-1].t <= '21:30',
