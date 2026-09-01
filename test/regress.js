@@ -89,10 +89,10 @@ console.log('\nDatenintegritaet');
   let loc=0, coord=0, info=0, hours=0, rail=0, eat=0;
   TRIP.forEach(d => d.items.forEach(i => { if(i.loc){loc++; if(i.loc.lat){coord++; if(i.info)info++}}
     if(i.hours)hours++; if(i.rail)rail++; if(i.eat)eat++ }));
-  ok('91 Orte, 90 mit Koordinaten', loc===91 && coord===90, `${loc}/${coord}`);
+  ok('92 Orte, 91 mit Koordinaten', loc===92 && coord===91, `${loc}/${coord}`);
   ok('jeder Ort mit Koordinaten beschrieben',
      !TRIP.some(d=>d.items.some(i=>i.loc&&i.loc.lat&&!i.info)), `${info}`);
-  ok('hours 8 · rail 4 · eat 25', hours===8&&rail===4&&eat===25, `${hours}/${rail}/${eat}`);
+  ok('hours 8 · rail 4 · eat 26', hours===8&&rail===4&&eat===26, `${hours}/${rail}/${eat}`);
   // Echte ONCF-Zeiten. Der frueher eingetragene 18:40 war die Ankunft des
   // 18:04, keine Abfahrt — so ein Fehler darf nicht zurueckkommen.
   const a5 = t => TRIP[4].items.find(i => i.t === t);
@@ -196,7 +196,7 @@ console.log('\nitem(): alle Felder werden durchgereicht');
   ok('hours durchgereicht', !!zus.hours);
 
 console.log('\nKarte');
-  const erwartet = [7,14,11,8,15,16,8,10,1];
+  const erwartet = [8,14,11,8,15,16,8,10,1];
   let mapOk = true;
   TRIP.forEach((d,i) => { drawn.markers.length=0; eval('active='+i+';renderDay();');
     const h = els['#p-tage'].innerHTML;
@@ -292,6 +292,18 @@ console.log('\nKartenansicht');
            eval("closeMapView();POS=null;posAufKarte(mapObj,'tag');");
            return da})());
   eval('active=0;renderDay();');
+
+  // Der Drink zaehlt als Snack, sonst haette Tag 1 drei Lokale.
+  ok('Villa Mabrouka zaehlt nicht als Restaurant',
+     (()=>{const v = TRIP[0].items.find(i => /Villa Mabrouka/.test(i.h));
+           return !!v && v.snack === 1})());
+  ok('Villa Mabrouka steht vor dem Sonnenuntergang',
+     TRIP[0].items.find(i => /Villa Mabrouka/.test(i.h)).t < '19:50');
+  ok('Villa Mabrouka nennt Reservierung und Preisvorbehalt',
+     (()=>{const v = TRIP[0].items.find(i => /Villa Mabrouka/.test(i.h));
+           return /RESERVIEREN/.test(v.info) && /Richtwert/.test(v.cn)})());
+  ok('Tag 1 hat weiter hoechstens zwei Lokale',
+     TRIP[0].items.filter(i => i.eat && !i.snack).length <= 2);
 
 console.log('\nRabat: alles in seiner Oeffnungszeit');
   const R = t => TRIP[5].items.find(i => i.h.indexOf(t) === 0);
@@ -1018,7 +1030,7 @@ console.log('\nZeitzone, Standort, Fixpunkte');
   ok('ohne Standort keine Angabe', eval(`entfText({lat:35.79,lng:-5.82})`)==='');
 
   const fixe = TRIP.reduce((a,d)=>a+d.items.filter(i=>i.fix).length,0);
-  ok('neun Fixpunkte markiert', fixe===9, `${fixe}`);
+  ok('zehn Fixpunkte markiert', fixe===10, `${fixe}`);
   ok('jeder Fixpunkt hat eine Aufbruchszeit vor der Abfahrt',
      TRIP.every(d=>d.items.filter(i=>i.fix).every(i=>i.fix.go < i.t)));
   ok('Countdown nur am heutigen Tag', eval('naechsterFix(5)')===null);
